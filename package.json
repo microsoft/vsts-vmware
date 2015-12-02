@@ -1,0 +1,21 @@
+{
+  "name": "sample-typescript",
+  "version": "1.0.0",
+  "description": "Sample typescript project",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "codito",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-mocha": "^2.1.3",
+    "gulp-tsb": "^1.7.4",
+    "gulp-tslint": "^3.5.0",
+    "mocha": "^2.3.3",
+    "rimraf": "^2.4.3",
+    "tsd": "^0.6.5",
+    "tslint": "^2.5.1"
+  }
+}
