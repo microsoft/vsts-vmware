@@ -36,7 +36,7 @@ gulp.task("clean", function(done) {
 
 gulp.task("test", ["build"], function() {
     return gulp.src(testFiles, { read: false })
-        .pipe(mocha());
+        .pipe(mocha( { reporter: 'xunit', reporterOptions: { output: '_build/testTaskMochTestResult.xml'}  }  ));
 });
 
 gulp.task("default", ["build"]);
