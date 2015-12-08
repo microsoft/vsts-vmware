@@ -1,0 +1,85 @@
+﻿{
+    "manifestVersion": 1,
+    "id": "vmwareapp",
+    "name": "VMWareApp",
+    "version": "0.0.1",
+    "publisher": "ms",
+    "description": "Manage your VMvare environments",
+    "public": true,
+    "icons": {
+        "default": "images/Vmware_logo.png",
+        "large": "images/VMware-logo-large.jpg"
+    },
+    "categories": [
+        "Build and release"
+    ],
+    "tags": [],
+    "links": {
+        "support": {
+            "uri": "http://support"
+        },
+        "pricing": {
+            "uri": "http://pricing"
+        },
+        "home": {
+            "uri": "http://home"
+        }
+    },
+    "branding": {
+        "color": "#f6f7fb",
+        "theme": "light"
+    },
+    "screenshots": [],
+    "content": {
+        "details": {
+            "path": "overview.md"
+        }
+    },
+    "files": [
+        {
+            "path": "VMWareResourceDeploymentTask"
+        },
+        {
+            "path": "images",
+            "addressable": true
+        }
+    ],
+    "scopes": [
+        "vso.build_execute",
+        "vso.serviceendpoint_manage"
+    ],
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],
+    "contributions": [
+        {
+            "id": "vmware-endpoint-type",
+            "description": "VMwareConnectionServiceEndpoint",
+            "type": "ms.vss-endpoint.service-endpoint-type",
+            "targets": [
+                "ms.vss-endpoint.endpoint-types"
+            ],
+            "properties": {
+                "name": "vmware",
+                "displayName": "VMWare",
+                "authenticationSchemes": [
+                    {
+                        "type": "ms.vss-endpoint.endpoint-auth-scheme-basic"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "vmwareresourcedeployment-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "VMWareResourceDeploymentTask"
+            }
+        }
+    ]
+}
