@@ -36,7 +36,16 @@ gulp.task("clean", function(done) {
 
 gulp.task("test", ["build"], function() {
     return gulp.src(testFiles, { read: false })
-        .pipe(mocha( { reporter: 'xunit', reporterOptions: { output: '_build/testTaskMochTestResult.xml'}  }  ));
+        .pipe(mocha());
+});
+
+gulp.task("testci", ["build"], function() {
+    return gulp.src(testFiles, { read: false })
+        .pipe(mocha({ reporter: 'xunit', reporterOptions: { output: '_build/testTaskMochaTestResult.xml'} }));
+});
+
+gulp.task("watch", function() {
+    gulp.watch(sourceFiles, ["test"]);    
 });
 
 gulp.task("default", ["build"]);
