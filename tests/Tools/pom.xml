@@ -28,6 +28,7 @@
     <build>
         <sourceDirectory>./vmware</sourceDirectory>
         <testSourceDirectory>.\vmware</testSourceDirectory>
+        <outputDirectory>..\..\_build\target\test-classes</outputDirectory>
         <plugins>
         
             <plugin>

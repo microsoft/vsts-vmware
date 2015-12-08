@@ -16,6 +16,7 @@
     
   <build>
         <sourceDirectory>./vmware</sourceDirectory>
+        <outputDirectory>..\..\_build\target\classes</outputDirectory>
         <plugins>
         
             <plugin>
