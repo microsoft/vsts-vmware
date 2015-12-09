@@ -10,7 +10,18 @@
     },
     "node/node.d.ts": {
       "commit": "eb59a40d3c2f3257e34ec2ede181046230814a41"
+    },
+    "chai/chai.d.ts": {
+      "commit": "220716d99a77df1654fb4f6cd760dc134ffa8e89"
+    },
+    "assertion-error/assertion-error.d.ts": {
+      "commit": "220716d99a77df1654fb4f6cd760dc134ffa8e89"
+    },
+    "sinon/sinon.d.ts": {
+      "commit": "220716d99a77df1654fb4f6cd760dc134ffa8e89"
+    },
+    "sinon-chai/sinon-chai.d.ts": {
+      "commit": "220716d99a77df1654fb4f6cd760dc134ffa8e89"
     }
   }
 }
-

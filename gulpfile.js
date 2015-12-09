@@ -12,16 +12,17 @@ var testFiles = [buildDirectory + "/**/*Tests*.js"];
 var compilation = tsb.create({
     target: 'es5',
     module: 'commonjs',
-    declaration: false
+    declaration: false,
+    verbose: false
 });
 
-gulp.task("build", ["clean", "lint"], function() {
+gulp.task("build", ["lint"], function() {
     return gulp.src(sourceFiles, { base: "." })
         .pipe(compilation())
         .pipe(gulp.dest(buildDirectory));
 });
 
-gulp.task("lint", ["clean"], function() {
+gulp.task("lint", function() {
     return gulp.src(sourceFiles)
         .pipe(tslint())
         .pipe(tslint.report("verbose"))
