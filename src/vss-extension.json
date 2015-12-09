@@ -13,7 +13,7 @@
     "categories": [
         "Build and release"
     ],
-    "tags": [],
+    "tags": [ ],
     "links": {
         "support": {
             "uri": "http://support"
@@ -29,7 +29,11 @@
         "color": "#f6f7fb",
         "theme": "light"
     },
-    "screenshots": [],
+    "screenshots": [
+        {
+            "path": "images/screen1.png"
+        }
+    ],
     "content": {
         "details": {
             "path": "overview.md"
@@ -37,7 +41,7 @@
     },
     "files": [
         {
-            "path": "VMWareResourceDeploymentTask"
+            "path": "VMOpsTask"
         },
         {
             "path": "images",
@@ -63,12 +67,16 @@
             ],
             "properties": {
                 "name": "vmware",
-                "displayName": "VMWare",
+                "displayName": "VMWare vCenter",
                 "authenticationSchemes": [
                     {
                         "type": "ms.vss-endpoint.endpoint-auth-scheme-basic"
                     }
-                ]
+                ],
+                "helpLink": {
+                    "text": "Learn More",
+                    "url": "https://msdn.microsoft.com/Library/vs/alm/Release/author-release-definition/understanding-tasks#serviceconnections"
+                }
             }
         },
         {
@@ -78,7 +86,7 @@
                 "ms.vss-distributed-task.tasks"
             ],
             "properties": {
-                "name": "VMWareResourceDeploymentTask"
+                "name": "VMOpsTask"
             }
         }
     ]
