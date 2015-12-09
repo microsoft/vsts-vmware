@@ -5,9 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.microsoft.vmware.src</groupId>
-        <artifactId>src</artifactId>
+        <groupId>com.microsoft.vmware</groupId>
+        <artifactId>module-main</artifactId>
         <version>1.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>com.microsoft.vmware.tools</groupId>
     <artifactId>Tools</artifactId>
@@ -16,7 +17,7 @@
     
   <build>
         <sourceDirectory>./vmware</sourceDirectory>
-        <outputDirectory>..\..\_build\target\classes</outputDirectory>
+        <outputDirectory>../../_build/src/tools</outputDirectory>
         <plugins>
         
             <plugin>

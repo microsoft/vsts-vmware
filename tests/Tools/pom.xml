@@ -5,9 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.microsoft.vmware.tests</groupId>
-        <artifactId>tests</artifactId>
+        <groupId>com.microsoft.vmware</groupId>
+        <artifactId>module-main</artifactId>
         <version>1.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>TestTools</artifactId>
     <packaging>jar</packaging>
@@ -27,8 +28,8 @@
     
     <build>
         <sourceDirectory>./vmware</sourceDirectory>
-        <testSourceDirectory>.\vmware</testSourceDirectory>
-        <outputDirectory>..\..\_build\target\test-classes</outputDirectory>
+        <testSourceDirectory>./vmware</testSourceDirectory>
+        <outputDirectory>../../_build/tests/tools/vmware</outputDirectory>
         <plugins>
         
             <plugin>

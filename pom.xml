@@ -10,8 +10,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>src</module>
-        <module>tests</module>
+        <module>src/Tools</module>
+        <module>tests/Tools</module>
     </modules>
 
     <properties>
