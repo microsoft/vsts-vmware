@@ -36,7 +36,8 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-unit-test-report</id>                        
+                        <id>generate-unit-test-report</id>
+                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
@@ -49,5 +50,4 @@
             </plugin>
         </plugins>
     </build>
-    
 </project>

@@ -8,7 +8,7 @@ public class App1Test {
   public void TestAddApp() {
     app1.App1 app = new app1.App1();
     String addedStr = app.addStrings("a","bc");
-    assertEquals("abc1", addedStr);
+    assertEquals("abc", addedStr);
   }
   
   @Test
