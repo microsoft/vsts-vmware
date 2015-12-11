@@ -2,42 +2,65 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.microsoft.vmware</groupId>
-    <artifactId>module-main</artifactId>
-    <version>1.0</version>
-    <packaging>pom</packaging>
+  <groupId>com.microsoft.vmware</groupId>
+  <artifactId>module-main</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
 
-    <modules>
-        <module>src/Tools</module>
-        <module>tests/Tools</module>
-    </modules>
+  <modules>
+    <module>src/Tools</module>
+    <module>tests/Tools</module>
+  </modules>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.5.201505241946</version>
-                <executions>
-                    <execution>
-                        <id>prepare-unit-test-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <destFile>${session.executionRootDirectory}/_build/codecoverage/jacoco.exec</destFile>                                                                                
-                            <append>true</append>
-                        </configuration>
-                    </execution>                    
-                </executions>
-            </plugin>
-            
-        </plugins>
-    </build>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+    <outputDirectory>${session.executionRootDirectory}/_build</outputDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.7.5.201505241946</version>
+        <executions>
+          <execution>
+            <id>prepare-unit-test-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+            <configuration>
+              <destFile>${session.executionRootDirectory}/_build/testReports/codecoverage/jacoco.exec</destFile>
+              <append>true</append>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${session.executionRootDirectory}/_build/testReports/codecoverage</outputDirectory>
+              <dataFile>${session.executionRootDirectory}/_build/testReports/codecoverage/jacoco.exec</dataFile>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>COMPLEXITY</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.90</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
 </project>

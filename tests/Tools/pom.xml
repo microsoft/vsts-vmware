@@ -31,6 +31,7 @@
     <testSourceDirectory>./vmware</testSourceDirectory>
     <outputDirectory>../../_build/tests/tools/vmware</outputDirectory>
     <plugins>
+      
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
@@ -66,10 +67,10 @@
                 <taskdef name="report" classname="org.jacoco.ant.ReportTask">
                   <classpath path="../../_build/target/jacoco-jars/org.jacoco.ant.jar" />
                 </taskdef>
-                <mkdir dir="../../_build/codecoverage" />
+                <mkdir dir="../../_build/testReports/codecoverage" />
                 <report>
                   <executiondata>
-                    <fileset dir="../../_build/codecoverage">
+                    <fileset dir="../../_build/testReports/codecoverage">
                       <include name="jacoco.exec" />
                     </fileset>
                   </executiondata>
@@ -81,9 +82,9 @@
                       <fileset dir="../../src"/>
                     </sourcefiles>
                   </structure>
-                  <html destdir="../../_build/codecoverage/html" />
-                  <xml destfile="../../_build/codecoverage/coverage-report.xml" />
-                  <csv destfile="../../_build/codecoverage/coverage-report.csv" />
+                  <html destdir="../../_build/testReports/codecoverage/html" />
+                  <xml destfile="../../_build/testReports/codecoverage/coverage-report.xml" />
+                  <csv destfile="../../_build/testReports/codecoverage/coverage-report.csv" />
                 </report>
               </target>
             </configuration>
@@ -97,7 +98,7 @@
           </dependency>
         </dependencies>
       </plugin>
+      
     </plugins>
   </build>
-
 </project>
