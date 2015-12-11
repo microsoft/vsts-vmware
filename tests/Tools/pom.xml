@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.microsoft.vmware</groupId>
+    <artifactId>module-main</artifactId>
+    <version>1.0</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <artifactId>Tools.Test</artifactId>
+  <packaging>jar</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>com.microsoft.vmware.tools</groupId>
+      <artifactId>Tools</artifactId>
+      <version>1.0</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <sourceDirectory>./vmware</sourceDirectory>
+    <testSourceDirectory>./vmware</testSourceDirectory>
+    <outputDirectory>../../_build/tests/tools/vmware</outputDirectory>
+    <plugins>
+      
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <includes>
+            <include>**</include>
+          </includes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.15</version>
+        <configuration>
+          <reportsDirectory>../../_build/testReports/vmware</reportsDirectory>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo message="Generating JaCoCo Reports..." />
+                <taskdef name="report" classname="org.jacoco.ant.ReportTask">
+                  <classpath path="../../_build/target/jacoco-jars/org.jacoco.ant.jar" />
+                </taskdef>
+                <mkdir dir="../../_build/testReports/codecoverage" />
+                <report>
+                  <executiondata>
+                    <fileset dir="../../_build/testReports/codecoverage">
+                      <include name="jacoco.exec" />
+                    </fileset>
+                  </executiondata>
+                  <structure name="Jacoco report">
+                    <classfiles>
+                      <fileset dir="../../_build/src"/>
+                    </classfiles>
+                    <sourcefiles encoding="UTF-8">
+                      <fileset dir="../../src"/>
+                    </sourcefiles>
+                  </structure>
+                  <html destdir="../../_build/testReports/codecoverage/html" />
+                  <xml destfile="../../_build/testReports/codecoverage/coverage-report.xml" />
+                  <csv destfile="../../_build/testReports/codecoverage/coverage-report.csv" />
+                </report>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.ant</artifactId>
+            <version>0.7.5.201505241946</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      
+    </plugins>
+  </build>
+</project>
