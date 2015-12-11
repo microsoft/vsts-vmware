@@ -1,0 +1,68 @@
+{
+    "id": "735d144e-55fe-44d6-b687-db9031b6e70b",
+    "name": "VMWareTask",
+    "friendlyName": "VMWare Resource Deployment",
+    "description": "Enables create or restore of snapshot on virtual machine",
+    "helpMarkDown": "[More Information](http://aka.ms/vmwaretaskreadme)",
+    "category": "Deploy",
+    "visibility": [
+        "Build",
+        "Release"
+    ],
+    "author": "Microsoft Corporation",
+    "version": {
+        "Major": 1,
+        "Minor": 0,
+        "Patch": 0
+    },
+    "demands": [
+        "java"
+    ],
+    "minimumAgentVersion": "1.91.0",
+    "groups": [
+    ],
+    "inputs": [
+        {
+            "name": "vCenterConnection",
+            "type": "connectedService:VMWare",
+            "label": "vCenter Service Connection",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "Connection required for communicating with vCenter"
+        },
+        {
+            "name": "action", 
+            "type": "pickList",
+            "label": "Action",
+            "defaultValue": "Restore Snapshot on Virtual Machines",
+            "required": true,
+            "helpMarkDown" : "Action to be performed on the Azure resources or resource group.",
+            "options": {
+                 "ResoreSnapshot": "Restore Snapshot on Virtual Machines"
+            }
+        },
+        {
+            "name": "vmList",
+            "type": "string",
+            "label": "VM Name(s)",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "Comma separated list of virtual machine names"
+        },
+        {
+            "name": "snapshotName ",
+            "type": "string",
+            "label": "Snapshot Name",
+            "required": true,
+            "defaultValue": "",
+            "helpMarkDown": "Name of the snapshot to be created or reverted to"
+        }
+    ],
+    "instanceNameFormat": "$(action) : $(vmList)",
+    "execution": {
+        "Node": {
+            "target": "invokeTask.js",
+            "argumentFormat": ""
+        }
+    }
+}

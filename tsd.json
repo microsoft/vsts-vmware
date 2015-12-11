@@ -22,6 +22,9 @@
     },
     "sinon-chai/sinon-chai.d.ts": {
       "commit": "220716d99a77df1654fb4f6cd760dc134ffa8e89"
+    },
+    "Q/Q.d.ts": {
+      "commit": "923c5431d9447db9d5cf41adc5914e3c94c1ff10"
     }
   }
 }
