@@ -1,15 +1,17 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import vmOps = require("../../src/Tasks/VMOpsTask/VMOpsTask");
+import vmOpsTask = require("../../src/Tasks/VMOpsTask/VMOpsTask");
 
 import mocha = require("mocha");
 import chai = require("chai");
 import sinon = require("sinon");
-import assert = require("assert");
+import sinonChai = require("sinon-chai");
 import tl = require("vso-task-lib");
+import Q = require("q");
 
 var expect = chai.expect;
-var should = chai.should;
+chai.use(sinonChai);
+chai.should();
 
 describe("GetCmdCommonArgs", (): void => {
     var sandbox;
@@ -38,33 +40,33 @@ describe("GetCmdCommonArgs", (): void => {
         getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
         getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummyuser", "password" : "dummypassword"}});
 
-        var cmdArgs = vmOps.GetCmdCommonArgs();
+        var cmdArgs = vmOpsTask.GetCmdCommonArgs();
 
-        expect(cmdArgs).to.contain("-vCenterUrl \"" + dummyEndpointUrl + "\"");
-        expect(cmdArgs).to.contain("-vCenterUserName \"dummyuser\"");
-        expect(cmdArgs).to.contain("-vCenterPassword \"dummypassword\"");
-        expect(cmdArgs).to.contain("-vmList \"" + dummyVmList + "\"");
-        assert(getInputStub.calledTwice);
-        assert(getEndPointUrlStub.calledOnce);
-        assert(getEndpointAuthorizationStub.calledTwice);
+        cmdArgs.should.contain("-vCenterUrl \"" + dummyEndpointUrl + "\"");
+        cmdArgs.should.contain("-vCenterUserName \"dummyuser\"");
+        cmdArgs.should.contain("-vCenterPassword \"dummypassword\"");
+        cmdArgs.should.contain("-vmList \"" + dummyVmList + "\"");
+        getInputStub.should.have.been.calledTwice;
+        getEndPointUrlStub.should.have.been.calledOnce;
+        getEndpointAuthorizationStub.should.have.been.calledTwice;
     });
 
     it("Should throw on failure to get connected service name", (): void => {
         getInputStub.withArgs("vCenterConnection", true).throws();
 
-        expect(vmOps.GetCmdCommonArgs).to.throw("Error");
-        assert(getInputStub.calledOnce);
-        assert(getInputStub.threw("Error"));
+        expect(vmOpsTask.GetCmdCommonArgs).to.throw("Error");
+        getInputStub.should.have.been.calledOnce;
+        getInputStub.should.have.thrown("Error");
     });
 
     it("Should throw on failure to get end point url", (): void => {
         getInputStub.withArgs("vCenterConnection", true).returns(dummyConnectionName);
         getEndPointUrlStub.withArgs(dummyConnectionName, false).throws();
 
-        expect(vmOps.GetCmdCommonArgs).to.throw("Error");
-        assert(getInputStub.calledOnce);
-        assert(getEndPointUrlStub.calledOnce);
-        assert(getEndPointUrlStub.threw("Error"));
+        expect(vmOpsTask.GetCmdCommonArgs).to.throw("Error");
+        getInputStub.should.have.been.calledOnce;
+        getEndPointUrlStub.should.have.been.calledOnce;
+        getEndPointUrlStub.should.have.thrown("Error");
     });
 
     it("Should throw on failure to get end point username or password", (): void => {
@@ -72,11 +74,11 @@ describe("GetCmdCommonArgs", (): void => {
         getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
         getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).throws();
 
-        expect(vmOps.GetCmdCommonArgs).to.throw("Error");
-        assert(getInputStub.calledOnce);
-        assert(getEndPointUrlStub.calledOnce);
-        assert(getEndpointAuthorizationStub.calledOnce);
-        assert(getEndpointAuthorizationStub.threw("Error"));
+        expect(vmOpsTask.GetCmdCommonArgs).to.throw("Error");
+        getInputStub.should.have.been.calledOnce;
+        getEndPointUrlStub.should.have.been.calledOnce;
+        getEndpointAuthorizationStub.should.have.been.calledOnce;
+        getEndpointAuthorizationStub.should.have.thrown("Error");
     });
 
     it("Should escape inputs with spaces, double quotes, comma, semi colon, uni code characters", (): void => {
@@ -85,13 +87,13 @@ describe("GetCmdCommonArgs", (): void => {
         getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
         getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummydomain\\dummyuser", "password" : " dummyp\" assword , ; "}});
 
-        var cmdArgs = vmOps.GetCmdCommonArgs();
+        var cmdArgs = vmOpsTask.GetCmdCommonArgs();
 
-        expect(cmdArgs).to.contain(" -vCenterUserName \"dummydomain\\dummyuser\"");
-        expect(cmdArgs).to.contain(" -vCenterPassword \" dummyp\\\" assword , ; \"");
-        assert(getInputStub.calledTwice);
-        assert(getEndPointUrlStub.calledOnce);
-        assert(getEndpointAuthorizationStub.calledTwice);
+        cmdArgs.should.contain(" -vCenterUserName \"dummydomain\\dummyuser\"");
+        cmdArgs.should.contain(" -vCenterPassword \" dummyp\\\" assword , ; \"");
+        getInputStub.should.have.been.calledTwice;
+        getEndPointUrlStub.should.have.been.calledOnce;
+        getEndpointAuthorizationStub.should.have.been.calledTwice;
     });
 });
 
@@ -110,40 +112,95 @@ describe("GetCmdArgsForAction", (): void => {
     it("Should read snapshot name for restore snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnap\"shotName");
 
-        var cmdArgs = vmOps.GetCmdArgsForAction("ResoreSnapshot");
+        var cmdArgs = vmOpsTask.GetCmdArgsForAction("ResoreSnapshot");
 
-        expect(cmdArgs).to.contain("-snapShotOps restore -snapshotName \"dummySnap\\\"shotName\"");
+        cmdArgs.should.contain("-snapShotOps restore -snapshotName \"dummySnap\\\"shotName\"");
     });
 
     it("Should throw on failure to read snapshot name for restore action", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 
         expect( (): void => {
-             vmOps.GetCmdArgsForAction("ResoreSnapshot");
+             vmOpsTask.GetCmdArgsForAction("ResoreSnapshot");
              }).to.throw("Error");
-        assert(getInputStub.calledOnce);
+        getInputStub.should.have.been.calledOnce;
     });
 
     it("Should throw on failure for invalid action name", (): void => {
         expect( (): void => {
-             vmOps.GetCmdArgsForAction("InvalidAction");
+             vmOpsTask.GetCmdArgsForAction("InvalidAction");
              }).to.throw("Invalid action name");
     });
 });
 
-describe("RunCommand", (): void => {
+describe("RunMain", (): void => {
     var sandbox;
     var getInputStub;
+    var getCmdCommonArgsStub;
+    var getCmdArgsForActionStub;
+    var execCmdStub;
+    var exitStub;
+
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
         getInputStub = sandbox.stub(tl, "getInput");
+        execCmdStub = sandbox.stub(tl, "exec");
+        exitStub = sandbox.stub(tl, "exit");
+        getCmdCommonArgsStub = sandbox.stub(vmOpsTask, "GetCmdCommonArgs");
+        getCmdArgsForActionStub = sandbox.stub(vmOpsTask, "GetCmdArgsForAction");
     });
 
     afterEach((): void => {
         sandbox.restore();
     });
 
-    // Should log telemetry data and throw on failure to find java
-    // Should return 0 on successful exection of command
-    // Should log telemetry data and return 1 on failure of command execution
+    var commonArgs = " -vCenterUrl \"http://localhost:8080\" -vCenterUserName \"dummydomain\\dummyuser\" -vCenterPassword \"  pas\\\" w,o ;d\" ";
+    var cmdArgsForAction = " -snapShotOps restore -snapshotName \"dummysnapshot\"";
+    var cmdArgs = "vmOpsTool " + cmdArgsForAction + commonArgs;
+    var actionName = "ResoreSnapshot";
+
+    it("Should return 0 on successful exection of the command", (done): void => {
+        getInputStub.withArgs("action", true).returns(actionName);
+        getCmdCommonArgsStub.returns(commonArgs);
+        getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
+        var promise = Q.Promise<number>((complete, failure) => {
+            complete(0);
+        });
+        execCmdStub.withArgs("java", cmdArgs).returns(promise);
+        exitStub.withArgs(0);
+
+        vmOpsTask.RunMain().then((code) => {
+            getInputStub.should.have.been.calledOnce;
+            getCmdCommonArgsStub.should.have.been.calledOnce;
+            getCmdArgsForActionStub.should.have.been.calledOnce;
+            execCmdStub.should.have.been.calledOnce;
+            exitStub.should.have.been.calledOnce;
+        }).done(done);
+    });
+
+    it("Should exit with 1 and log telemetry point on exection failure", (done): void => {
+        getInputStub.withArgs("action", true).returns(actionName);
+        getCmdCommonArgsStub.returns(commonArgs);
+        getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
+        var promise = Q.Promise<number>((complete, failure) => {
+            failure("Command execution failed");
+        });
+        execCmdStub.withArgs("java", cmdArgs).returns(promise);
+        exitStub.withArgs(1);
+
+        vmOpsTask.RunMain().then((code) => {
+            getInputStub.should.have.been.calledOnce;
+            getCmdCommonArgsStub.should.have.been.calledOnce;
+            getCmdArgsForActionStub.should.have.been.calledOnce;
+            execCmdStub.should.have.been.calledOnce;
+            exitStub.should.have.been.calledOnce;
+        }).done(done);
+    });
+
+    it("Should throw exception on failure to get actionName", (): void => {
+        getInputStub.withArgs("action", true).throws();
+
+        expect(vmOpsTask.RunMain).to.throw("Error");
+        getInputStub.should.have.been.calledOnce;
+    });
 });

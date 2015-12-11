@@ -62,7 +62,7 @@
     "instanceNameFormat": "$(action) : $(vmList)",
     "execution": {
         "Node": {
-            "target": "VMOpsTask.js",
+            "target": "InvokeTask.js",
             "argumentFormat": ""
         }
     }

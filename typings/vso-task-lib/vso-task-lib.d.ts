@@ -1,3 +1,5 @@
+// <reference path="../Q/Q.d.ts"/>
+
 declare module VsoTaskLib {
     interface VsoTaskCommon {
         
@@ -31,6 +33,7 @@ declare module VsoTaskLib {
         
         getEndpointUrl(id: string, optional: boolean): string;
         getEndpointAuthorization(id: string, optional: boolean): EndpointAuthorization;
+        exec(tool: string, args:any, options?:any): Q.Promise<number>;
     }
     
     export interface EndpointAuthorization {
@@ -39,10 +42,6 @@ declare module VsoTaskLib {
         };
         scheme: string;
     }
-    
-    // var TaskCommand: any;
-    // var commandFromString: any;
-    // var ToolRunner: any;
 }
 
 declare var vsotasklib: VsoTaskLib.VsoTaskCommon;

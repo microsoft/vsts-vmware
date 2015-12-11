@@ -42,6 +42,18 @@ export function GetCmdArgsForAction(actionName: string): string {
     return cmdArgs;
 }
 
-export function RunCommand(exeName: string, cmdArgs: string): number {
-    return 0;
+export function RunMain(): Q.Promise<void> {
+    var actionName: string = tl.getInput("action", true);
+    var commonArgs: string = this.GetCmdCommonArgs();
+    var cmdArgsForAction: string = this.GetCmdArgsForAction(actionName);
+    var cmdArgs = "vmOpsTool " + cmdArgsForAction + commonArgs;
+    return tl.exec("java", cmdArgs)
+        .then((code) => {
+            tl.debug("Exit code: " + code);
+            tl.exit(code);
+        })
+        .fail( (err) => {
+            tl.debug("Failure reason :" + err);
+            tl.exit(1);
+        });
 }
