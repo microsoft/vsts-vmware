@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import * as vmOperations from "../../src/Tasks/VMOperations/VMOperations";
+import * as vmOperations from "../../src/Tasks/vmOperations/vmOperations";
 
 import mocha = require("mocha");
 import chai = require("chai");
@@ -13,7 +13,7 @@ var expect = chai.expect;
 chai.use(sinonChai);
 chai.should();
 
-describe("GetCmdCommonArgs", (): void => {
+describe("getCmdCommonArgs", (): void => {
     var sandbox;
     var getInputStub;
     var getEndPointUrlStub;
@@ -40,7 +40,7 @@ describe("GetCmdCommonArgs", (): void => {
         getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
         getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummyuser", "password" : "dummypassword"}});
 
-        var cmdArgs = vmOperations.VmOperations.GetCmdCommonArgs();
+        var cmdArgs = vmOperations.VmOperations.getCmdCommonArgs();
 
         cmdArgs.should.contain("-vCenterUrl \"" + dummyEndpointUrl + "\"");
         cmdArgs.should.contain("-vCenterUserName \"dummyuser\"");
@@ -54,7 +54,7 @@ describe("GetCmdCommonArgs", (): void => {
     it("Should throw on failure to get connected service name", (): void => {
         getInputStub.withArgs("vCenterConnection", true).throws();
 
-        expect(vmOperations.VmOperations.GetCmdCommonArgs).to.throw("Error");
+        expect(vmOperations.VmOperations.getCmdCommonArgs).to.throw("Error");
         getInputStub.should.have.been.calledOnce;
         getInputStub.should.have.thrown("Error");
     });
@@ -63,7 +63,7 @@ describe("GetCmdCommonArgs", (): void => {
         getInputStub.withArgs("vCenterConnection", true).returns(dummyConnectionName);
         getEndPointUrlStub.withArgs(dummyConnectionName, false).throws();
 
-        expect(vmOperations.VmOperations.GetCmdCommonArgs).to.throw("Error");
+        expect(vmOperations.VmOperations.getCmdCommonArgs).to.throw("Error");
         getInputStub.should.have.been.calledOnce;
         getEndPointUrlStub.should.have.been.calledOnce;
         getEndPointUrlStub.should.have.thrown("Error");
@@ -74,7 +74,7 @@ describe("GetCmdCommonArgs", (): void => {
         getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
         getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).throws();
 
-        expect(vmOperations.VmOperations.GetCmdCommonArgs).to.throw("Error");
+        expect(vmOperations.VmOperations.getCmdCommonArgs).to.throw("Error");
         getInputStub.should.have.been.calledOnce;
         getEndPointUrlStub.should.have.been.calledOnce;
         getEndpointAuthorizationStub.should.have.been.calledOnce;
@@ -87,7 +87,7 @@ describe("GetCmdCommonArgs", (): void => {
         getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
         getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummydomain\\dummyuser", "password" : " dummyp\" assword , ; "}});
 
-        var cmdArgs = vmOperations.VmOperations.GetCmdCommonArgs();
+        var cmdArgs = vmOperations.VmOperations.getCmdCommonArgs();
 
         cmdArgs.should.contain(" -vCenterUserName \"dummydomain\\dummyuser\"");
         cmdArgs.should.contain(" -vCenterPassword \" dummyp\\\" assword , ; \"");
@@ -97,7 +97,7 @@ describe("GetCmdCommonArgs", (): void => {
     });
 });
 
-describe("GetCmdArgsForAction", (): void => {
+describe("getCmdArgsForAction", (): void => {
     var sandbox;
     var getInputStub;
     beforeEach((): void => {
@@ -112,7 +112,7 @@ describe("GetCmdArgsForAction", (): void => {
     it("Should read snapshot name for restore snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnap\"shotName");
 
-        var cmdArgs = vmOperations.VmOperations.GetCmdArgsForAction("ResoreSnapshot");
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("RestoreSnapshot");
 
         cmdArgs.should.contain("-snapShotOps restore -snapshotName \"dummySnap\\\"shotName\"");
     });
@@ -121,33 +121,35 @@ describe("GetCmdArgsForAction", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 
         expect( (): void => {
-             vmOperations.VmOperations.GetCmdArgsForAction("ResoreSnapshot");
+             vmOperations.VmOperations.getCmdArgsForAction("RestoreSnapshot");
              }).to.throw("Error");
         getInputStub.should.have.been.calledOnce;
     });
 
     it("Should throw on failure for invalid action name", (): void => {
         expect( (): void => {
-             vmOperations.VmOperations.GetCmdArgsForAction("InvalidAction");
+             vmOperations.VmOperations.getCmdArgsForAction("InvalidAction");
              }).to.throw("Invalid action name");
     });
 });
 
-describe("RunMain", (): void => {
+describe("runMain", (): void => {
     var sandbox;
     var getInputStub;
     var getCmdCommonArgsStub;
     var getCmdArgsForActionStub;
     var execCmdStub;
     var exitStub;
+    var debugStub;
 
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
         getInputStub = sandbox.stub(tl, "getInput");
         execCmdStub = sandbox.stub(tl, "exec");
         exitStub = sandbox.stub(tl, "exit");
-        getCmdCommonArgsStub = sandbox.stub(vmOperations.VmOperations, "GetCmdCommonArgs");
-        getCmdArgsForActionStub = sandbox.stub(vmOperations.VmOperations, "GetCmdArgsForAction");
+        debugStub = sandbox.stub(tl, "debug");
+        getCmdCommonArgsStub = sandbox.stub(vmOperations.VmOperations, "getCmdCommonArgs");
+        getCmdArgsForActionStub = sandbox.stub(vmOperations.VmOperations, "getCmdArgsForAction");
     });
 
     afterEach((): void => {
@@ -157,7 +159,7 @@ describe("RunMain", (): void => {
     var commonArgs = " -vCenterUrl \"http://localhost:8080\" -vCenterUserName \"dummydomain\\dummyuser\" -vCenterPassword \"  pas\\\" w,o ;d\" ";
     var cmdArgsForAction = " -snapShotOps restore -snapshotName \"dummysnapshot\"";
     var cmdArgs = "vmOpsTool " + cmdArgsForAction + commonArgs;
-    var actionName = "ResoreSnapshot";
+    var actionName = "RestoreSnapshot";
 
     it("Should return 0 on successful exection of the command", (done): void => {
         getInputStub.withArgs("action", true).returns(actionName);
@@ -167,14 +169,13 @@ describe("RunMain", (): void => {
             complete(0);
         });
         execCmdStub.withArgs("java", cmdArgs).returns(promise);
-        exitStub.withArgs(0);
 
-        vmOperations.VmOperations.RunMain().then((code) => {
+        vmOperations.VmOperations.runMain().then((code) => {
             getInputStub.should.have.been.calledOnce;
             getCmdCommonArgsStub.should.have.been.calledOnce;
             getCmdArgsForActionStub.should.have.been.calledOnce;
             execCmdStub.should.have.been.calledOnce;
-            exitStub.should.have.been.calledOnce;
+            exitStub.withArgs(0).should.have.been.calledOnce;
         }).done(done);
     });
 
@@ -186,21 +187,21 @@ describe("RunMain", (): void => {
             failure("Command execution failed");
         });
         execCmdStub.withArgs("java", cmdArgs).returns(promise);
-        exitStub.withArgs(1);
 
-        vmOperations.VmOperations.RunMain().then((code) => {
+        vmOperations.VmOperations.runMain().then((code) => {
             getInputStub.should.have.been.calledOnce;
             getCmdCommonArgsStub.should.have.been.calledOnce;
             getCmdArgsForActionStub.should.have.been.calledOnce;
             execCmdStub.should.have.been.calledOnce;
-            exitStub.should.have.been.calledOnce;
+            exitStub.withArgs(1).should.have.been.calledOnce;
+            debugStub.withArgs("Failure reason : Command execution failed").should.have.been.calledOnce;
         }).done(done);
     });
 
     it("Should throw exception on failure to get actionName", (): void => {
         getInputStub.withArgs("action", true).throws();
 
-        expect(vmOperations.VmOperations.RunMain).to.throw("Error");
+        expect(vmOperations.VmOperations.runMain).to.throw("Error");
         getInputStub.should.have.been.calledOnce;
     });
 });

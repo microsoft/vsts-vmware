@@ -6,7 +6,6 @@
     "helpMarkDown": "[More Information](http://aka.ms/vmwaretaskreadme)",
     "category": "Deploy",
     "visibility": [
-        "Preview",
         "Build",
         "Release"
     ],
@@ -20,7 +19,7 @@
         "java"
     ],
     "minimumAgentVersion": "1.91.0",
-    "groups": [    
+    "groups": [
     ],
     "inputs": [
         {
@@ -51,7 +50,7 @@
             "helpMarkDown": "Comma separated list of virtual machine names"
         },
         {
-            "name": "snapshotName",
+            "name": "snapshotName ",
             "type": "string",
             "label": "Snapshot Name",
             "required": true,
@@ -62,7 +61,7 @@
     "instanceNameFormat": "$(action) : $(vmList)",
     "execution": {
         "Node": {
-            "target": "InvokeTask.js",
+            "target": "invokeTask.js",
             "argumentFormat": ""
         }
     }

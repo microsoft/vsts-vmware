@@ -1,2 +1,2 @@
-import * as vmOperations  from "./VMOperations";
-vmOperations.VmOperations.RunMain();
+import * as vmOperations  from "./vmOperations";
+vmOperations.VmOperations.runMain();
