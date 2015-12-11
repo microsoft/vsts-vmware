@@ -1,22 +1,29 @@
 {
-  "name": "sample-typescript",
+  "name": "vso-vmware",
   "version": "1.0.0",
-  "description": "Sample typescript project",
+  "description": "VMWare extension with tasks for Visual Studio Team Services.",
   "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "Microsoft",
-  "license": "Microsoft",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vso-vmware.git"
+  },
   "devDependencies": {
+    "chai": "^3.4.1",
     "gulp": "^3.9.0",
     "gulp-mocha": "^2.1.3",
     "gulp-tsb": "^1.7.4",
     "gulp-tslint": "^3.5.0",
     "mocha": "^2.3.3",
     "rimraf": "^2.4.3",
+    "sinon": "^1.17.2",
+    "sinon-chai": "^2.8.0",
     "tsd": "^0.6.5",
-    "tslint": "^2.5.1"
+    "tslint": "^2.5.1",
+    "vso-task-lib": "^0.5.4"
+  },
+  "dependencies": {
+    "vso-task-lib": "^0.5.4"
   }
 }
-

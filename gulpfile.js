@@ -12,16 +12,17 @@ var testFiles = [buildDirectory + "/**/*Tests*.js"];
 var compilation = tsb.create({
     target: 'es5',
     module: 'commonjs',
-    declaration: false
+    declaration: false,
+    verbose: false
 });
 
-gulp.task("build", ["clean", "lint"], function() {
+gulp.task("build", ["lint"], function() {
     return gulp.src(sourceFiles, { base: "." })
         .pipe(compilation())
         .pipe(gulp.dest(buildDirectory));
 });
 
-gulp.task("lint", ["clean"], function() {
+gulp.task("lint", function() {
     return gulp.src(sourceFiles)
         .pipe(tslint())
         .pipe(tslint.report("verbose"))
@@ -36,7 +37,16 @@ gulp.task("clean", function(done) {
 
 gulp.task("test", ["build"], function() {
     return gulp.src(testFiles, { read: false })
-        .pipe(mocha( { reporter: 'xunit', reporterOptions: { output: '_build/testTaskMochTestResult.xml'}  }  ));
+        .pipe(mocha());
+});
+
+gulp.task("testci", ["build"], function() {
+    return gulp.src(testFiles, { read: false })
+        .pipe(mocha({ reporter: 'xunit', reporterOptions: { output: '_build/testTaskMochaTestResult.xml'} }));
+});
+
+gulp.task("watch", function() {
+    gulp.watch(sourceFiles, ["test"]);    
 });
 
 gulp.task("default", ["build"]);
