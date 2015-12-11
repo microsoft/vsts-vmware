@@ -34,20 +34,10 @@
                             <destFile>${session.executionRootDirectory}/_build/codecoverage/jacoco.exec</destFile>                                                                                
                             <append>true</append>
                         </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-unit-test-report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                             <outputDirectory>${session.executionRootDirectory}/_build/codecoverage</outputDirectory>
-                             <dataFile>${session.executionRootDirectory}/_build/codecoverage/jacoco.exec</dataFile>
-                        </configuration>
-                    </execution>
+                    </execution>                    
                 </executions>
             </plugin>
+            
         </plugins>
     </build>
 </project>
