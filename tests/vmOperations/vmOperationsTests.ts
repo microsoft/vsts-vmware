@@ -179,7 +179,28 @@ describe("runMain", (): void => {
         }).done(done);
     });
 
-    it("Should exit with 1 on failure of the command", (done): void => {
+    // Should not log telemetry point if the error message does not have line break (\n)
+    it("Should exit with 1 and log telemetry point for expected failure in command line tool", (done): void => {
+        getInputStub.withArgs("action", true).returns(actionName);
+        getCmdCommonArgsStub.returns(commonArgs);
+        getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
+        var promise = Q.Promise<number>((complete, failure) => {
+            failure("##vso[task.logissue type=error;code=deployment_dummyerror;taskid=dummytaskid\nCommand execution failed");
+        });
+        execCmdStub.withArgs("java", cmdArgs).returns(promise);
+
+        vmOperations.VmOperations.runMain().then((code) => {
+            getInputStub.should.have.been.calledOnce;
+            getCmdCommonArgsStub.should.have.been.calledOnce;
+            getCmdArgsForActionStub.should.have.been.calledOnce;
+            execCmdStub.should.have.been.calledOnce;
+            exitStub.withArgs(1).should.have.been.calledOnce;
+            debugStub.withArgs("Failure reason : Command execution failed").should.have.been.calledOnce;
+            debugStub.withArgs("##vso[task.logissue type=error;code=deployment_dummyerror;taskid=dummytaskid").should.have.been.calledOnce;
+        }).done(done);
+    });
+
+    it("Should exit with 1 and does not log telemetry point for unexpected command line tool termination", (done): void => {
         getInputStub.withArgs("action", true).returns(actionName);
         getCmdCommonArgsStub.returns(commonArgs);
         getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
@@ -195,8 +216,10 @@ describe("runMain", (): void => {
             execCmdStub.should.have.been.calledOnce;
             exitStub.withArgs(1).should.have.been.calledOnce;
             debugStub.withArgs("Failure reason : Command execution failed").should.have.been.calledOnce;
+            debugStub.withArgs("##vso[task.logissue type=error;code=deployment_dummyerror;taskid=dummytaskid").should.not.have.been.called;
         }).done(done);
     });
+
 
     it("Should throw exception on failure to get actionName", (): void => {
         getInputStub.withArgs("action", true).throws();

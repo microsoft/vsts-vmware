@@ -56,7 +56,18 @@ export class VmOperations {
                 tl.exit(code);
             })
             .fail( (err) => {
-                tl.debug("Failure reason : " + err);
+                var splitted = err.split("\n", 2);
+                var telemetryData = "";
+                var failureMsg;
+                if (splitted[1] !== undefined) {
+                    telemetryData = splitted[0];
+                    failureMsg = splitted[1];
+                }
+                else {
+                    failureMsg = splitted[0];
+                }
+                tl.debug(telemetryData);
+                tl.debug("Failure reason : " + failureMsg);
                 tl.exit(1);
             });
     }
