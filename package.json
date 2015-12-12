@@ -16,6 +16,7 @@
     "gulp-tsb": "^1.7.4",
     "gulp-tslint": "^3.5.0",
     "mocha": "^2.3.3",
+    "q": "^1.4.1",
     "rimraf": "^2.4.3",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
@@ -24,6 +25,7 @@
     "vso-task-lib": "^0.5.4"
   },
   "dependencies": {
+    "q": "^1.4.1",
     "vso-task-lib": "^0.5.4"
   }
 }
