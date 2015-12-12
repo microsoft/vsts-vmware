@@ -179,7 +179,6 @@ describe("runMain", (): void => {
         }).done(done);
     });
 
-    // Should not log telemetry point if the error message does not have line break (\n)
     it("Should exit with 1 and log telemetry point for expected failure in command line tool", (done): void => {
         getInputStub.withArgs("action", true).returns(actionName);
         getCmdCommonArgsStub.returns(commonArgs);
