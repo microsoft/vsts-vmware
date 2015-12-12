@@ -25,7 +25,6 @@
     "vso-task-lib": "^0.5.4"
   },
   "dependencies": {
-    "q": "^1.4.1",
     "vso-task-lib": "^0.5.4"
   }
 }
