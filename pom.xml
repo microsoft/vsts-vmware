@@ -35,10 +35,21 @@
               <destFile>${session.executionRootDirectory}/_build/testReports/codecoverage/jacoco.exec</destFile>
               <append>true</append>
             </configuration>
-          </execution>          
+          </execution>
+          <execution>
+            <id>pre-integration-test</id>
+            <phase>integration-test</phase>
+            <goals>
+                <goal>prepare-agent</goal>
+            </goals>
+           <configuration>
+              <destFile>${session.executionRootDirectory}/_build/testReports/codecoverage/jacoco.exec</destFile>
+              <append>true</append>
+            </configuration>
+        </execution>         
         </executions>
       </plugin>
+    </plugins>    
+  </build> 
 
-    </plugins>
-  </build>
 </project>
