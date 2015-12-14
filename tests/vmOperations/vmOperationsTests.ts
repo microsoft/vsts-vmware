@@ -46,9 +46,6 @@ describe("getCmdCommonArgs", (): void => {
         cmdArgs.should.contain("-vCenterUserName \"dummyuser\"");
         cmdArgs.should.contain("-vCenterPassword \"dummypassword\"");
         cmdArgs.should.contain("-vmList \"" + dummyVmList + "\"");
-        getInputStub.should.have.been.calledTwice;
-        getEndPointUrlStub.should.have.been.calledOnce;
-        getEndpointAuthorizationStub.should.have.been.calledTwice;
     });
 
     it("Should throw on failure to get connected service name", (): void => {
@@ -64,7 +61,6 @@ describe("getCmdCommonArgs", (): void => {
         getEndPointUrlStub.withArgs(dummyConnectionName, false).throws();
 
         expect(vmOperations.VmOperations.getCmdCommonArgs).to.throw("Error");
-        getInputStub.should.have.been.calledOnce;
         getEndPointUrlStub.should.have.been.calledOnce;
         getEndPointUrlStub.should.have.thrown("Error");
     });
@@ -75,8 +71,6 @@ describe("getCmdCommonArgs", (): void => {
         getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).throws();
 
         expect(vmOperations.VmOperations.getCmdCommonArgs).to.throw("Error");
-        getInputStub.should.have.been.calledOnce;
-        getEndPointUrlStub.should.have.been.calledOnce;
         getEndpointAuthorizationStub.should.have.been.calledOnce;
         getEndpointAuthorizationStub.should.have.thrown("Error");
     });
@@ -91,9 +85,6 @@ describe("getCmdCommonArgs", (): void => {
 
         cmdArgs.should.contain(" -vCenterUserName \"dummydomain\\dummyuser\"");
         cmdArgs.should.contain(" -vCenterPassword \" dummyp\\\" assword , ; \"");
-        getInputStub.should.have.been.calledTwice;
-        getEndPointUrlStub.should.have.been.calledOnce;
-        getEndpointAuthorizationStub.should.have.been.calledTwice;
     });
 });
 
@@ -179,7 +170,23 @@ describe("runMain", (): void => {
         }).done(done);
     });
 
-    it("Should exit with 1 on failure of the command", (done): void => {
+    it("Should exit with 1 and log telemetry point for expected failure in command line tool", (done): void => {
+        getInputStub.withArgs("action", true).returns(actionName);
+        getCmdCommonArgsStub.returns(commonArgs);
+        getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
+        var promise = Q.Promise<number>((complete, failure) => {
+            failure("##vso[task.logissue type=error;code=deployment_dummyerror;taskid=dummytaskid\nCommand execution failed");
+        });
+        execCmdStub.withArgs("java", cmdArgs).returns(promise);
+
+        vmOperations.VmOperations.runMain().then((code) => {
+            exitStub.withArgs(1).should.have.been.calledOnce;
+            debugStub.withArgs("Failure reason : Command execution failed").should.have.been.calledOnce;
+            debugStub.withArgs("##vso[task.logissue type=error;code=deployment_dummyerror;taskid=dummytaskid").should.have.been.calledOnce;
+        }).done(done);
+    });
+
+    it("Should exit with 1 and does not log telemetry point for unexpected command line tool termination", (done): void => {
         getInputStub.withArgs("action", true).returns(actionName);
         getCmdCommonArgsStub.returns(commonArgs);
         getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
@@ -189,14 +196,12 @@ describe("runMain", (): void => {
         execCmdStub.withArgs("java", cmdArgs).returns(promise);
 
         vmOperations.VmOperations.runMain().then((code) => {
-            getInputStub.should.have.been.calledOnce;
-            getCmdCommonArgsStub.should.have.been.calledOnce;
-            getCmdArgsForActionStub.should.have.been.calledOnce;
-            execCmdStub.should.have.been.calledOnce;
             exitStub.withArgs(1).should.have.been.calledOnce;
             debugStub.withArgs("Failure reason : Command execution failed").should.have.been.calledOnce;
+            debugStub.withArgs("##vso[task.logissue type=error;code=deployment_dummyerror;taskid=dummytaskid").should.not.have.been.called;
         }).done(done);
     });
+
 
     it("Should throw exception on failure to get actionName", (): void => {
         getInputStub.withArgs("action", true).throws();
