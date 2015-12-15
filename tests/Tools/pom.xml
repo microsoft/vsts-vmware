@@ -31,7 +31,7 @@
     <testSourceDirectory>./vmware</testSourceDirectory>
     <outputDirectory>../../_build/tests/tools/vmware</outputDirectory>
     <plugins>
-      
+
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
@@ -47,8 +47,63 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.15</version>
         <configuration>
+          <includes>
+            <include>**/*UnitTest.java</include>
+          </includes>
           <reportsDirectory>../../_build/testReports/vmware</reportsDirectory>
+          <testClassesDirectory>../../_build/tests/tools/vmware</testClassesDirectory>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.16</version>
+        <configuration>
+          <includes>
+            <include>**/*IntegrationTest.java</include>
+          </includes>
+          <reportsDirectory>../../_build/testReports/vmware</reportsDirectory>
+          <testClassesDirectory>../../_build/tests/tools/vmware</testClassesDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.7.5.201505241946</version>
+        <executions>
+          <execution>
+            <id>default-check</id>
+            <phase>package</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <dataFile>${session.executionRootDirectory}/_build/testReports/codecoverage/jacoco.exec</dataFile>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>COMPLEXITY</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.95</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
@@ -98,7 +153,7 @@
           </dependency>
         </dependencies>
       </plugin>
-      
+
     </plugins>
   </build>
 </project>
