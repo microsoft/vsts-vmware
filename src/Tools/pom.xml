@@ -15,7 +15,7 @@
   <packaging>jar</packaging>
 
   <build>
-    <sourceDirectory>./vmware</sourceDirectory>
+    <sourceDirectory>./vmOpsTool</sourceDirectory>
     <outputDirectory>../../_build/src/tools</outputDirectory>
     <plugins>
       
