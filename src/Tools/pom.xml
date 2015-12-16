@@ -10,10 +10,24 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <groupId>com.microsoft.vmware.tools</groupId>
-  <artifactId>Tools</artifactId>
-  <version>1.0</version>
+  <artifactId>Tools</artifactId>  
   <packaging>jar</packaging>
 
+  <dependencies>
+    <dependency>
+      <groupId>com.vmware</groupId>
+      <artifactId>vimjar</artifactId>
+      <version>6.0</version>
+      <scope>system</scope>
+      <systemPath>c:/externalapis/vim25.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>javax.xml.ws</groupId>
+      <artifactId>jaxws-api</artifactId>
+      <version>2.1</version>
+    </dependency>
+  </dependencies>
+    
   <build>
     <sourceDirectory>./vmOpsTool</sourceDirectory>
     <outputDirectory>../../_build/src/tools</outputDirectory>

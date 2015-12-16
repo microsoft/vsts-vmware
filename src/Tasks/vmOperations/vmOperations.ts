@@ -5,6 +5,8 @@ import * as tl from "vso-task-lib";
 import * as util from "util";
 
 export class VmOperations {
+    // tl.getInput will exit the task if required input is null or empty, we were not able to have
+    // a platform test for this behavior as process is exiting if you don't stub
     public static getCmdCommonArgs(): string {
         var cmdArgs = "";
         var vCenterConnectionName: string = tl.getInput("vCenterConnection", true);
@@ -14,6 +16,7 @@ export class VmOperations {
         var vCenterPassword: string =
             this.escapeDoubleQuotes(tl.getEndpointAuthorization(vCenterConnectionName, false)["parameters"]["password"]);
         var vmList: string = this.escapeDoubleQuotes(tl.getInput("vmList", true));
+        this.validateVmListInput(vmList);
 
         tl.debug("vCenterConnectionName = " + vCenterConnectionName);
         tl.debug("vCenterUrl = " + vCenterUrl);
@@ -34,7 +37,7 @@ export class VmOperations {
             case "RestoreSnapshot":
                 snapshotName  = this.escapeDoubleQuotes(tl.getInput("snapshotName", true));
                 tl.debug("snapshotName  = " + snapshotName );
-                cmdArgs += " -snapShotOps restore -snapshotName \"" + snapshotName  + "\"";
+                cmdArgs += " -snapshotOps restore -snapshotName \"" + snapshotName  + "\"";
                 tl.debug(util.format("action args: %s", cmdArgs));
                 break;
             default:
@@ -56,18 +59,7 @@ export class VmOperations {
                 tl.exit(code);
             })
             .fail( (err) => {
-                var splitted = err.split("\n", 2);
-                var telemetryData = "";
-                var failureMsg;
-                if (splitted[1] !== undefined) {
-                    telemetryData = splitted[0];
-                    failureMsg = splitted[1];
-                }
-                else {
-                    failureMsg = splitted[0];
-                }
-                tl.debug(telemetryData);
-                tl.debug("Failure reason : " + failureMsg);
+                tl.debug("Failure reason : " + err);
                 tl.exit(1);
             });
     }
@@ -76,5 +68,16 @@ export class VmOperations {
         var strUpdated = str.replace("\"", "\\\"");
         tl.debug(util.format("Input string: %s, Updated string:%s", str, strUpdated));
         return strUpdated;
+    }
+
+    // tl.exit will exit the task and hence not exiting from here, we were not able to have
+    // a platform test for this behavior as process is exiting if you don't stub
+    private static validateVmListInput(vmList: any): void {
+        var vms = vmList.split(",");
+        vms.forEach(vm => {
+            if (vm.trim()) {
+                tl.error("Invalid input for vmList: vmName cannot be empty string.");
+            }
+        });
     }
 }
