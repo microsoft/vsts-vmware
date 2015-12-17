@@ -8,6 +8,9 @@ import vmOpsTool.ConnectionData;
 import vmOpsTool.IVMWare;
 
 public class VmOpsToolUnitTests {
+  
+    private InMemoryVMWareImpl vmWareImpl = new InMemoryVMWareImpl();
+    private VmOpsTool vmOpsTool = new VmOpsTool(vmWareImpl);
 
     @Test
     public void parseCmdArgsWithAllRequiredInputs() {
@@ -21,19 +24,72 @@ public class VmOpsToolUnitTests {
         assertThat(argsMap.get("-vCenterUrl")).isEqualTo("http://localhost:8080");
     }
 
-    // Restore snapshot operation for one vm successful
-    // Restore snapshot operation for one vm failed
-    // Restore snapshot operation for multiple vms successful
-    // Restore snapshot operation for multiple vms for one vm failed with vm does not exist
-    // Restore snapshot operation for multiple vms for one vm failed with vm snapshot does not exist
     @Test
-    public void restoreSnapshotforOneVMSuccess(){
-        String vmList = "dummyvm";
-        String snapshotName = "dummySnapshot";
-        String vCenterUrl = "http://localhost:8080";
-        String vCenterUserName = "dummyuser";
-        String vCenterPassword = "dummypassword";
-        ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword);        
-        IVMWare vmwareInterface = new VMWareImpl();
+    public void executeActionShouldRestoreSnapshotForRestoreOperation() throws Exception {
+
+        String[] cmdArgs = new String[] {"vmOpsTool", "-vCenterUrl", "http://localhost:8080", "-vCenterUserName", "dummyuser",
+                "-vCenterPassword", "dummypassword", "-vmList", "vm1, vm2", "-snapshotOps", "restore",
+                "-snapshotName", "dummySnapshot"};
+        vmOpsTool.executeAction(cmdArgs);
+
+    	assertThat(vmWareImpl.snapshotExists("vm1", "dummySnapshot")).isEqualTo(true);
+    	assertThat(vmWareImpl.snapshotExists("vm2", "dummySnapshot")).isEqualTo(true);
+    }
+
+    @Test
+    public void executeActionShouldThrowForRestoreSnapshotFailureOnAVM() {
+        Exception exp = null;
+        String[] cmdArgs = new String[] {"vmOpsTool", "-vCenterUrl", "http://localhost:8080", "-vCenterUserName", "dummyuser",
+                "-vCenterPassword", "dummypassword", "-vmList", "vm1, vm3", "-snapshotOps", "restore",
+                "-snapshotName", "dummySnapshot"};
+        try {
+            vmOpsTool.executeAction(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+        
+        assertThat(exp).isNotNull();
+        assertThat(vmWareImpl.snapshotExists("vm1", "dummySnapshot")).isEqualTo(true);
+        assertThat(vmWareImpl.snapshotExists("vm3", "dummySnapshot")).isEqualTo(false);
+    }
+
+    @Test
+    public void executeActionInvalidSnapshotOperationShouldFail() {
+        String[] cmdArgs = new String[] {"vmOpsTool", "-vCenterUrl", "http://localhost:8080", "-vCenterUserName", "dummyuser",
+                "-vCenterPassword", "dummypassword", "-vmList", "vm1, vm2", "-snapshotOps", "invalid",
+                "-snapshotName", "dummySnapshot"};
+        Exception exp = null;
+        try {
+            vmOpsTool.executeAction(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }   
+        assertThat(exp).isNotNull();
+    }
+
+    @Test
+    public void executeActionForInvalidActionNameShouldFail() {
+        String[] cmdArgs = new String[] {"vmOpsTool", "-vCenterUrl", "http://localhost:8080", "-vCenterUserName", "dummyuser",
+                "-vCenterPassword", "dummypassword", "-vmList", "vm1, vm2", "-invalidOps", "restore",
+                "-snapshotName", "dummySnapshot"};
+        Exception exp = null;
+        try {
+            vmOpsTool.executeAction(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }   
+        assertThat(exp).isNotNull();
+    }
+
+    @Test
+    public void executeActionShouldIfRequiredInputIsNotPresent() {
+        String[] cmdArgs = new String[] {"vmOpsTool"};
+        Exception exp = null;
+        try {
+            vmOpsTool.executeAction(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }   
+        assertThat(exp).isNotNull();
     }
 }

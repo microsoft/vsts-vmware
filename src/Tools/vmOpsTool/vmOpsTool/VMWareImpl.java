@@ -13,7 +13,12 @@ public class VMWareImpl implements IVMWare {
     private UserSession userSession;
     private ManagedObjectReference rootFolder;
 
-    public void RestoreSnapShot(String vmList, String snapshotName, ConnectionData connData) throws Exception {
+    public Boolean snapshotExists(String vmName, String snapshotName) {
+        //TODO: Implement later to query for snapshot
+        return false;
+    }
+
+    public void restoreSnapshot(String vmList, String snapshotName, ConnectionData connData) throws Exception {
 
         Init(connData);
         String [] vmNames = vmList.split(",");
@@ -22,7 +27,7 @@ public class VMWareImpl implements IVMWare {
         for (String vmName : vmNames) {
             System.out.printf("Restoring snapshot(%s) on virtual machine (%s)", snapshotName, vmName);
             Map<String, ManagedObjectReference> vmsMap = getObjectsInContainerByType(this.rootFolder, "VirtualMachine");
-            
+
             if(!vmsMap.containsKey(vmName))
             {
                 System.out.printf("##vso[task.logissue type=error;code=USERINPUT_VmNotFound;TaskId=%s;]", taskId);
