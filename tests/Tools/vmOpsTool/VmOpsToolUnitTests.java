@@ -1,16 +1,21 @@
-import java.util.*;
+
 import org.junit.Test;
 import static org.assertj.core.api.Assertions.*;
 
-import vmOpsTool.VMWareImpl;
-import vmOpsTool.VmOpsTool;
+import java.util.Map;
+
 import vmOpsTool.ConnectionData;
-import vmOpsTool.IVMWare;
+import vmOpsTool.VmOpsTool;
 
 public class VmOpsToolUnitTests {
   
     private InMemoryVMWareImpl vmWareImpl = new InMemoryVMWareImpl();
     private VmOpsTool vmOpsTool = new VmOpsTool(vmWareImpl);
+    private String vCenterUrl = "https://localhost:8080/sdk/vimservice";
+    private String vCenterUserName = "Administrator";
+    private String vCenterPassword = "Password~1";
+    
+    private ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword);
 
     @Test
     public void parseCmdArgsWithAllRequiredInputs() {
@@ -27,38 +32,34 @@ public class VmOpsToolUnitTests {
     @Test
     public void executeActionShouldRestoreSnapshotForRestoreOperation() throws Exception {
 
-        String[] cmdArgs = new String[] {"vmOpsTool", "-vCenterUrl", "http://localhost:8080", "-vCenterUserName", "dummyuser",
-                "-vCenterPassword", "dummypassword", "-vmList", "vm1, vm2", "-snapshotOps", "restore",
-                "-snapshotName", "dummySnapshot"};
+        String[] cmdArgs = getCmdArgs("vm1, vm2", "-snapshotOps", "restore", "Snapshot1"); 
+
         vmOpsTool.executeAction(cmdArgs);
 
-    	assertThat(vmWareImpl.snapshotExists("vm1", "dummySnapshot")).isEqualTo(true);
-    	assertThat(vmWareImpl.snapshotExists("vm2", "dummySnapshot")).isEqualTo(true);
+        assertThat(vmWareImpl.getCurrentSnapshot("vm1", connData)).isEqualTo("Snapshot1");
+        assertThat(vmWareImpl.getCurrentSnapshot("vm2", connData)).isEqualTo("Snapshot1");
     }
 
     @Test
     public void executeActionShouldThrowForRestoreSnapshotFailureOnAVM() {
+        String[] cmdArgs = getCmdArgs("vm1, vm3", "-snapshotOps", "restore", "Snapshot1");
         Exception exp = null;
-        String[] cmdArgs = new String[] {"vmOpsTool", "-vCenterUrl", "http://localhost:8080", "-vCenterUserName", "dummyuser",
-                "-vCenterPassword", "dummypassword", "-vmList", "vm1, vm3", "-snapshotOps", "restore",
-                "-snapshotName", "dummySnapshot"};
+
         try {
             vmOpsTool.executeAction(cmdArgs);
         } catch (Exception e) {
             exp = e;
         }
-        
+
         assertThat(exp).isNotNull();
-        assertThat(vmWareImpl.snapshotExists("vm1", "dummySnapshot")).isEqualTo(true);
-        assertThat(vmWareImpl.snapshotExists("vm3", "dummySnapshot")).isEqualTo(false);
+        assertThat(vmWareImpl.getCurrentSnapshot("vm1", connData)).isEqualTo("Snapshot1");
     }
 
     @Test
     public void executeActionInvalidSnapshotOperationShouldFail() {
-        String[] cmdArgs = new String[] {"vmOpsTool", "-vCenterUrl", "http://localhost:8080", "-vCenterUserName", "dummyuser",
-                "-vCenterPassword", "dummypassword", "-vmList", "vm1, vm2", "-snapshotOps", "invalid",
-                "-snapshotName", "dummySnapshot"};
+        String[] cmdArgs = getCmdArgs("vm1, vm2", "-snapshotOps", "invalid", "Snapshot1");
         Exception exp = null;
+
         try {
             vmOpsTool.executeAction(cmdArgs);
         } catch (Exception e) {
@@ -69,10 +70,9 @@ public class VmOpsToolUnitTests {
 
     @Test
     public void executeActionForInvalidActionNameShouldFail() {
-        String[] cmdArgs = new String[] {"vmOpsTool", "-vCenterUrl", "http://localhost:8080", "-vCenterUserName", "dummyuser",
-                "-vCenterPassword", "dummypassword", "-vmList", "vm1, vm2", "-invalidOps", "restore",
-                "-snapshotName", "dummySnapshot"};
+        String[] cmdArgs = getCmdArgs("vm1, vm2", "-invalidOps", "restore", "Snapshot1");
         Exception exp = null;
+
         try {
             vmOpsTool.executeAction(cmdArgs);
         } catch (Exception e) {
@@ -85,11 +85,20 @@ public class VmOpsToolUnitTests {
     public void executeActionShouldIfRequiredInputIsNotPresent() {
         String[] cmdArgs = new String[] {"vmOpsTool"};
         Exception exp = null;
+
         try {
             vmOpsTool.executeAction(cmdArgs);
         } catch (Exception e) {
             exp = e;
-        }   
+        }
+
         assertThat(exp).isNotNull();
+    }
+    
+    private String[] getCmdArgs(String vmList, String actionName , String actionOption, String snapshotName) {
+        String[] cmdArgs = new String[] {"vmOpsTool", "-vCenterUrl", "http://localhost:8080",
+                "-vCenterUserName", "dummyuser", "-vCenterPassword", "dummypassword", "-vmList",
+                vmList, actionName, actionOption, "-snapshotName", snapshotName};
+        return cmdArgs;
     }
 }

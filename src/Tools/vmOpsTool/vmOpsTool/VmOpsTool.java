@@ -28,30 +28,30 @@ public class VmOpsTool {
     public void executeAction(String[] args) throws Exception {
         
         Map<String, String> argsMap = parseCmdLine(args);
-        
+
         String vCenterUrl = argsMap.get("-vCenterUrl");
         String vCenterUserName = argsMap.get("-vCenterUserName");
         String vCenterPassword = argsMap.get("-vCenterPassword");
         String vmList = argsMap.get("-vmList");
 
         ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword);        
-        
+
         if(argsMap.containsKey("-snapshotOps")) {
             String actionName = argsMap.get("-snapshotOps");
             String snapshotName = argsMap.get("-snapshotName");
             if(actionName.equalsIgnoreCase("restore")) {
-            	System.out.printf("Initiating restore snapshot operation on vmList[%s]", vmList);
+                System.out.printf("Initiating restore snapshot operation on vmList[%s]\n", vmList);
                 vmWareImpl.restoreSnapshot(vmList, snapshotName, connData);
             }
             else {
-                System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]", taskId );
-                System.err.printf("Invalid action name(%s) for snapshot operation", actionName);
+                System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]\n", taskId );
+                System.err.printf("Invalid action name(%s) for snapshot operation\n", actionName);
                 throw new Exception("Invalid action name(" + actionName + ") for snapshot operation");
             }
         }
         else {
-            System.out.printf("##vso[task.logissue type=error;code=INFRA_Operation;TaskId=%s;]", taskId );
-            System.err.printf("Invalid action input for the operation.");
+            System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]\n", taskId );
+            System.err.printf("Invalid action input for the operation.\n");
             throw new Exception("Invalid action input for the operation.");
         }
     }

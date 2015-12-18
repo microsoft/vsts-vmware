@@ -12,10 +12,17 @@ public interface IVMWare {
     public void restoreSnapshot(String vmList, String snapshotName, ConnectionData connData) throws Exception;
 
     /**
-     * Checks whether snapshot exists on given VM
-     * @param vmName name of the virtual machine
-     * @param snapshotName name of the snapshot to check
-     * @return true if snapshot exists, else false
+     * Gets the current active snapshot information for the VM
+     * @param vmName Name of the virtual machine
+     * @return current snapshot name
+     * @throws Exception 
      */
-    public Boolean snapshotExists(String vmName, String snapshotName);
+    public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception;
+    
+    /**
+     * 
+     * @param connData
+     * @throws Exception
+     */
+    public void connect(ConnectionData connData) throws Exception;
 }

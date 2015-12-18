@@ -54,6 +54,7 @@
         <configuration>
           <includes>
             <include>**/*UnitTests.java</include>
+            <include>**/*PlatformTests.java</include>
           </includes>
           <reportsDirectory>../../_build/testReports/vmOpsTool</reportsDirectory>
           <testClassesDirectory>../../_build/tests/tools/vmOpsTool</testClassesDirectory>
@@ -66,7 +67,7 @@
         <version>2.16</version>
         <configuration>
           <includes>
-            <include>**/*IntegrationTest.java</include>
+            <include>**/*IntegrationTests.java</include>
           </includes>
           <reportsDirectory>../../_build/testReports/vmOpsTool</reportsDirectory>
           <testClassesDirectory>../../_build/tests/tools/vmOpsTool</testClassesDirectory>
