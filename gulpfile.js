@@ -9,7 +9,7 @@ var shell = require('shelljs')
 var gutil = require('gulp-util');
 
 var buildDirectory = "_build";
-var packageDirectory = __dirname + "/_package";
+var packageDirectory = "_package";
 var sourcePaths = {
     typescriptFiles: "src/**/*.ts",
     copyFiles: ["src/*.json", "src/*.md", "src/Images/*", "src/Tasks/**/*.json", "src/Tasks/**/*.js", "src/Tasks/**/*.md", "src/Tasks/**/*.png", "src/Tasks/**/*.svg"]       
@@ -19,6 +19,7 @@ var testPaths = {
     copyfiles: ["tests/**/*.js"],
     compiledJSFiles: buildDirectory + "/**/*Tests*.js"  
 };
+var manifestFile = "vss-extension.json";
 
 var jsCoverageDir = path.join(buildDirectory, "codecoverage");
 
@@ -77,9 +78,9 @@ gulp.task("testci", ["build"], function() {
         .pipe(istanbul.enforceThresholds({ thresholds: { global: 95 } }));
 });
 
-gulp.task("package", ["build"], function() {    
-    shell.cd(buildDirectory + "/src");
-    if(shell.exec("tfx extension create --manifest-globs vss-extension.json --output-path " + packageDirectory).code !== 0) {
+gulp.task("package", ["build"], function() {
+    var srcBuildDirectory = buildDirectory + "/src";
+    if(shell.exec("tfx extension create --manifest-globs " + manifestFile + " --root " + srcBuildDirectory + " --output-path " + packageDirectory).code !== 0) {
         throw new gutil.PluginError({
             plugin: "package",
             message: "Unable to create package."          
