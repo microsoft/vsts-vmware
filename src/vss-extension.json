@@ -41,7 +41,7 @@
     },
     "files": [
         {
-            "path": "VMOpsTask"
+            "path": "Tasks/vmOperations"
         },
         {
             "path": "images",
@@ -86,7 +86,7 @@
                 "ms.vss-distributed-task.tasks"
             ],
             "properties": {
-                "name": "VMOpsTask"
+                "name": "Tasks/vmOperations"
             }
         }
     ]
