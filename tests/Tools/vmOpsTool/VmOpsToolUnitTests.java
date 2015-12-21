@@ -1,11 +1,9 @@
 
-import org.junit.Test;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 
-import vmOpsTool.ConnectionData;
-import vmOpsTool.VmOpsTool;
+import org.junit.Test;
 
 public class VmOpsToolUnitTests {
   

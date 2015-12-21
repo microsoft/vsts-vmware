@@ -1,6 +1,3 @@
-import vmOpsTool.IVMWare;
-import vmOpsTool.VMWareImpl;
-
 public class VMWareImplPlatformTests extends VMWarePlatformTests {
 
     @Override

@@ -1,5 +1,3 @@
-import vmOpsTool.IVMWare;
-
 public class InMemoryVMWareImplPlatformTests extends VMWarePlatformTests{
 
     @Override

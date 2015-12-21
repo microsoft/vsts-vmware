@@ -1,9 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
 
-import vmOpsTool.ConnectionData;
-import vmOpsTool.IVMWare;
-
 public class InMemoryVMWareImpl implements IVMWare {
 
     private Map<String, Map<String, Integer>> vmSnapshotInfo = new HashMap<String, Map<String, Integer>>();

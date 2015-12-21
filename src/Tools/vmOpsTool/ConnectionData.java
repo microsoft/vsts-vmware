@@ -1,4 +1,4 @@
-package vmOpsTool;
+
 
 public class ConnectionData {
 

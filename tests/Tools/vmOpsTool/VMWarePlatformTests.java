@@ -1,15 +1,6 @@
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 import org.junit.Test;
-
-import vmOpsTool.ConnectionData;
-import vmOpsTool.IVMWare;
-
-import static org.assertj.core.api.Assertions.*;
 
 public abstract class VMWarePlatformTests {
     private String vCenterUserName = "Administrator@vsphere.local";
