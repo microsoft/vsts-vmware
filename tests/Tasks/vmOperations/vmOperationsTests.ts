@@ -1,6 +1,6 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../../typings/tsd.d.ts" />
 
-import * as vmOperations from "../../src/Tasks/vmOperations/vmOperations";
+import * as vmOperations from "../../../src/Tasks/vmOperations/vmOperations";
 
 import mocha = require("mocha");
 import chai = require("chai");
