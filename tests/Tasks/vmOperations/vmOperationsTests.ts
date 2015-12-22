@@ -164,7 +164,7 @@ describe("runMain", (): void => {
 
     var commonArgs = " -vCenterUrl \"http://localhost:8080\" -vCenterUserName \"dummydomain\\dummyuser\" -vCenterPassword \"  pas\\\" w,o ;d\" ";
     var cmdArgsForAction = " -snapshotOps restore -snapshotName \"dummysnapshot\"";
-    var cmdArgs = "vmOpsTool " + cmdArgsForAction + commonArgs;
+    var cmdArgs = "./vmOpsTool-1.0.jar " + cmdArgsForAction + commonArgs;
     var actionName = "RestoreSnapshot";
 
     it("Should return 0 on successful exection of the command", (done): void => {

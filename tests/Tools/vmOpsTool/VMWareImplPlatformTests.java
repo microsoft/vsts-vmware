@@ -7,6 +7,6 @@ public class VMWareImplPlatformTests extends VMWarePlatformTests {
 
     @Override
     public String getvCenterUrl() {
-        return "https://idcvstt-lab325.fareast.corp.microsoft.com/sdk/vimservice";
+        return System.getenv("VCENTER_URL") + "/sdk/vimservice";
     }
 }
