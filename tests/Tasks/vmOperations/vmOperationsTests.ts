@@ -91,14 +91,14 @@ describe("getCmdCommonArgs", (): void => {
 
     it("Should fail task for invalid vmList input, i.e vmname empty string", (): void => {
         getInputStub.withArgs("vCenterConnection", true).returns(dummyConnectionName);
-        getInputStub.withArgs("vmList", true).returns(", vm1,, vm2, vm3");
+        getInputStub.withArgs("vmList", true).returns("vm1, ,vm, vm2, vm3,");
         getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
         getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummydomain\\dummyuser", "password" : " dummyp\" assword , ; "}});
         logErrorStub.withArgs("Invalid input for vmList: vmName cannot be empty string.").returns(1);
 
         vmOperations.VmOperations.getCmdCommonArgs();
 
-        logErrorStub.withArgs("Invalid input for vmList: vmName cannot be empty string.").should.have.been.called;
+        logErrorStub.withArgs("Invalid input for vmList: vmName cannot be empty string.").should.have.been.calledTwice;
 
     });
 });

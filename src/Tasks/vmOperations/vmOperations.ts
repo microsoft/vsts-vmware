@@ -75,7 +75,7 @@ export class VmOperations {
     private static validateVmListInput(vmList: any): void {
         var vms = vmList.split(",");
         vms.forEach(vm => {
-            if (vm.trim()) {
+            if (!vm.trim()) {
                 tl.error("Invalid input for vmList: vmName cannot be empty string.");
             }
         });
