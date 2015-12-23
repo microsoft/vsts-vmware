@@ -13,6 +13,7 @@ public class VmOpsTool {
         try {
             new VmOpsTool(new VMWareImpl()).executeAction(args);
         } catch (Exception exp) {
+            System.err.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occured");
             System.exit(1);
         }
     }
@@ -45,13 +46,11 @@ public class VmOpsTool {
             } else {
                 System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]\n",
                         Constants.taskId);
-                System.err.printf("Invalid action name(%s) for snapshot operation\n", actionName);
-                throw new Exception("Invalid action name(" + actionName + ") for snapshot operation");
+                throw new Exception("Invalid action name ( " + actionName + " ) for snapshot operation");
             }
         } else {
             System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]\n",
                     Constants.taskId);
-            System.err.printf("Invalid action input for the operation.\n");
             throw new Exception("Invalid action input for the operation.");
         }
     }
