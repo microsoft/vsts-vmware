@@ -46,7 +46,7 @@ public class VmOpsTool {
             } else {
                 System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]\n",
                         Constants.taskId);
-                throw new Exception("Invalid action name ( " + actionName + " ) for snapshot operation\n");
+                throw new Exception("Invalid action name ( " + actionName + " ) for snapshot operation");
             }
         } else {
             System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]\n",

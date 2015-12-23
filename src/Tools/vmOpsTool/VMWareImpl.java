@@ -81,7 +81,7 @@ public class VMWareImpl implements IVMWare {
         }
 
         if (!failedVmList.isEmpty()) {
-            throw new Exception(String.format("Failed to revert snapshot [%s] on virtual machines [%s]\n", snapshotName,
+            throw new Exception(String.format("Failed to revert snapshot [%s] on virtual machines [%s].", snapshotName,
                     failedVmList));
         }
         return;
