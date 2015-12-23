@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vmwareapp",
     "name": "VMWareApp",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "publisher": "ms",
     "description": "Manage your VMvare environments",
     "public": true,
@@ -41,7 +41,7 @@
     },
     "files": [
         {
-            "path": "vmOperations"
+            "path": "Tasks/vmOperations"
         },
         {
             "path": "images",
@@ -86,7 +86,7 @@
                 "ms.vss-distributed-task.tasks"
             ],
             "properties": {
-                "name": "vmOperations"
+                "name": "Tasks/vmOperations"
             }
         }
     ]

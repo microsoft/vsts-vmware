@@ -78,4 +78,5 @@ local.properties
 **/*pom.properties
 ## Application Specific
 _build
-
+_package
+tests/Tools/target

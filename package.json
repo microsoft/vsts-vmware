@@ -16,14 +16,16 @@
     "gulp-mocha": "^2.1.3",
     "gulp-tsb": "^1.7.4",
     "gulp-tslint": "^3.5.0",
+    "gulp-util": "^3.0.4",
     "mocha": "^2.3.3",
     "q": "^1.4.1",
     "rimraf": "^2.4.3",
+    "shelljs": "^0.3.0",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
+    "tfx-cli": "^0.3.8",
     "tsd": "^0.6.5",
-    "tslint": "^2.5.1",
-    "vso-task-lib": "^0.5.4"
+    "tslint": "^2.5.1"
   },
   "dependencies": {
     "vso-task-lib": "^0.5.4"
