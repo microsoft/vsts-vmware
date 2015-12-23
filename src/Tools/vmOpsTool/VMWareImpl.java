@@ -64,7 +64,7 @@ public class VMWareImpl implements IVMWare {
             try {
                 vmMor = getVMMorByName(vmName);
             } catch (Exception exp) {
-                failedVmList += vmName;
+                failedVmList += vmName + " ";
                 continue;
             }
 
@@ -75,14 +75,14 @@ public class VMWareImpl implements IVMWare {
                 System.out.printf("Successfully reverted to snapshot [%s] On virtual machine [%s]\n", snapshotName,
                         vmName);
             } else {
-                System.err.printf("Failed to revert snapshot [%s] on virtual machine [%s]\n", snapshotName, vmName);
-                failedVmList += vmName;
+                System.out.printf("Failed to revert snapshot [%s] on virtual machine [%s]\n", snapshotName, vmName);
+                failedVmList += vmName + " ";
             }
         }
 
         if (!failedVmList.isEmpty()) {
-            System.err.printf("Failed to revert snapshot [%s] on virtual machines [%s]\n", snapshotName, failedVmList);
-            throw new Exception();
+            throw new Exception(String.format("Failed to revert snapshot [%s] on virtual machines [%s]\n", snapshotName,
+                    failedVmList));
         }
         return;
     }
@@ -93,7 +93,6 @@ public class VMWareImpl implements IVMWare {
         if (!vmsMap.containsKey(vmName)) {
             System.out.printf("##vso[task.logissue type=error;code=USERINPUT_VmNotFound;TaskId=%s;]\n",
                     Constants.taskId);
-            System.err.println("Virtual machine with name " + vmName + " not found.");
             throw new Exception("Virtual machine with name " + vmName + " not found.");
         }
 
@@ -165,8 +164,7 @@ public class VMWareImpl implements IVMWare {
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=PREREQ_WaitForResultFailed;TaskId=%s;]\n",
                     Constants.taskId);
-            System.err.println("Failed to get operation result: " + exp.getMessage());
-            throw exp;
+            throw new Exception(String.format("Failed to get operation result: " + exp.getMessage()));
         }
     }
 
@@ -203,8 +201,7 @@ public class VMWareImpl implements IVMWare {
         } else {
             System.out.printf("##vso[task.logissue type=error;code=USERINPUT_SnapshotNotFound;TaskId=%s;]\n",
                     Constants.taskId);
-            System.err.println(snapshotNotFoundErr);
-            throw new Exception();
+            throw new Exception(snapshotNotFoundErr);
         }
         return snapshotMor;
     }
@@ -279,8 +276,7 @@ public class VMWareImpl implements IVMWare {
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=PREREQ_RetriveObjectPropertiesFailed;TaskId=%s;]\n",
                     Constants.taskId);
-            System.err.println("Failed to properties for managed object : " + exp.getMessage());
-            throw exp;
+            throw new Exception(String.format("Failed to properties for managed object : " + exp.getMessage()));
         }
         final Map<String, Object> propMap = new HashMap<String, Object>();
         if (results != null) {
@@ -331,8 +327,7 @@ public class VMWareImpl implements IVMWare {
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=PREREQ_QueryObjectsFailed;TaskId=%s;]\n",
                     Constants.taskId);
-            System.err.println("Failed to fetch objects: " + exp.getMessage());
-            throw exp;
+            throw new Exception(String.format("Failed to fetch objects: " + exp.getMessage()));
         }
     }
 
@@ -392,8 +387,7 @@ public class VMWareImpl implements IVMWare {
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=PREREQ_CreateFilterSpecFailed;TaskId=%s;]\n",
                     Constants.taskId);
-            System.err.println("Failed to create filter spec: " + exp.getMessage());
-            throw exp;
+            throw new Exception(String.format("Failed to create filter spec: " + exp.getMessage()));
         }
     }
 
@@ -417,10 +411,9 @@ public class VMWareImpl implements IVMWare {
                         null);
             }
         } catch (Exception exp) {
-            System.err.println("Failed to connect: " + exp.getMessage());
             System.out.printf("##vso[task.logissue type=error;code=USERINPUT_ConnectionFailed;TaskId=%s;]\n",
                     Constants.taskId);
-            throw exp;
+            throw new Exception(String.format("Failed to connect: " + exp.getMessage()));
         }
         System.out.println("Successfully established session with vCenter server.");
         return;
