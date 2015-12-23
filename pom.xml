@@ -16,7 +16,23 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <build.profile.id>dev</build.profile.id>    
+    <skip.jacoco.check>true</skip.jacoco.check>
   </properties>
+  
+  <profiles>
+    <profile>
+        <id>ci</id>
+            <properties>
+                <build.profile.id>ci</build.profile.id>
+                <!-- All tests are run. -->                
+                <skip.jacoco.check>false</skip.jacoco.check>                
+            </properties>
+    </profile>
+    <profile>
+        <id>dev</id>
+    </profile>
+  </profiles>
 
   <build>
     <outputDirectory>${session.executionRootDirectory}/_build</outputDirectory>

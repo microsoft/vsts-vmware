@@ -51,7 +51,7 @@
             <include>**/*UnitTest.java</include>
           </includes>
           <reportsDirectory>../../_build/testReports/vmware</reportsDirectory>
-          <testClassesDirectory>../../_build/tests/tools/vmware</testClassesDirectory>
+          <testClassesDirectory>../../_build/tests/tools/vmware</testClassesDirectory>          
         </configuration>
       </plugin>
 
@@ -64,7 +64,7 @@
             <include>**/*IntegrationTest.java</include>
           </includes>
           <reportsDirectory>../../_build/testReports/vmware</reportsDirectory>
-          <testClassesDirectory>../../_build/tests/tools/vmware</testClassesDirectory>
+          <testClassesDirectory>../../_build/tests/tools/vmware</testClassesDirectory>          
         </configuration>
         <executions>
           <execution>
@@ -101,6 +101,7 @@
                   </limits>
                 </rule>
               </rules>
+              <skip>${skip.jacoco.check}</skip>
             </configuration>
           </execution>
         </executions>
@@ -139,8 +140,8 @@
                   </structure>
                   <html destdir="../../_build/testReports/codecoverage/html" />
                   <xml destfile="../../_build/testReports/codecoverage/coverage-report.xml" />
-                  <csv destfile="../../_build/testReports/codecoverage/coverage-report.csv" />
-                </report>
+                  <csv destfile="../../_build/testReports/codecoverage/coverage-report.csv" />                  
+                </report>                
               </target>
             </configuration>
           </execution>

@@ -12,7 +12,7 @@ var buildDirectory = "_build";
 var packageDirectory = "_package";
 var sourcePaths = {
     typescriptFiles: "src/**/*.ts",
-    copyFiles: ["src/*.json", "src/*.md", "src/Images/*", "src/Tasks/**/*.json", "src/Tasks/**/*.js", "src/Tasks/**/*.md", "src/Tasks/**/*.png", "src/Tasks/**/*.svg"]       
+    copyFiles: ["src/*.json", "src/*.md", "src/Images/*", "src/Tasks/**/*.json", "src/Tasks/**/*.md", "src/Tasks/**/*.png", "src/Tasks/**/*.svg"]       
 };
 var testPaths = {
     typescriptFiles: "tests/**/*.ts",
@@ -34,7 +34,7 @@ var compilation = tsb.create({
 gulp.task("compile", ["lint"], function() {
      return gulp.src([sourcePaths.typescriptFiles, testPaths.typescriptFiles], { base: "." })
         .pipe(compilation())
-        .pipe(gulp.dest(__dirname))
+        .pipe(gulp.dest(buildDirectory))
         .pipe(istanbul({includeUntested: true}))
         .pipe(istanbul.hookRequire());
 });
@@ -78,14 +78,8 @@ gulp.task("testci", ["build"], function() {
         .pipe(istanbul.enforceThresholds({ thresholds: { global: 95 } }));
 });
 
-gulp.task("package", ["build"], function() {
-    var srcBuildDirectory = buildDirectory + "/src";
-    if(shell.exec("tfx extension create --manifest-globs " + manifestFile + " --root " + srcBuildDirectory + " --output-path " + packageDirectory).code !== 0) {
-        throw new gutil.PluginError({
-            plugin: "package",
-            message: "Unable to create package."          
-        });
-    }   
+gulp.task("package", ["build"], function(cb) {
+    createPackage(cb);    
 });
 
 gulp.task("watch", function() {
@@ -93,3 +87,45 @@ gulp.task("watch", function() {
 });
 
 gulp.task("default", ["build"]);
+
+var createPackage = function (cb) {
+    var srcBuildDirectory = buildDirectory + "/src";
+    runMaven(function () {
+        createVsix(manifestFile, srcBuildDirectory, packageDirectory, cb);
+    }, function (err) {
+        cb(new gutil.PluginError({
+            plugin: "package",
+            message: err
+        }));
+    });
+}
+
+var runMaven = function(successcb, failcb) {
+    var mavenPath = shell.which('mvn');
+	if (!mavenPath) {
+		failcb('mvn.exe needs to be in the path. Could not find.');
+		return;
+	}
+    shell.exec("mvn package", {silent:true}, function(code, output) {
+        if (code !== 0) {
+            failcb(output);
+        }
+        else {
+            successcb();
+        }
+    });
+}
+
+var createVsix = function(manifestFile, srcBuildDirectory, packageDirectory, cb) {
+    shell.exec("tfx extension create --manifest-globs " + manifestFile + " --root " + srcBuildDirectory + " --output-path " + packageDirectory, {silent:true}, function(code, output) {
+        if (code !== 0) {
+            cb(new gutil.PluginError({
+                plugin: "package",
+                message: output
+            }));
+        }
+        else {
+            cb();
+        }
+    });
+}
