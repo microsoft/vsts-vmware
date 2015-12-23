@@ -1,6 +1,6 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../../typings/tsd.d.ts" />
 
-import * as vmOperations from "../../src/Tasks/vmOperations/vmOperations";
+import * as vmOperations from "../../../src/Tasks/vmOperations/vmOperations";
 
 import mocha = require("mocha");
 import chai = require("chai");
@@ -18,6 +18,7 @@ describe("getCmdCommonArgs", (): void => {
     var getInputStub;
     var getEndPointUrlStub;
     var getEndpointAuthorizationStub;
+    var logErrorStub;
     var dummyConnectionName = "DummyConnectionName";
     var dummyEndpointUrl = "http://localhost:8080";
     var dummyVmList = "dummyvm1, dummyvm2";
@@ -27,6 +28,7 @@ describe("getCmdCommonArgs", (): void => {
         getInputStub = sandbox.stub(tl, "getInput");
         getEndPointUrlStub = sandbox.stub(tl, "getEndpointUrl");
         getEndpointAuthorizationStub = sandbox.stub(tl, "getEndpointAuthorization");
+        logErrorStub = sandbox.stub(tl, "error");
     });
 
     afterEach((): void => {
@@ -86,6 +88,19 @@ describe("getCmdCommonArgs", (): void => {
         cmdArgs.should.contain(" -vCenterUserName \"dummydomain\\dummyuser\"");
         cmdArgs.should.contain(" -vCenterPassword \" dummyp\\\" assword , ; \"");
     });
+
+    it("Should fail task for invalid vmList input, i.e vmname empty string", (): void => {
+        getInputStub.withArgs("vCenterConnection", true).returns(dummyConnectionName);
+        getInputStub.withArgs("vmList", true).returns("vm1, ,vm, vm2, vm3,");
+        getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
+        getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummydomain\\dummyuser", "password" : " dummyp\" assword , ; "}});
+        logErrorStub.withArgs("Invalid input for vmList: vmName cannot be empty string.").returns(1);
+
+        vmOperations.VmOperations.getCmdCommonArgs();
+
+        logErrorStub.withArgs("Invalid input for vmList: vmName cannot be empty string.").should.have.been.calledTwice;
+
+    });
 });
 
 describe("getCmdArgsForAction", (): void => {
@@ -105,7 +120,7 @@ describe("getCmdArgsForAction", (): void => {
 
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("RestoreSnapshot");
 
-        cmdArgs.should.contain("-snapShotOps restore -snapshotName \"dummySnap\\\"shotName\"");
+        cmdArgs.should.contain("-snapshotOps restore -snapshotName \"dummySnap\\\"shotName\"");
     });
 
     it("Should throw on failure to read snapshot name for restore action", (): void => {
@@ -148,8 +163,8 @@ describe("runMain", (): void => {
     });
 
     var commonArgs = " -vCenterUrl \"http://localhost:8080\" -vCenterUserName \"dummydomain\\dummyuser\" -vCenterPassword \"  pas\\\" w,o ;d\" ";
-    var cmdArgsForAction = " -snapShotOps restore -snapshotName \"dummysnapshot\"";
-    var cmdArgs = "vmOpsTool " + cmdArgsForAction + commonArgs;
+    var cmdArgsForAction = " -snapshotOps restore -snapshotName \"dummysnapshot\"";
+    var cmdArgs = "./vmOpsTool-1.0.jar " + cmdArgsForAction + commonArgs;
     var actionName = "RestoreSnapshot";
 
     it("Should return 0 on successful exection of the command", (done): void => {
@@ -170,23 +185,7 @@ describe("runMain", (): void => {
         }).done(done);
     });
 
-    it("Should exit with 1 and log telemetry point for expected failure in command line tool", (done): void => {
-        getInputStub.withArgs("action", true).returns(actionName);
-        getCmdCommonArgsStub.returns(commonArgs);
-        getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
-        var promise = Q.Promise<number>((complete, failure) => {
-            failure("##vso[task.logissue type=error;code=deployment_dummyerror;taskid=dummytaskid\nCommand execution failed");
-        });
-        execCmdStub.withArgs("java", cmdArgs).returns(promise);
-
-        vmOperations.VmOperations.runMain().then((code) => {
-            exitStub.withArgs(1).should.have.been.calledOnce;
-            debugStub.withArgs("Failure reason : Command execution failed").should.have.been.calledOnce;
-            debugStub.withArgs("##vso[task.logissue type=error;code=deployment_dummyerror;taskid=dummytaskid").should.have.been.calledOnce;
-        }).done(done);
-    });
-
-    it("Should exit with 1 and does not log telemetry point for unexpected command line tool termination", (done): void => {
+    it("Should exit with 1 and log failure message", (done): void => {
         getInputStub.withArgs("action", true).returns(actionName);
         getCmdCommonArgsStub.returns(commonArgs);
         getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
@@ -198,10 +197,8 @@ describe("runMain", (): void => {
         vmOperations.VmOperations.runMain().then((code) => {
             exitStub.withArgs(1).should.have.been.calledOnce;
             debugStub.withArgs("Failure reason : Command execution failed").should.have.been.calledOnce;
-            debugStub.withArgs("##vso[task.logissue type=error;code=deployment_dummyerror;taskid=dummytaskid").should.not.have.been.called;
         }).done(done);
     });
-
 
     it("Should throw exception on failure to get actionName", (): void => {
         getInputStub.withArgs("action", true).throws();

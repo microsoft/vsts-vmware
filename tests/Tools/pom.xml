@@ -14,8 +14,8 @@
   <packaging>jar</packaging>
   <dependencies>
     <dependency>
-      <groupId>com.microsoft.vmware.tools</groupId>
-      <artifactId>Tools</artifactId>
+      <groupId>com.microsoft.vmware.tools.vmopstool</groupId>
+      <artifactId>vmOpsTool</artifactId>
       <version>1.0</version>
       <type>jar</type>
     </dependency>
@@ -24,12 +24,17 @@
       <artifactId>junit</artifactId>
       <version>4.12</version>
     </dependency>
+    <dependency>
+    <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.2.0</version>
+    </dependency>
   </dependencies>
 
   <build>
-    <sourceDirectory>./vmware</sourceDirectory>
-    <testSourceDirectory>./vmware</testSourceDirectory>
-    <outputDirectory>../../_build/tests/tools/vmware</outputDirectory>
+    <sourceDirectory>./vmOpsTool</sourceDirectory>
+    <testSourceDirectory>./vmOpsTool</testSourceDirectory>
+    <outputDirectory>../../_build/tests/tools/vmOpsTool</outputDirectory>
     <plugins>
 
       <plugin>
@@ -48,10 +53,11 @@
         <version>2.15</version>
         <configuration>
           <includes>
-            <include>**/*UnitTest.java</include>
+            <include>**/*UnitTests.java</include>
+            <include>**/*PlatformTests.java</include>
           </includes>
-          <reportsDirectory>../../_build/testReports/vmware</reportsDirectory>
-          <testClassesDirectory>../../_build/tests/tools/vmware</testClassesDirectory>
+          <reportsDirectory>../../_build/testReports/vmOpsTool</reportsDirectory>
+          <testClassesDirectory>../../_build/tests/tools/vmOpsTool</testClassesDirectory>
         </configuration>
       </plugin>
 
@@ -61,10 +67,10 @@
         <version>2.16</version>
         <configuration>
           <includes>
-            <include>**/*IntegrationTest.java</include>
+            <include>**/*IntegrationTests.java</include>
           </includes>
-          <reportsDirectory>../../_build/testReports/vmware</reportsDirectory>
-          <testClassesDirectory>../../_build/tests/tools/vmware</testClassesDirectory>
+          <reportsDirectory>../../_build/testReports/vmOpsTool</reportsDirectory>
+          <testClassesDirectory>../../_build/tests/tools/vmOpsTool</testClassesDirectory>
         </configuration>
         <executions>
           <execution>
