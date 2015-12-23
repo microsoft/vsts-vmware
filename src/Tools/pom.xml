@@ -52,6 +52,7 @@
     <groupId>com.microsoft.vmware</groupId>
     <artifactId>module-main</artifactId>
     <version>1.0</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
   <artifactId>Tools</artifactId>
   <groupId>com.microsoft.vmware.tools</groupId>
