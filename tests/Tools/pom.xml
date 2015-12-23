@@ -53,7 +53,7 @@
         <version>2.15</version>
         <configuration>
           <includes>
-            <include>**/*UnitTests.java</include>            
+            <include>**/*UnitTests.java</include>
           </includes>
           <reportsDirectory>../../_build/testReports/vmOpsTool</reportsDirectory>
           <testClassesDirectory>../../_build/tests/tools/vmOpsTool</testClassesDirectory>
@@ -65,8 +65,7 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>2.16</version>
         <configuration>
-          <includes>
-            <include>**/*IntegrationTests.java</include>
+          <includes>            
             <include>**/*PlatformTests.java</include>
           </includes>
           <reportsDirectory>../../_build/testReports/vmOpsTool</reportsDirectory>
@@ -146,8 +145,8 @@
                   </structure>
                   <html destdir="../../_build/testReports/codecoverage/html" />
                   <xml destfile="../../_build/testReports/codecoverage/coverage-report.xml" />
-                  <csv destfile="../../_build/testReports/codecoverage/coverage-report.csv" />                  
-                </report>                
+                  <csv destfile="../../_build/testReports/codecoverage/coverage-report.csv" />
+                </report>
               </target>
             </configuration>
           </execution>

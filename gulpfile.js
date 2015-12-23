@@ -12,12 +12,11 @@ var buildDirectory = "_build";
 var packageDirectory = "_package";
 var sourcePaths = {
     typescriptFiles: "src/**/*.ts",
-    copyFiles: ["src/*.json", "src/*.md", "src/Images/*", "src/Tasks/**/*.json", "src/Tasks/**/*.md", "src/Tasks/**/*.png", "src/Tasks/**/*.svg"]       
+    copyFiles: ["src/*.json", "src/*.md", "src/Images/*", "src/Tasks/**/*.json", "src/Tasks/**/*.md", "src/Tasks/**/*.png", "src/Tasks/**/*.svg"]
 };
 var testPaths = {
     typescriptFiles: "tests/**/*.ts",
-    copyfiles: ["tests/**/*.js"],
-    compiledJSFiles: buildDirectory + "/**/*Tests*.js"  
+    compiledJSFiles: buildDirectory + "/**/*Tests*.js"
 };
 var manifestFile = "vss-extension.json";
 
@@ -40,8 +39,7 @@ gulp.task("compile", ["lint"], function() {
 });
 
 gulp.task("build", ["compile"], function() {
-    var copyFiles = sourcePaths.copyFiles.concat(testPaths.copyfiles);    
-    return gulp.src(copyFiles, { base: "." })        
+    return gulp.src(sourcePaths.copyFiles, { base: "." })
         .pipe(gulp.dest(buildDirectory));
 });
 
@@ -79,11 +77,11 @@ gulp.task("testci", ["build"], function() {
 });
 
 gulp.task("package", ["build"], function(cb) {
-    createPackage(cb);    
+    createPackage(cb);
 });
 
 gulp.task("watch", function() {
-    gulp.watch([sourcePaths.typescriptFiles, testPaths.typescriptFiles], ["test"]);    
+    gulp.watch([sourcePaths.typescriptFiles, testPaths.typescriptFiles], ["test"]);
 });
 
 gulp.task("default", ["build"]);
@@ -102,10 +100,10 @@ var createPackage = function (cb) {
 
 var runMaven = function(successcb, failcb) {
     var mavenPath = shell.which('mvn');
-	if (!mavenPath) {
-		failcb('mvn.exe needs to be in the path. Could not find.');
-		return;
-	}
+    if (!mavenPath) {
+        failcb('mvn.exe needs to be in the path. Could not find.');
+        return;
+    }
     shell.exec("mvn package", {silent:true}, function(code, output) {
         if (code !== 0) {
             failcb(output);

@@ -25,8 +25,7 @@
     "sinon-chai": "^2.8.0",
     "tfx-cli": "^0.3.8",
     "tsd": "^0.6.5",
-    "tslint": "^2.5.1",
-    "vso-task-lib": "^0.5.4"
+    "tslint": "^2.5.1"
   },
   "dependencies": {
     "vso-task-lib": "^0.5.4"

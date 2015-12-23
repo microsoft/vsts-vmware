@@ -16,7 +16,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <build.profile.id>dev</build.profile.id>    
+    <build.profile.id>dev</build.profile.id>
     <skip.jacoco.check>true</skip.jacoco.check>
   </properties>
   
@@ -25,8 +25,8 @@
         <id>ci</id>
             <properties>
                 <build.profile.id>ci</build.profile.id>
-                <!-- All tests are run. -->                
-                <skip.jacoco.check>false</skip.jacoco.check>                
+                <!-- All tests are run. -->
+                <skip.jacoco.check>false</skip.jacoco.check>
             </properties>
     </profile>
     <profile>
@@ -62,10 +62,10 @@
               <destFile>${session.executionRootDirectory}/_build/testReports/codecoverage/jacoco.exec</destFile>
               <append>true</append>
             </configuration>
-        </execution>         
+        </execution>
         </executions>
       </plugin>
-    </plugins>    
+    </plugins>
   </build> 
 
 </project>
