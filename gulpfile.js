@@ -26,8 +26,6 @@ var tempNodeModules = path.join(tempPath, 'node_modules');
 
 var jsCoverageDir = path.join(buildDirectory, "codecoverage");
 
-var NPM_MIN_VER = '3.0.0';
-
 // create and keep compiler
 var compilation = tsb.create({
     target: 'es5',
