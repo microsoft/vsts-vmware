@@ -11,17 +11,11 @@ export class VmOperations {
         var cmdArgs = "";
         var vCenterConnectionName: string = tl.getInput("vCenterConnection", true);
         var vCenterUrl: string = tl.getEndpointUrl(vCenterConnectionName, false);
-        var vCenterUserName: string =
-            this.escapeDoubleQuotes(tl.getEndpointAuthorization(vCenterConnectionName, false)["parameters"]["username"]);
-        var vCenterPassword: string =
-            this.escapeDoubleQuotes(tl.getEndpointAuthorization(vCenterConnectionName, false)["parameters"]["password"]);
+        var endPointAuthCreds = tl.getEndpointAuthorization(vCenterConnectionName, false)["parameters"];
+        var vCenterUserName: string = this.escapeDoubleQuotes(endPointAuthCreds["username"]);
+        var vCenterPassword: string = this.escapeDoubleQuotes(endPointAuthCreds["password"]);
         var vmList: string = this.escapeDoubleQuotes(tl.getInput("vmList", true));
         this.validateVmListInput(vmList);
-
-        tl.debug("vCenterConnectionName = " + vCenterConnectionName);
-        tl.debug("vCenterUrl = " + vCenterUrl);
-        tl.debug("vCenterUserName = " + vCenterUserName);
-        tl.debug("vmList = " + vmList);
 
         cmdArgs += " -vCenterUrl \"" + vCenterUrl  + "\" -vCenterUserName \"" + vCenterUserName  + "\" -vCenterPassword \"" +
                  vCenterPassword + "\" -vmList \"" + vmList + "\"";
@@ -34,15 +28,13 @@ export class VmOperations {
         var cmdArgs = "";
         var snapshotName  = null;
         switch (actionName) {
-            case "RestoreSnapshot":
+            case "Restore Snapshot on Virtual Machines":
                 snapshotName  = this.escapeDoubleQuotes(tl.getInput("snapshotName", true));
-                tl.debug("snapshotName  = " + snapshotName );
                 cmdArgs += " -snapshotOps restore -snapshotName \"" + snapshotName  + "\"";
                 tl.debug(util.format("action args: %s", cmdArgs));
                 break;
             default:
-                tl.debug("actionName = " + actionName);
-                throw "Invalid action name";
+                tl.error("Invalid action name : " + actionName);
         }
         return cmdArgs;
     }
@@ -51,7 +43,7 @@ export class VmOperations {
         var actionName: string = tl.getInput("action", true);
         var commonArgs: string = this.getCmdCommonArgs();
         var cmdArgsForAction: string = this.getCmdArgsForAction(actionName);
-        var cmdArgs = "./vmOpsTool-1.0.jar " + cmdArgsForAction + commonArgs;
+        var cmdArgs = "-jar ./vmOpsTool-1.0.jar " + cmdArgsForAction + commonArgs;
         util.log("Invoking command to perform vm operations ...\n");
         return tl.exec("java", cmdArgs)
             .then((code) => {

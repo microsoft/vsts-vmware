@@ -106,9 +106,11 @@ describe("getCmdCommonArgs", (): void => {
 describe("getCmdArgsForAction", (): void => {
     var sandbox;
     var getInputStub;
+    var logErrorStub;
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
         getInputStub = sandbox.stub(tl, "getInput");
+        logErrorStub = sandbox.stub(tl, "error");
     });
 
     afterEach((): void => {
@@ -118,7 +120,7 @@ describe("getCmdArgsForAction", (): void => {
     it("Should read snapshot name for restore snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnap\"shotName");
 
-        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("RestoreSnapshot");
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Restore Snapshot on Virtual Machines");
 
         cmdArgs.should.contain("-snapshotOps restore -snapshotName \"dummySnap\\\"shotName\"");
     });
@@ -127,15 +129,15 @@ describe("getCmdArgsForAction", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 
         expect( (): void => {
-             vmOperations.VmOperations.getCmdArgsForAction("RestoreSnapshot");
+             vmOperations.VmOperations.getCmdArgsForAction("Restore Snapshot on Virtual Machines");
              }).to.throw("Error");
         getInputStub.should.have.been.calledOnce;
     });
 
     it("Should throw on failure for invalid action name", (): void => {
-        expect( (): void => {
-             vmOperations.VmOperations.getCmdArgsForAction("InvalidAction");
-             }).to.throw("Invalid action name");
+        vmOperations.VmOperations.getCmdArgsForAction("InvalidAction");
+
+        logErrorStub.withArgs(("Invalid action name : InvalidAction")).should.have.been.calledOnce;
     });
 });
 
@@ -164,7 +166,7 @@ describe("runMain", (): void => {
 
     var commonArgs = " -vCenterUrl \"http://localhost:8080\" -vCenterUserName \"dummydomain\\dummyuser\" -vCenterPassword \"  pas\\\" w,o ;d\" ";
     var cmdArgsForAction = " -snapshotOps restore -snapshotName \"dummysnapshot\"";
-    var cmdArgs = "./vmOpsTool-1.0.jar " + cmdArgsForAction + commonArgs;
+    var cmdArgs = "-jar ./vmOpsTool-1.0.jar " + cmdArgsForAction + commonArgs;
     var actionName = "RestoreSnapshot";
 
     it("Should return 0 on successful exection of the command", (done): void => {
