@@ -80,3 +80,4 @@ local.properties
 _build
 _package
 tests/Tools/target
+src/Tools/target/
