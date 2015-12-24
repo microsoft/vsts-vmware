@@ -58,7 +58,7 @@ gulp.task("lint", function() {
 });
 
 gulp.task("clean", function(done) {
-    return rimraf([buildDirectory, packageDirectory, tempPath], function() {
+    return rimraf(buildDirectory, function () {
         // rimraf deletes the directory asynchronously
         done();
     });
