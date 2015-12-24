@@ -44,7 +44,7 @@ describe("getCmdCommonArgs", (): void => {
 
         var cmdArgs = vmOperations.VmOperations.getCmdCommonArgs();
 
-        cmdArgs.should.contain("-vCenterUrl \"" + dummyEndpointUrl + "\"");
+        cmdArgs.should.contain("-vCenterUrl \"" + dummyEndpointUrl + "sdk/vimService\"");
         cmdArgs.should.contain("-vCenterUserName \"dummyuser\"");
         cmdArgs.should.contain("-vCenterPassword \"dummypassword\"");
         cmdArgs.should.contain("-vmList \"" + dummyVmList + "\"");

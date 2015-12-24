@@ -10,7 +10,7 @@ export class VmOperations {
     public static getCmdCommonArgs(): string {
         var cmdArgs = "";
         var vCenterConnectionName: string = tl.getInput("vCenterConnection", true);
-        var vCenterUrl: string = tl.getEndpointUrl(vCenterConnectionName, false);
+        var vCenterUrl: string = tl.getEndpointUrl(vCenterConnectionName, false) + "sdk/vimService";
         var endPointAuthCreds = tl.getEndpointAuthorization(vCenterConnectionName, false)["parameters"];
         var vCenterUserName: string = this.escapeDoubleQuotes(endPointAuthCreds["username"]);
         var vCenterPassword: string = this.escapeDoubleQuotes(endPointAuthCreds["password"]);
