@@ -18,7 +18,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <build.profile.id>dev</build.profile.id>
     <skip.jacoco.check>true</skip.jacoco.check>
-    <skip.unittests>true</skip.unittests>
   </properties>
   
   <profiles>
@@ -28,7 +27,6 @@
                 <build.profile.id>ci</build.profile.id>
                 <!-- All tests are run. -->
                 <skip.jacoco.check>false</skip.jacoco.check>
-                <skip.unittests>false</skip.unittests>
             </properties>
     </profile>
     <profile>
