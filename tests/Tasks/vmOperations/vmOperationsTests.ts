@@ -149,6 +149,7 @@ describe("runMain", (): void => {
     var execCmdStub;
     var exitStub;
     var debugStub;
+    var getVariableStub;
 
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
@@ -156,6 +157,7 @@ describe("runMain", (): void => {
         execCmdStub = sandbox.stub(tl, "exec");
         exitStub = sandbox.stub(tl, "exit");
         debugStub = sandbox.stub(tl, "debug");
+        getVariableStub = sandbox.stub(tl, "getVariable");
         getCmdCommonArgsStub = sandbox.stub(vmOperations.VmOperations, "getCmdCommonArgs");
         getCmdArgsForActionStub = sandbox.stub(vmOperations.VmOperations, "getCmdArgsForAction");
     });
@@ -164,15 +166,17 @@ describe("runMain", (): void => {
         sandbox.restore();
     });
 
+    // var systemClassPath = getVariableStub.withArgs("classpath").returns("c:\Windows");
     var commonArgs = " -vCenterUrl \"http://localhost:8080\" -vCenterUserName \"dummydomain\\dummyuser\" -vCenterPassword \"  pas\\\" w,o ;d\" ";
     var cmdArgsForAction = " -snapshotOps restore -snapshotName \"dummysnapshot\"";
-    var cmdArgs = "-jar ./vmOpsTool-1.0.jar " + cmdArgsForAction + commonArgs;
+    var cmdArgs = "-classpath vmOpsTool-1.0.jar;c:\\Windows VmOpsTool " + cmdArgsForAction + commonArgs;
     var actionName = "RestoreSnapshot";
 
     it("Should return 0 on successful exection of the command", (done): void => {
         getInputStub.withArgs("action", true).returns(actionName);
         getCmdCommonArgsStub.returns(commonArgs);
         getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
+        getVariableStub.withArgs("classpath").returns("c:\\Windows");
         var promise = Q.Promise<number>((complete, failure) => {
             complete(0);
         });
@@ -191,6 +195,7 @@ describe("runMain", (): void => {
         getInputStub.withArgs("action", true).returns(actionName);
         getCmdCommonArgsStub.returns(commonArgs);
         getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
+        getVariableStub.withArgs("classpath").returns("c:\\Windows");
         var promise = Q.Promise<number>((complete, failure) => {
             failure("Command execution failed");
         });

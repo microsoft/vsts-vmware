@@ -43,7 +43,8 @@ export class VmOperations {
         var actionName: string = tl.getInput("action", true);
         var commonArgs: string = this.getCmdCommonArgs();
         var cmdArgsForAction: string = this.getCmdArgsForAction(actionName);
-        var cmdArgs = "-jar ./vmOpsTool-1.0.jar " + cmdArgsForAction + commonArgs;
+        var systemClassPath: string = tl.getVariable("classpath");
+        var cmdArgs = "-classpath vmOpsTool-1.0.jar;" + systemClassPath + " VmOpsTool " + cmdArgsForAction + commonArgs;
         util.log("Invoking command to perform vm operations ...\n");
         return tl.exec("java", cmdArgs)
             .then((code) => {
