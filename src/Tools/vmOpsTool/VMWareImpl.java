@@ -64,6 +64,7 @@ public class VMWareImpl implements IVMWare {
             try {
                 vmMor = getVMMorByName(vmName);
             } catch (Exception exp) {
+                System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occured");
                 failedVmList += vmName + " ";
                 continue;
             }
