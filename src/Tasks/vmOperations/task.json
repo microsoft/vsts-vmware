@@ -50,11 +50,11 @@
             "helpMarkDown": "Comma separated list of virtual machine names"
         },
         {
-            "name": "snapshotName ",
+            "name": "snapshotName",
             "type": "string",
             "label": "Snapshot Name",
-            "required": true,
             "defaultValue": "",
+            "required": true,
             "helpMarkDown": "Name of the snapshot to be created or reverted to"
         }
     ],
