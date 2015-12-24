@@ -149,6 +149,7 @@ describe("runMain", (): void => {
     var execCmdStub;
     var exitStub;
     var debugStub;
+    var errorStub;
     var getVariableStub;
 
     beforeEach((): void => {
@@ -157,6 +158,7 @@ describe("runMain", (): void => {
         execCmdStub = sandbox.stub(tl, "exec");
         exitStub = sandbox.stub(tl, "exit");
         debugStub = sandbox.stub(tl, "debug");
+        errorStub = sandbox.stub(tl, "error");
         getVariableStub = sandbox.stub(tl, "getVariable");
         getCmdCommonArgsStub = sandbox.stub(vmOperations.VmOperations, "getCmdCommonArgs");
         getCmdArgsForActionStub = sandbox.stub(vmOperations.VmOperations, "getCmdArgsForAction");
@@ -203,7 +205,7 @@ describe("runMain", (): void => {
 
         vmOperations.VmOperations.runMain().then((code) => {
             exitStub.withArgs(1).should.have.been.calledOnce;
-            debugStub.withArgs("Failure reason : Command execution failed").should.have.been.calledOnce;
+            errorStub.withArgs("Failure reason : Command execution failed").should.have.been.calledOnce;
         }).done(done);
     });
 

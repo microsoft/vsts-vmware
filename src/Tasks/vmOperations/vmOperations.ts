@@ -52,7 +52,7 @@ export class VmOperations {
                 tl.exit(code);
             })
             .fail( (err) => {
-                tl.debug("Failure reason : " + err);
+                tl.error("Failure reason : " + err);
                 tl.exit(1);
             });
     }
