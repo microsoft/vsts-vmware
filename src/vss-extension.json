@@ -1,14 +1,14 @@
 ﻿{
     "manifestVersion": 1,
     "id": "vmwareapp",
-    "name": "VMWareApp",
+    "name": "VMWare Integration",
     "version": "1.0.0",
     "publisher": "ms",
-    "description": "Manage your VMvare environments",
+    "description": "Connect to a VMWare vCenter server, and easily provision VMs, and perform actions on them like snapshot, revert snapshot, start, stop etc.",
     "public": true,
     "icons": {
         "default": "images/Vmware_logo.png",
-        "large": "images/VMware-logo-large.jpg"
+        "large": "images/VMware-logo-large.png"
     },
     "categories": [
         "Build and release"
@@ -16,27 +16,22 @@
     "tags": [ ],
     "links": {
         "support": {
-            "uri": "http://support"
+            "uri": "http://aka.ms/vmwaresupport"
         },
         "pricing": {
-            "uri": "http://pricing"
+            "uri": "http://aka.ms/vstspricing"
         },
         "home": {
-            "uri": "http://home"
+            "uri": "http://aka.ms/vmwarehelp"
         }
     },
     "branding": {
         "color": "#f6f7fb",
         "theme": "light"
     },
-    "screenshots": [
-        {
-            "path": "images/screen1.png"
-        }
-    ],
     "content": {
         "details": {
-            "path": "overview.md"
+            "path": "VMWare.md"
         }
     },
     "files": [
@@ -46,6 +41,23 @@
         {
             "path": "images",
             "addressable": true
+        }
+    ],
+    "screenshots": [
+        {
+            "path": "images/AdminPanel.png"
+        },
+        {
+            "path": "images/ClassPath.png"
+        },
+        {
+            "path": "images/NewService.png"
+        },
+        {
+            "path": "images/Task.png"
+        },
+        {
+            "path": "images/VMWareConnection.png"
         }
     ],
     "scopes": [
@@ -75,7 +87,7 @@
                 ],
                 "helpLink": {
                     "text": "Learn More",
-                    "url": "https://msdn.microsoft.com/Library/vs/alm/Release/author-release-definition/understanding-tasks#serviceconnections"
+                    "url": "http://aka.ms/learnmorerm"
                 }
             }
         },

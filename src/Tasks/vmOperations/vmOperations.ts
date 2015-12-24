@@ -28,7 +28,7 @@ export class VmOperations {
         var cmdArgs = "";
         var snapshotName  = null;
         switch (actionName) {
-            case "Restore Snapshot on Virtual Machines":
+            case "Apply Snapshot to Virtual Machines":
                 snapshotName  = this.escapeDoubleQuotes(tl.getInput("snapshotName", true));
                 cmdArgs += " -snapshotOps restore -snapshotName \"" + snapshotName  + "\"";
                 tl.debug(util.format("action args: %s", cmdArgs));
