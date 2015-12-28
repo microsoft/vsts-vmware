@@ -25,7 +25,7 @@
         {
             "name": "vCenterConnection",
             "type": "connectedService:VMWare",
-            "label": "VMWare vCenter Service Connection",
+            "label": "vCenter Connection",
             "defaultValue": "",
             "required": true,
             "helpMarkDown": "VMWare vCenter service connection to target for deployment."

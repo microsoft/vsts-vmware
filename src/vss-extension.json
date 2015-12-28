@@ -43,23 +43,6 @@
             "addressable": true
         }
     ],
-    "screenshots": [
-        {
-            "path": "images/AdminPanel.png"
-        },
-        {
-            "path": "images/ClassPath.png"
-        },
-        {
-            "path": "images/NewService.png"
-        },
-        {
-            "path": "images/Task.png"
-        },
-        {
-            "path": "images/VMWareConnection.png"
-        }
-    ],
     "scopes": [
         "vso.build_execute",
         "vso.serviceendpoint_manage"
