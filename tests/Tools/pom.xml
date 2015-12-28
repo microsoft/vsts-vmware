@@ -120,7 +120,7 @@
         <version>1.6</version>
         <executions>
           <execution>
-            <phase>post-integration-test</phase>
+            <phase>package</phase>
             <goals>
               <goal>run</goal>
             </goals>
