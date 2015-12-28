@@ -64,6 +64,7 @@ public class VMWareImpl implements IVMWare {
             try {
                 vmMor = getVMMorByName(vmName);
             } catch (Exception exp) {
+                System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occured");
                 failedVmList += vmName + " ";
                 continue;
             }
@@ -195,8 +196,7 @@ public class VMWareImpl implements IVMWare {
             if (snapshotMor == null) {
                 System.out.printf("##vso[task.logissue type=error;code=USERINPUT_SnapshotNotFound;TaskId=%s;]\n",
                         Constants.taskId);
-                System.err.println(snapshotNotFoundErr);
-                throw new Exception();
+                throw new Exception(snapshotNotFoundErr);
             }
         } else {
             System.out.printf("##vso[task.logissue type=error;code=USERINPUT_SnapshotNotFound;TaskId=%s;]\n",

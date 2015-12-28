@@ -44,7 +44,7 @@ describe("getCmdCommonArgs", (): void => {
 
         var cmdArgs = vmOperations.VmOperations.getCmdCommonArgs();
 
-        cmdArgs.should.contain("-vCenterUrl \"" + dummyEndpointUrl + "\"");
+        cmdArgs.should.contain("-vCenterUrl \"" + dummyEndpointUrl + "sdk/vimService\"");
         cmdArgs.should.contain("-vCenterUserName \"dummyuser\"");
         cmdArgs.should.contain("-vCenterPassword \"dummypassword\"");
         cmdArgs.should.contain("-vmList \"" + dummyVmList + "\"");
@@ -106,9 +106,11 @@ describe("getCmdCommonArgs", (): void => {
 describe("getCmdArgsForAction", (): void => {
     var sandbox;
     var getInputStub;
+    var logErrorStub;
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
         getInputStub = sandbox.stub(tl, "getInput");
+        logErrorStub = sandbox.stub(tl, "error");
     });
 
     afterEach((): void => {
@@ -118,7 +120,7 @@ describe("getCmdArgsForAction", (): void => {
     it("Should read snapshot name for restore snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnap\"shotName");
 
-        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("RestoreSnapshot");
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Apply Snapshot to Virtual Machines");
 
         cmdArgs.should.contain("-snapshotOps restore -snapshotName \"dummySnap\\\"shotName\"");
     });
@@ -127,15 +129,15 @@ describe("getCmdArgsForAction", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 
         expect( (): void => {
-             vmOperations.VmOperations.getCmdArgsForAction("RestoreSnapshot");
+             vmOperations.VmOperations.getCmdArgsForAction("Apply Snapshot to Virtual Machines");
              }).to.throw("Error");
         getInputStub.should.have.been.calledOnce;
     });
 
     it("Should throw on failure for invalid action name", (): void => {
-        expect( (): void => {
-             vmOperations.VmOperations.getCmdArgsForAction("InvalidAction");
-             }).to.throw("Invalid action name");
+        vmOperations.VmOperations.getCmdArgsForAction("InvalidAction");
+
+        logErrorStub.withArgs(("Invalid action name : InvalidAction")).should.have.been.calledOnce;
     });
 });
 
@@ -147,6 +149,8 @@ describe("runMain", (): void => {
     var execCmdStub;
     var exitStub;
     var debugStub;
+    var errorStub;
+    var getVariableStub;
 
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
@@ -154,6 +158,8 @@ describe("runMain", (): void => {
         execCmdStub = sandbox.stub(tl, "exec");
         exitStub = sandbox.stub(tl, "exit");
         debugStub = sandbox.stub(tl, "debug");
+        errorStub = sandbox.stub(tl, "error");
+        getVariableStub = sandbox.stub(tl, "getVariable");
         getCmdCommonArgsStub = sandbox.stub(vmOperations.VmOperations, "getCmdCommonArgs");
         getCmdArgsForActionStub = sandbox.stub(vmOperations.VmOperations, "getCmdArgsForAction");
     });
@@ -162,15 +168,17 @@ describe("runMain", (): void => {
         sandbox.restore();
     });
 
+    // var systemClassPath = getVariableStub.withArgs("classpath").returns("c:\Windows");
     var commonArgs = " -vCenterUrl \"http://localhost:8080\" -vCenterUserName \"dummydomain\\dummyuser\" -vCenterPassword \"  pas\\\" w,o ;d\" ";
     var cmdArgsForAction = " -snapshotOps restore -snapshotName \"dummysnapshot\"";
-    var cmdArgs = "./vmOpsTool-1.0.jar " + cmdArgsForAction + commonArgs;
+    var cmdArgs = "-classpath vmOpsTool-1.0.jar;c:\\Windows VmOpsTool " + cmdArgsForAction + commonArgs;
     var actionName = "RestoreSnapshot";
 
     it("Should return 0 on successful exection of the command", (done): void => {
         getInputStub.withArgs("action", true).returns(actionName);
         getCmdCommonArgsStub.returns(commonArgs);
         getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
+        getVariableStub.withArgs("classpath").returns("c:\\Windows");
         var promise = Q.Promise<number>((complete, failure) => {
             complete(0);
         });
@@ -189,6 +197,7 @@ describe("runMain", (): void => {
         getInputStub.withArgs("action", true).returns(actionName);
         getCmdCommonArgsStub.returns(commonArgs);
         getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
+        getVariableStub.withArgs("classpath").returns("c:\\Windows");
         var promise = Q.Promise<number>((complete, failure) => {
             failure("Command execution failed");
         });
@@ -196,7 +205,7 @@ describe("runMain", (): void => {
 
         vmOperations.VmOperations.runMain().then((code) => {
             exitStub.withArgs(1).should.have.been.calledOnce;
-            debugStub.withArgs("Failure reason : Command execution failed").should.have.been.calledOnce;
+            errorStub.withArgs("Failure reason : Command execution failed").should.have.been.calledOnce;
         }).done(done);
     });
 

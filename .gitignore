@@ -80,4 +80,5 @@ local.properties
 _build
 _package
 tests/Tools/target
-_temp
+src/Tools/target/
+/_temp

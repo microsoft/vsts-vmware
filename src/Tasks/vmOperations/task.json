@@ -2,7 +2,7 @@
     "id": "735d144e-55fe-44d6-b687-db9031b6e70b",
     "name": "VMWareTask",
     "friendlyName": "VMWare Resource Deployment",
-    "description": "Enables create or restore of snapshot on virtual machine",
+    "description": "Create or restore virtual machines snapshot",
     "helpMarkDown": "[More Information](http://aka.ms/vmwaretaskreadme)",
     "category": "Deploy",
     "visibility": [
@@ -25,37 +25,37 @@
         {
             "name": "vCenterConnection",
             "type": "connectedService:VMWare",
-            "label": "vCenter Service Connection",
+            "label": "VMWare vCenter Service Connection",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "Connection required for communicating with vCenter"
+            "helpMarkDown": "VMWare vCenter service connection to target for deployment."
         },
         {
             "name": "action", 
             "type": "pickList",
             "label": "Action",
-            "defaultValue": "Restore Snapshot on Virtual Machines",
+            "defaultValue": "Apply Snapshot to Virtual Machines",
             "required": true,
-            "helpMarkDown" : "Action to be performed on the Azure resources or resource group.",
+            "helpMarkDown" : "Action to be performed on the VMWare virtual machines.",
             "options": {
-                 "ResoreSnapshot": "Restore Snapshot on Virtual Machines"
+                 "ResoreSnapshot": "Apply Snapshot to Virtual Machines"
             }
         },
         {
             "name": "vmList",
             "type": "string",
-            "label": "VM Name(s)",
+            "label": "Virtual Machines Name",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "Comma separated list of virtual machine names"
+            "helpMarkDown": "Provide a comma separated list of the names of the virtual machines, like FabrikamWeb, FabrikamDB, FabrikamTest."
         },
         {
-            "name": "snapshotName ",
+            "name": "snapshotName",
             "type": "string",
             "label": "Snapshot Name",
-            "required": true,
             "defaultValue": "",
-            "helpMarkDown": "Name of the snapshot to be created or reverted to"
+            "required": true,
+            "helpMarkDown": "Enter the name of the snapshot for applying to the virtual machines."
         }
     ],
     "instanceNameFormat": "$(action) : $(vmList)",
