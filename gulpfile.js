@@ -42,11 +42,7 @@ gulp.task("compile", ["lint"], function () {
         .pipe(istanbul.hookRequire());
 });
 
-gulp.task("build", ["compile", "gettasklib"], function() {
-    fs.readdirSync(sourcePaths.tasksPath).filter(function (file) {
-        return fs.statSync(path.join(sourcePaths.tasksPath, file)).isDirectory();
-    }).forEach(copyTaskLib);
-    
+gulp.task("build", ["clean", "compile"], function() {
     return gulp.src(sourcePaths.copyFiles, { base: "." })
         .pipe(gulp.dest(buildDirectory));
 });
@@ -84,7 +80,10 @@ gulp.task("testci", ["build"], function() {
         .pipe(istanbul.enforceThresholds({ thresholds: { global: 95 } }));
 });
 
-gulp.task("package", ["build"], function(cb) {
+gulp.task("package", ["build", "gettasklib"], function(cb) {
+    fs.readdirSync(sourcePaths.tasksPath).filter(function (file) {
+        return fs.statSync(path.join(sourcePaths.tasksPath, file)).isDirectory();
+    }).forEach(copyTaskLib);
     createPackage(cb);
 });
 
