@@ -79,4 +79,10 @@ local.properties
 ## Application Specific
 _build
 _package
+<<<<<<< HEAD
 tests/Tools/target
+=======
+tests/Tools/target
+src/Tools/target/
+/_temp
+>>>>>>> 895fcb4... Fixing rolling failure
