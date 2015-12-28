@@ -34,7 +34,7 @@ var compilation = tsb.create({
     verbose: false
 });
 
-gulp.task("compile", ["lint", "clean"], function () {
+gulp.task("compile", ["lint"], function () {
     return gulp.src([sourcePaths.typescriptFiles, testPaths.typescriptFiles], { base: "." })
         .pipe(compilation())
         .pipe(gulp.dest(buildDirectory))
@@ -42,11 +42,7 @@ gulp.task("compile", ["lint", "clean"], function () {
         .pipe(istanbul.hookRequire());
 });
 
-gulp.task("build", ["compile"], function() {
-    fs.readdirSync(sourcePaths.tasksPath).filter(function (file) {
-        return fs.statSync(path.join(sourcePaths.tasksPath, file)).isDirectory();
-    }).forEach(copyTaskLib);
-    
+gulp.task("build", ["clean", "compile"], function() {
     return gulp.src(sourcePaths.copyFiles, { base: "." })
         .pipe(gulp.dest(buildDirectory));
 });
@@ -85,6 +81,9 @@ gulp.task("testci", ["build"], function() {
 });
 
 gulp.task("package", ["build", "gettasklib"], function(cb) {
+    fs.readdirSync(sourcePaths.tasksPath).filter(function (file) {
+        return fs.statSync(path.join(sourcePaths.tasksPath, file)).isDirectory();
+    }).forEach(copyTaskLib);
     createPackage(cb);
 });
 
