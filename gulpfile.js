@@ -42,12 +42,12 @@ gulp.task("compile", ["lint"], function () {
         .pipe(istanbul.hookRequire());
 });
 
-gulp.task("build", ["clean", "compile"], function() {
+gulp.task("build", ["compile"], function() {
     return gulp.src(sourcePaths.copyFiles, { base: "." })
         .pipe(gulp.dest(buildDirectory));
 });
 
-gulp.task("lint", function() {
+gulp.task("lint", ["clean"], function() {
     return gulp.src([sourcePaths.typescriptFiles, testPaths.typescriptFiles])
         .pipe(tslint())
         .pipe(tslint.report("verbose"))
