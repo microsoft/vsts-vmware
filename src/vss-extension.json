@@ -6,6 +6,9 @@
     "publisher": "ms",
     "description": "Connect to a VMWare vCenter server, and easily provision VMs, and perform actions on them like snapshot, revert snapshot, start, stop etc.",
     "public": true,
+    "galleryFlags": [
+    "Preview"
+    ],
     "icons": {
         "default": "images/Vmware_logo.png",
         "large": "images/VMware-logo-large.png"
