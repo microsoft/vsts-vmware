@@ -80,7 +80,7 @@ gulp.task("testci", ["build"], function() {
         .pipe(istanbul.enforceThresholds({ thresholds: { global: 95 } }));
 });
 
-gulp.task("package", ["build", "gettasklib"], function(cb) {
+gulp.task("package", ["gettasklib"], function(cb) {
     fs.readdirSync(sourcePaths.tasksPath).filter(function (file) {
         return fs.statSync(path.join(sourcePaths.tasksPath, file)).isDirectory();
     }).forEach(copyTaskLib);
@@ -93,7 +93,7 @@ gulp.task("watch", function() {
 
 gulp.task("default", ["build"]);
 
-gulp.task("gettasklib", function (cb) {
+gulp.task("gettasklib", ["build"], function (cb) {
     getLatestTaskLib(cb);
 });
 
