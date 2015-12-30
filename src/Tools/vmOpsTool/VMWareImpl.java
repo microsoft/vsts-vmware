@@ -233,7 +233,7 @@ public class VMWareImpl implements IVMWare {
         }
 
         for (VirtualMachineSnapshotTree vmSnapshot : vmRootSnapshotList) {
-            System.out.printf("Current CP Name: %s\n", vmSnapshot.getName());
+            System.out.printf("Current snapshot name: %s\n", vmSnapshot.getName());
             if (vmSnapshot.getSnapshot().getValue().equals(currentSnapshotMor.getValue())) {
                 System.out.println("Found current snapshot in tree ( " + vmSnapshot.getName() + " )");
                 return vmSnapshot.getName();
