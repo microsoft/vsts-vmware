@@ -1,4 +1,5 @@
 var gulp = require("gulp");
+var del = require("del");
 var rimraf = require("rimraf");
 var tsb = require("gulp-tsb");
 var mocha = require("gulp-mocha");
@@ -21,7 +22,7 @@ var testPaths = {
     compiledJSFiles: buildDirectory + "/**/*Tests*.js"
 };
 var manifestFile = "vss-extension.json";
-var tempPath = path.join(__dirname, '_temp');
+var tempPath = "_temp";
 var tempNodeModules = path.join(tempPath, 'node_modules');
 
 var jsCoverageDir = path.join(buildDirectory, "codecoverage");
@@ -53,11 +54,8 @@ gulp.task("lint", ["clean"], function() {
         .pipe(tslint.report("verbose"))
 });
 
-gulp.task("clean", function(done) {
-    return rimraf(buildDirectory, function () {
-        // rimraf deletes the directory asynchronously
-        done();
-    });
+gulp.task("clean", function() {
+    return del([buildDirectory, packageDirectory, tempPath]);
 });
 
 gulp.task("test", ["build"], function() {
