@@ -44,7 +44,7 @@
         {
             "name": "vmList",
             "type": "string",
-            "label": "Virtual Machines Name",
+            "label": "Virtual Machine Names",
             "defaultValue": "",
             "required": true,
             "helpMarkDown": "Provide a comma separated list of the names of the virtual machines, like FabrikamWeb, FabrikamDB, FabrikamTest."
