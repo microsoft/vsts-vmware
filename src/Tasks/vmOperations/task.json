@@ -47,7 +47,7 @@
             "label": "Virtual Machine Names",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "Provide a comma separated list of the names of the virtual machines, like FabrikamWeb, FabrikamDB, FabrikamTest."
+            "helpMarkDown": "Provide a comma separated list of the virtual machine's names. For example, FabrikamWeb, FabrikamDB, FabrikamTest. "
         },
         {
             "name": "snapshotName",
