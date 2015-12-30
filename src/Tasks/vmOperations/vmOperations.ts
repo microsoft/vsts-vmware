@@ -35,6 +35,7 @@ export class VmOperations {
                 break;
             default:
                 tl.error("Invalid action name : " + actionName);
+                tl.exit(1);
         }
         return cmdArgs;
     }

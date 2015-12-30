@@ -107,10 +107,12 @@ describe("getCmdArgsForAction", (): void => {
     var sandbox;
     var getInputStub;
     var logErrorStub;
+    var exitStub;
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
         getInputStub = sandbox.stub(tl, "getInput");
         logErrorStub = sandbox.stub(tl, "error");
+        exitStub = sandbox.stub(tl, "exit");
     });
 
     afterEach((): void => {
@@ -138,6 +140,7 @@ describe("getCmdArgsForAction", (): void => {
         vmOperations.VmOperations.getCmdArgsForAction("InvalidAction");
 
         logErrorStub.withArgs(("Invalid action name : InvalidAction")).should.have.been.calledOnce;
+        exitStub.withArgs(1).should.have.been.calledOnce;
     });
 });
 
