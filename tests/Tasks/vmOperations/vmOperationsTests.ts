@@ -185,7 +185,7 @@ describe("runMain", (): void => {
         var promise = Q.Promise<number>((complete, failure) => {
             complete(0);
         });
-        execCmdStub.withArgs("java", cmdArgs).returns(promise);
+        execCmdStub.withArgs("java", cmdArgs, {failOnStdErr: true}).returns(promise);
 
         vmOperations.VmOperations.runMain().then((code) => {
             getInputStub.should.have.been.calledOnce;
@@ -204,7 +204,7 @@ describe("runMain", (): void => {
         var promise = Q.Promise<number>((complete, failure) => {
             failure("Command execution failed");
         });
-        execCmdStub.withArgs("java", cmdArgs).returns(promise);
+        execCmdStub.withArgs("java", cmdArgs, {failOnStdErr: true}).returns(promise);
 
         vmOperations.VmOperations.runMain().then((code) => {
             exitStub.withArgs(1).should.have.been.calledOnce;

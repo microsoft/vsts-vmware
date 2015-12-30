@@ -47,7 +47,7 @@ export class VmOperations {
         var systemClassPath: string = tl.getVariable("classpath");
         var cmdArgs = "-classpath vmOpsTool-1.0.jar;" + systemClassPath + " VmOpsTool " + cmdArgsForAction + commonArgs;
         util.log("Invoking command to perform vm operations ...\n");
-        return tl.exec("java", cmdArgs)
+        return tl.exec("java", cmdArgs, {failOnStdErr: true})
             .then((code) => {
                 tl.debug("Exit code: " + code);
                 tl.exit(code);
