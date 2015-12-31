@@ -35,7 +35,7 @@ public abstract class VMWarePlatformTests {
         vmWareImpl.connect(connData);
     }
 
-    // Common for restore/delete snapshot operations 
+    // Common for restore/delete snapshot operations
     @Test
     public void restoreSnapshotShouldThrowIfSnapshotDoesNotExist() {
         Exception exp = null;
@@ -70,14 +70,13 @@ public abstract class VMWarePlatformTests {
 
     @Test
     public void restoreSnapshotShouldRestoreSnapshotForTwoVms() throws Exception {
-        
-        String vmList = "PoweredOffVM, TestVM1";
-        
-        
+
+        String vmList = "PoweredoffVM, testVM1";
+
         vmWareImpl.restoreSnapshot(vmList, snapshotOne, connData);
         assertThat(vmWareImpl.getCurrentSnapshot("PoweredOffVM", connData)).isEqualTo(snapshotOne);
         assertThat(vmWareImpl.getCurrentSnapshot("TestVM1", connData)).isEqualTo(snapshotOne);
-        
+
         vmWareImpl.restoreSnapshot(vmList, snapshotTwo, connData);
         assertThat(vmWareImpl.getCurrentSnapshot("PoweredOffVM", connData)).isEqualTo(snapshotTwo);
         assertThat(vmWareImpl.getCurrentSnapshot("TestVM1", connData)).isEqualTo(snapshotTwo);
@@ -98,32 +97,32 @@ public abstract class VMWarePlatformTests {
         String vmName2 = "VMTemplate";
         vmWareImpl.restoreSnapshot(vmName1, snapshotOne, connData);
         vmWareImpl.restoreSnapshot(vmName2, snapshotOne, connData);
-        
+
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotOne);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(snapshotOne);
-        
+
         vmWareImpl.restoreSnapshot(vmName1, snapshotTwo, connData);
         vmWareImpl.restoreSnapshot(vmName2, snapshotTwo, connData);
-        
+
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotTwo);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(snapshotTwo);
     }
-    
+
     @Test
     public void restoreSnapshotShouldRestoreSnapshotForVMsDiffDataCenters() throws Exception {
-        
+
         String vmName1 = "VMInDC1";
         String vmName2 = "VMInDC2";
-        
+
         vmWareImpl.restoreSnapshot(vmName1, "Snapshot1", connData);
         vmWareImpl.restoreSnapshot(vmName2, "Snapshot1", connData);
-        
+
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotOne);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(snapshotOne);
-        
+
         vmWareImpl.restoreSnapshot(vmName1, "Snapshot2", connData);
         vmWareImpl.restoreSnapshot(vmName2, "Snapshot2", connData);
-        
+
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotTwo);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(snapshotTwo);
     }
