@@ -28,15 +28,23 @@ export class VmOperations {
         var cmdArgs = "";
         var snapshotName  = null;
         switch (actionName) {
+            case "Take Snapshot on Virtual Machines":
+                snapshotName = tl.getInput("snapshotName", true);
+                var snapshotVMMemory: string = tl.getInput("snapshotVMMemory", false);
+                var quiesceGuestFileSystem: string = tl.getInput("quiesceGuestFileSystem", false);
+                var description: string = tl.getInput("description", false);
+                cmdArgs += " -snapshotOps create -snapshotName \"" + snapshotName  + "\"" + " -snapshotVMMemory " +
+                     snapshotVMMemory + " -quiesceGuestFileSystem " + quiesceGuestFileSystem + " -description \"" + description + "\"";
+                break;
             case "Revert Snapshot on Virtual Machines":
                 snapshotName  = this.escapeDoubleQuotes(tl.getInput("snapshotName", true));
                 cmdArgs += " -snapshotOps restore -snapshotName \"" + snapshotName  + "\"";
-                tl.debug(util.format("action args: %s", cmdArgs));
                 break;
             default:
                 tl.error("Invalid action name : " + actionName);
                 tl.exit(1);
         }
+        tl.debug(util.format("action args: %s", cmdArgs));
         return cmdArgs;
     }
 

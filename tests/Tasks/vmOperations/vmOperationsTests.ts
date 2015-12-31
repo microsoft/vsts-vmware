@@ -108,15 +108,40 @@ describe("getCmdArgsForAction", (): void => {
     var getInputStub;
     var logErrorStub;
     var exitStub;
+    var debugStub;
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
         getInputStub = sandbox.stub(tl, "getInput");
         logErrorStub = sandbox.stub(tl, "error");
         exitStub = sandbox.stub(tl, "exit");
+        debugStub = sandbox.stub(tl, "debug");
     });
 
     afterEach((): void => {
         sandbox.restore();
+    });
+
+    it("Should read snapshot name, snapshot vm memory, quiesce file system and description", (): void => {
+        getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
+        getInputStub.withArgs("snapshotVMMemory", false).returns("true");
+        getInputStub.withArgs("quiesceGuestFileSystem", false).returns("false");
+        getInputStub.withArgs("description", false).returns("Sample description");
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot on Virtual Machines");
+
+        cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory true -quiesceGuestFileSystem false -description \"Sample description\"");
+        debugStub.should.have.been.calledOnce;
+    });
+
+    it("Should not throw on failure to read description for create snapshot action", (): void => {
+        getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
+        getInputStub.withArgs("snapshotVMMemory", false).returns("true");
+        getInputStub.withArgs("quiesceGuestFileSystem", false).returns("false");
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot on Virtual Machines");
+
+        cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory true -quiesceGuestFileSystem false -description \"undefined\"");
+        getInputStub.should.have.callCount(4);
     });
 
     it("Should read snapshot name for restore snapshot action", (): void => {
