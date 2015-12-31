@@ -44,7 +44,7 @@ public class VMWareImpl implements IVMWare {
     private final String config = "config";
 
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
-        System.out.println("Getting current snapshot name for virtual machine ( " + vmName + " )");
+        System.out.println("Getting current snapshot name for virtual machine ( " + vmName + " ).");
         connect(connData);
         ManagedObjectReference vmMor = getVMMorByName(vmName);
         return getCurrentSnapshotName(vmMor, vmName);
@@ -58,13 +58,13 @@ public class VMWareImpl implements IVMWare {
 
         for (String vmName : vmNames) {
             vmName = vmName.trim();
-            System.out.printf("Restoring snapshot (%s) on virtual machine (%s)\n", snapshotName, vmName);
+            System.out.printf("Restoring snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
             ManagedObjectReference vmMor = null;
 
             try {
                 vmMor = getVMMorByName(vmName);
             } catch (Exception exp) {
-                System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occured");
+                System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occured.");
                 failedVmList += vmName + " ";
                 continue;
             }
@@ -73,10 +73,10 @@ public class VMWareImpl implements IVMWare {
             ManagedObjectReference task = vimPort.revertToSnapshotTask(cpMor, null, true);
 
             if (waitAndGetTaskResult(task)) {
-                System.out.printf("Successfully reverted to snapshot [%s] On virtual machine [%s]\n", snapshotName,
+                System.out.printf("Successfully reverted to snapshot [%s] On virtual machine [%s].\n", snapshotName,
                         vmName);
             } else {
-                System.out.printf("Failed to revert snapshot [%s] on virtual machine [%s]\n", snapshotName, vmName);
+                System.out.printf("Failed to revert snapshot [%s] on virtual machine [%s].\n", snapshotName, vmName);
                 failedVmList += vmName + " ";
             }
         }
@@ -91,13 +91,13 @@ public class VMWareImpl implements IVMWare {
     private ManagedObjectReference getVMMorByName(String vmName) throws Exception {
         Map<String, ManagedObjectReference> vmsMap = getObjectsInContainerByType(rootFolder, virtualMachine);
 
-        if (!vmsMap.containsKey(vmName)) {
+        if (!vmsMap.containsKey(vmName.toLowerCase())) {
             System.out.printf("##vso[task.logissue type=error;code=USERINPUT_VmNotFound;TaskId=%s;]\n",
                     Constants.taskId);
             throw new Exception("Virtual machine with name " + vmName + " not found.");
         }
 
-        return vmsMap.get(vmName);
+        return vmsMap.get(vmName.toLowerCase());
     }
 
     private boolean waitAndGetTaskResult(ManagedObjectReference task) throws Exception {
@@ -183,7 +183,7 @@ public class VMWareImpl implements IVMWare {
 
     private ManagedObjectReference getSnapshotReference(ManagedObjectReference vmMor, String vmName,
             String snapshotName) throws Exception {
-        System.out.printf("Querying snapshot information for virtual machine (%s)\n", vmName);
+        System.out.printf("Querying snapshot information for virtual machine (%s).\n", vmName);
         VirtualMachineSnapshotInfo vmSnapshotInfo = (VirtualMachineSnapshotInfo) getMorProperties(vmMor,
                 new String[] { snapshot }).get(snapshot);
         ManagedObjectReference snapshotMor = null;
@@ -207,7 +207,7 @@ public class VMWareImpl implements IVMWare {
     }
 
     private String getCurrentSnapshotName(ManagedObjectReference vmMor, String vmName) throws Exception {
-        System.out.printf("Querying snapshot information for virtual machine (%s)\n", vmName);
+        System.out.printf("Querying snapshot information for virtual machine (%s).\n", vmName);
         VirtualMachineSnapshotInfo vmSnapshotInfo = (VirtualMachineSnapshotInfo) getMorProperties(vmMor,
                 new String[] { snapshot }).get(snapshot);
         String currentSnapshotName = "";
@@ -218,7 +218,7 @@ public class VMWareImpl implements IVMWare {
             ManagedObjectReference currentSnapshotMor = vmSnapshotInfo.getCurrentSnapshot();
             currentSnapshotName = getCurrentSnapshotNameFromTree(vmRootSnapshotList, currentSnapshotMor);
         } else {
-            System.out.println("Snapshot info is null!!");
+            System.out.println("Snapshot info is null!!.");
         }
         return currentSnapshotName;
     }
@@ -228,14 +228,14 @@ public class VMWareImpl implements IVMWare {
 
         String currentSnapshotName = "";
         if (vmRootSnapshotList == null) {
-            System.out.println("No snapshot found!!");
+            System.out.println("No snapshot found!!.");
             return currentSnapshotName;
         }
 
         for (VirtualMachineSnapshotTree vmSnapshot : vmRootSnapshotList) {
-            System.out.printf("Current CP Name: %s\n", vmSnapshot.getName());
+            System.out.printf("Current snapshot name: %s.\n", vmSnapshot.getName());
             if (vmSnapshot.getSnapshot().getValue().equals(currentSnapshotMor.getValue())) {
-                System.out.println("Found current snapshot in tree ( " + vmSnapshot.getName() + " )");
+                System.out.println("Found current snapshot in tree ( " + vmSnapshot.getName() + " ).");
                 return vmSnapshot.getName();
             } else {
                 List<VirtualMachineSnapshotTree> childTree = vmSnapshot.getChildSnapshotList();
@@ -250,14 +250,14 @@ public class VMWareImpl implements IVMWare {
         ManagedObjectReference snapshotMor = null;
 
         if (vmSnapshotList == null) {
-            System.out.printf("Snapshot(%s) not found for virtual machine\n", snapshotName);
+            System.out.printf("Snapshot(%s) not found for virtual machine.\n", snapshotName);
             return snapshotMor;
         }
 
         for (VirtualMachineSnapshotTree vmSnapshot : vmSnapshotList) {
 
             if (vmSnapshot.getName().equalsIgnoreCase(snapshotName)) {
-                System.out.printf("Found snapshot (%s) for virtual machine\n", snapshotName);
+                System.out.printf("Found snapshot (%s) for virtual machine.\n", snapshotName);
                 return vmSnapshot.getSnapshot();
             } else {
                 List<VirtualMachineSnapshotTree> childTree = vmSnapshot.getChildSnapshotList();
@@ -333,15 +333,15 @@ public class VMWareImpl implements IVMWare {
 
     private String createMap(final RetrieveResult results, final Map<String, ManagedObjectReference> morMap) {
         String token = null;
+        VirtualMachineConfigInfo vmConfig = null;
 
         if (results != null) {
             token = results.getToken();
             for (ObjectContent objectContent : results.getObjects()) {
                 ManagedObjectReference mor = objectContent.getObj();
-                VirtualMachineConfigInfo vmConfig = (VirtualMachineConfigInfo) objectContent.getPropSet().get(0)
-                        .getVal();
+                vmConfig = (VirtualMachineConfigInfo) objectContent.getPropSet().get(0).getVal();
                 if (vmConfig != null && !vmConfig.isTemplate()) {
-                    morMap.put(vmConfig.getName(), mor);
+                    morMap.put(vmConfig.getName().toLowerCase(), mor);
                 }
             }
         }

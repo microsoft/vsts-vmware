@@ -34,20 +34,20 @@
             "name": "action", 
             "type": "pickList",
             "label": "Action",
-            "defaultValue": "Apply Snapshot to Virtual Machines",
+            "defaultValue": "",
             "required": true,
             "helpMarkDown" : "Action to be performed on the VMWare virtual machines.",
             "options": {
-                 "ResoreSnapshot": "Apply Snapshot to Virtual Machines"
+                 "Revert Snapshot on Virtual Machines": "Revert Snapshot on Virtual Machines"
             }
         },
         {
             "name": "vmList",
             "type": "string",
-            "label": "Virtual Machines Name",
+            "label": "Virtual Machine Names",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "Provide a comma separated list of the names of the virtual machines, like FabrikamWeb, FabrikamDB, FabrikamTest."
+            "helpMarkDown": "Provide a comma separated list of the virtual machine's names. For example, FabrikamWeb, FabrikamDB, FabrikamTest."
         },
         {
             "name": "snapshotName",

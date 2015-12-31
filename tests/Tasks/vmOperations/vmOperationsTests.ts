@@ -107,10 +107,12 @@ describe("getCmdArgsForAction", (): void => {
     var sandbox;
     var getInputStub;
     var logErrorStub;
+    var exitStub;
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
         getInputStub = sandbox.stub(tl, "getInput");
         logErrorStub = sandbox.stub(tl, "error");
+        exitStub = sandbox.stub(tl, "exit");
     });
 
     afterEach((): void => {
@@ -120,7 +122,7 @@ describe("getCmdArgsForAction", (): void => {
     it("Should read snapshot name for restore snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnap\"shotName");
 
-        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Apply Snapshot to Virtual Machines");
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Revert Snapshot on Virtual Machines");
 
         cmdArgs.should.contain("-snapshotOps restore -snapshotName \"dummySnap\\\"shotName\"");
     });
@@ -129,7 +131,7 @@ describe("getCmdArgsForAction", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 
         expect( (): void => {
-             vmOperations.VmOperations.getCmdArgsForAction("Apply Snapshot to Virtual Machines");
+             vmOperations.VmOperations.getCmdArgsForAction("Revert Snapshot on Virtual Machines");
              }).to.throw("Error");
         getInputStub.should.have.been.calledOnce;
     });
@@ -138,6 +140,7 @@ describe("getCmdArgsForAction", (): void => {
         vmOperations.VmOperations.getCmdArgsForAction("InvalidAction");
 
         logErrorStub.withArgs(("Invalid action name : InvalidAction")).should.have.been.calledOnce;
+        exitStub.withArgs(1).should.have.been.calledOnce;
     });
 });
 
@@ -182,7 +185,7 @@ describe("runMain", (): void => {
         var promise = Q.Promise<number>((complete, failure) => {
             complete(0);
         });
-        execCmdStub.withArgs("java", cmdArgs).returns(promise);
+        execCmdStub.withArgs("java", cmdArgs, {failOnStdErr: true}).returns(promise);
 
         vmOperations.VmOperations.runMain().then((code) => {
             getInputStub.should.have.been.calledOnce;
@@ -201,7 +204,7 @@ describe("runMain", (): void => {
         var promise = Q.Promise<number>((complete, failure) => {
             failure("Command execution failed");
         });
-        execCmdStub.withArgs("java", cmdArgs).returns(promise);
+        execCmdStub.withArgs("java", cmdArgs, {failOnStdErr: true}).returns(promise);
 
         vmOperations.VmOperations.runMain().then((code) => {
             exitStub.withArgs(1).should.have.been.calledOnce;
