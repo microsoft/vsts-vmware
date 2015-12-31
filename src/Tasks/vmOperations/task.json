@@ -38,7 +38,7 @@
             "required": true,
             "helpMarkDown" : "Action to be performed on the VMWare virtual machines.",
             "options": {
-                 "ResoreSnapshot": "Revert Snapshot on Virtual Machines"
+                 "Revert Snapshot on Virtual Machines": "Revert Snapshot on Virtual Machines"
             }
         },
         {

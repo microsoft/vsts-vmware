@@ -122,7 +122,7 @@ describe("getCmdArgsForAction", (): void => {
     it("Should read snapshot name for restore snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnap\"shotName");
 
-        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("ResoreSnapshot");
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Revert Snapshot on Virtual Machines");
 
         cmdArgs.should.contain("-snapshotOps restore -snapshotName \"dummySnap\\\"shotName\"");
     });
@@ -131,7 +131,7 @@ describe("getCmdArgsForAction", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 
         expect( (): void => {
-             vmOperations.VmOperations.getCmdArgsForAction("ResoreSnapshot");
+             vmOperations.VmOperations.getCmdArgsForAction("Revert Snapshot on Virtual Machines");
              }).to.throw("Error");
         getInputStub.should.have.been.calledOnce;
     });
