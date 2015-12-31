@@ -40,9 +40,28 @@ public class VmOpsTool {
         if (argsMap.containsKey(Constants.snapshotOps)) {
             String actionName = argsMap.get(Constants.snapshotOps);
             String snapshotName = argsMap.get(Constants.snapshotName);
-            if (actionName.equalsIgnoreCase(Constants.restoreSnapshotAction)) {
-                System.out.printf("Initiating restore snapshot operation on vmList[%s]\n", vmList);
-                vmWareImpl.restoreSnapshot(vmList, snapshotName, connData);
+
+            if (actionName.equals(Constants.restoreSnapshotAction)) {
+                System.out.printf("Initiating restore snapshot operation on vmList[%s].\n", vmList);
+
+                String[] vmNames = vmList.split(",");
+                String failedVmList = "";
+
+                for (String vmName : vmNames) {
+                    vmName = vmName.trim();
+                    try {
+                        vmWareImpl.restoreSnapshot(vmName, snapshotName, connData);
+                    } catch (Exception exp) {
+                        System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occured.");
+                        failedVmList += vmName + " ";
+                        continue;
+                    }
+                }
+
+                if (!failedVmList.isEmpty()) {
+                    throw new Exception(String.format("Failed to revert snapshot [%s] on virtual machines [%s].",
+                            snapshotName, failedVmList));
+                }
             } else {
                 System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]\n",
                         Constants.taskId);

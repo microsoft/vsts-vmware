@@ -20,31 +20,27 @@ public class InMemoryVMWareImpl implements IVMWare {
         vmSnapshotInfo.put("vm2", snapshotMap);
     }
 
-    public void restoreSnapshot(String vmList, String snapshotName, ConnectionData connData) throws Exception {
-        String[] vms = vmList.split(",");
+    public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         Map<String, Integer> cpMap = null;
 
-        for (String vm : vms) {
-            vm = vm.trim().toLowerCase();
-
-            if (vmSnapshotInfo.containsKey(vm)) {
-                cpMap = vmSnapshotInfo.get(vm);
-                if (!cpMap.containsKey(snapshotName)) {
-                    System.out.println("Snapshot does not exist: " + snapshotName);
-                    throw new Exception("Snapshot does not exist: " + snapshotName);
-                }
-
-                for (Map.Entry<String, Integer> mapEntry : cpMap.entrySet()) {
-                    if (mapEntry.getKey().equalsIgnoreCase(snapshotName)) {
-                        mapEntry.setValue(1);
-                        System.out.println("Restored snapshot " + snapshotName);
-                    } else {
-                        mapEntry.setValue(0);
-                    }
-                }
-            } else {
-                throw new Exception("VM not found.");
+        vmName = vmName.toLowerCase();
+        if (vmSnapshotInfo.containsKey(vmName)) {
+            cpMap = vmSnapshotInfo.get(vmName);
+            if (!cpMap.containsKey(snapshotName)) {
+                System.out.println("Snapshot does not exist: " + snapshotName);
+                throw new Exception("Snapshot does not exist: " + snapshotName);
             }
+
+            for (Map.Entry<String, Integer> mapEntry : cpMap.entrySet()) {
+                if (mapEntry.getKey().equalsIgnoreCase(snapshotName)) {
+                    mapEntry.setValue(1);
+                    System.out.println("Restored snapshot " + snapshotName);
+                } else {
+                    mapEntry.setValue(0);
+                }
+            }
+        } else {
+            throw new Exception("VM not found.");
         }
         return;
     }

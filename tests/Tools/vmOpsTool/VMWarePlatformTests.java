@@ -12,6 +12,7 @@ public abstract class VMWarePlatformTests {
     private String snapshotTwo = "Snapshot2";
 
     public abstract IVMWare getVmWareImpl();
+
     public abstract String getvCenterUrl();
 
     // Common for all Operations
@@ -69,20 +70,6 @@ public abstract class VMWarePlatformTests {
     }
 
     @Test
-    public void restoreSnapshotShouldRestoreSnapshotForTwoVms() throws Exception {
-
-        String vmList = "PoweredoffVM, testVM1";
-
-        vmWareImpl.restoreSnapshot(vmList, snapshotOne, connData);
-        assertThat(vmWareImpl.getCurrentSnapshot("PoweredOffVM", connData)).isEqualTo(snapshotOne);
-        assertThat(vmWareImpl.getCurrentSnapshot("TestVM1", connData)).isEqualTo(snapshotOne);
-
-        vmWareImpl.restoreSnapshot(vmList, snapshotTwo, connData);
-        assertThat(vmWareImpl.getCurrentSnapshot("PoweredOffVM", connData)).isEqualTo(snapshotTwo);
-        assertThat(vmWareImpl.getCurrentSnapshot("TestVM1", connData)).isEqualTo(snapshotTwo);
-    }
-
-    @Test
     public void restoreSnapshotShouldRestoreSnapshotIfMultipleVmWithSameNameExist() throws Exception {
         String vmName = "DuplicateVMName";
         vmWareImpl.restoreSnapshot(vmName, snapshotOne, connData);
@@ -114,16 +101,31 @@ public abstract class VMWarePlatformTests {
         String vmName1 = "VMInDC1";
         String vmName2 = "VMInDC2";
 
-        vmWareImpl.restoreSnapshot(vmName1, "Snapshot1", connData);
-        vmWareImpl.restoreSnapshot(vmName2, "Snapshot1", connData);
+        vmWareImpl.restoreSnapshot(vmName1, snapshotOne, connData);
+        vmWareImpl.restoreSnapshot(vmName2, snapshotOne, connData);
 
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotOne);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(snapshotOne);
 
-        vmWareImpl.restoreSnapshot(vmName1, "Snapshot2", connData);
-        vmWareImpl.restoreSnapshot(vmName2, "Snapshot2", connData);
+        vmWareImpl.restoreSnapshot(vmName1, snapshotTwo, connData);
+        vmWareImpl.restoreSnapshot(vmName2, snapshotTwo, connData);
 
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotTwo);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(snapshotTwo);
+    }
+
+    @Test
+    public void restoreSnapshotShouldRestoreSnapshotForVMsEvenIfCaseDoesNotMatch() throws Exception {
+
+        String vmName1 = "testvm1";
+
+        vmWareImpl.restoreSnapshot(vmName1, snapshotOne, connData);
+
+        assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotOne);
+
+        vmWareImpl.restoreSnapshot(vmName1, snapshotTwo, connData);
+
+        assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotTwo);
+
     }
 }
