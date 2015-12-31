@@ -13,7 +13,7 @@
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 0
+        "Patch": 1
     },
     "demands": [
         "java"
@@ -38,6 +38,7 @@
             "required": true,
             "helpMarkDown" : "Action to be performed on the VMWare virtual machines.",
             "options": {
+                 "Take Snapshot on Virtual Machines": "Take Snapshot on Virtual Machines",
                  "Revert Snapshot on Virtual Machines": "Revert Snapshot on Virtual Machines"
             }
         },
@@ -56,6 +57,33 @@
             "defaultValue": "",
             "required": true,
             "helpMarkDown": "Enter the name of the snapshot for applying to the virtual machines."
+        },
+        {
+            "name": "snapshotVMMemory",
+            "type": "boolean",
+            "label": "Snapshot VM(s) Memory",
+            "defaultValue": "true",
+            "visibleRule": "action = Take Snapshot on Virtual Machines",
+            "required": false,
+            "helpMarkDown": "Whether to snapshot VM(s) memory or not"
+        },
+        {
+            "name": "quiesceGuestFileSystem",
+            "type": "boolean",
+            "label": "Quiesce Guest File System",
+            "defaultValue": "true",
+            "visibleRule": "action = Take Snapshot on Virtual Machines",
+            "required": false,
+            "helpMarkDown": "Whether to quiesce VM(s) file system or not"
+        },
+        {
+            "name": "description",
+            "type": "multiLine",
+            "label": "Notes",
+            "required": false,
+            "defaultValue": "",
+            "visibleRule": "action = Take Snapshot on Virtual Machines",
+            "helpMarkDown": "Description for associated operation"
         }
     ],
     "instanceNameFormat": "$(action) : $(vmList)",
