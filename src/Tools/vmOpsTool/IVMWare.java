@@ -2,13 +2,31 @@
 public interface IVMWare {
 
     /**
+     *
+     * @param vmName
+     *            name of the virtual machine
+     * @param snapshotName
+     *            name of the snapshot to create
+     * @param saveVMMemory
+     *            save virtual machine memory
+     * @param quiesceFs
+     *            quiesce virtual machine file system
+     * @param description
+     *            snapshot description
+     * @throws Exception
+     *             on failure
+     */
+    public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
+            String description, ConnectionData connData) throws Exception;
+
+    /**
      * Takes a comma separated list of virtual machines and restores given
      * snapshot for them
      * 
      * @param vmName
      *            name of the virtual machine
      * @param snapshotName
-     *            Name of the snapshot to create
+     *            Name of the snapshot to restore
      * @param connData
      *            connection information for vCenter
      * @throws Exception

@@ -1,44 +1,65 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class InMemoryVMWareImpl implements IVMWare {
 
-    private Map<String, Map<String, Integer>> vmSnapshotInfo = new HashMap<String, Map<String, Integer>>();
-    private Map<String, Integer> snapshotMap = new HashMap<String, Integer>();
+    private Map<String, List<String>> vmSnapshotInfo = new HashMap<String, List<String>>();
+    private Map<String, String> vmActiveSnapshot = new HashMap<String, String>();
+    private List<String> snapshotList = new ArrayList<String>();
+    private String activeSnapshot = "Snapshot2";
 
     public InMemoryVMWareImpl() {
-        snapshotMap.put("Snapshot1", 0);
-        snapshotMap.put("Snapshot2", 1);
-        vmSnapshotInfo.put("testvm1", snapshotMap);
-        vmSnapshotInfo.put("poweredoffvm", snapshotMap);
-        vmSnapshotInfo.put("duplicatevmname", snapshotMap);
-        vmSnapshotInfo.put("templatevm", snapshotMap);
-        vmSnapshotInfo.put("vmtemplate", snapshotMap);
-        vmSnapshotInfo.put("vmindc1", snapshotMap);
-        vmSnapshotInfo.put("vmindc2", snapshotMap);
-        vmSnapshotInfo.put("vm1", snapshotMap);
-        vmSnapshotInfo.put("vm2", snapshotMap);
+        snapshotList.add("Snapshot1");
+        snapshotList.add("Snapshot2");
+
+        vmSnapshotInfo.put("testvm1", snapshotList);
+        vmSnapshotInfo.put("poweredoffvm", snapshotList);
+        vmSnapshotInfo.put("duplicatevmname", snapshotList);
+        vmSnapshotInfo.put("templatevm", snapshotList);
+        vmSnapshotInfo.put("vmtemplate", snapshotList);
+        vmSnapshotInfo.put("vmindc1", snapshotList);
+        vmSnapshotInfo.put("vmindc2", snapshotList);
+        vmSnapshotInfo.put("vm1", snapshotList);
+        vmSnapshotInfo.put("vm2", snapshotList);
+
+        vmActiveSnapshot.put("testvm1", activeSnapshot);
+        vmActiveSnapshot.put("poweredoffvm", activeSnapshot);
+        vmActiveSnapshot.put("duplicatevmname", activeSnapshot);
+        vmActiveSnapshot.put("templatevm", activeSnapshot);
+        vmActiveSnapshot.put("vmtemplate", activeSnapshot);
+        vmActiveSnapshot.put("vmindc1", activeSnapshot);
+        vmActiveSnapshot.put("vmindc2", activeSnapshot);
+        vmActiveSnapshot.put("vm1", activeSnapshot);
+        vmActiveSnapshot.put("vm2", activeSnapshot);
+    }
+
+    public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
+            String description, ConnectionData connData) throws Exception {
+        vmName = vmName.toLowerCase();
+        if (vmSnapshotInfo.containsKey(vmName)) {
+            List<String> vmCpList = vmSnapshotInfo.get(vmName);
+            vmCpList.add(snapshotName);
+            vmSnapshotInfo.put(vmName, vmCpList);
+            vmActiveSnapshot.put(vmName, snapshotName);
+        } else {
+            throw new Exception("VM not found.");
+        }
     }
 
     public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
-        Map<String, Integer> cpMap = null;
+        List<String> cpList = null;
 
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
-            cpMap = vmSnapshotInfo.get(vmName);
-            if (!cpMap.containsKey(snapshotName)) {
+            cpList = vmSnapshotInfo.get(vmName);
+            if (!cpList.contains(snapshotName)) {
                 System.out.println("Snapshot does not exist: " + snapshotName);
                 throw new Exception("Snapshot does not exist: " + snapshotName);
             }
+            vmActiveSnapshot.put(vmName, snapshotName);
 
-            for (Map.Entry<String, Integer> mapEntry : cpMap.entrySet()) {
-                if (mapEntry.getKey().equalsIgnoreCase(snapshotName)) {
-                    mapEntry.setValue(1);
-                    System.out.println("Restored snapshot " + snapshotName);
-                } else {
-                    mapEntry.setValue(0);
-                }
-            }
         } else {
             throw new Exception("VM not found.");
         }
@@ -51,17 +72,15 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public String getCurrentSnapshot(String vmName, ConnectionData connData) {
+    public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
 
-        Map<String, Integer> cpMap = null;
         String currentSnapshotName = null;
-        vmName = vmName.toLowerCase();
-        cpMap = vmSnapshotInfo.get(vmName);
 
-        for (Map.Entry<String, Integer> mapEntry : cpMap.entrySet()) {
-            if (mapEntry.getValue().equals(1)) {
-                currentSnapshotName = mapEntry.getKey();
-            }
+        vmName = vmName.toLowerCase();
+        if (vmSnapshotInfo.containsKey(vmName)) {
+            currentSnapshotName = vmActiveSnapshot.get(vmName);
+        } else {
+            throw new Exception("VM not found.");
         }
 
         return currentSnapshotName;
