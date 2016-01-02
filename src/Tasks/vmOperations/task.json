@@ -39,7 +39,8 @@
             "helpMarkDown" : "Action to be performed on the VMWare virtual machines.",
             "options": {
                  "Take Snapshot on Virtual Machines": "Take Snapshot on Virtual Machines",
-                 "Revert Snapshot on Virtual Machines": "Revert Snapshot on Virtual Machines"
+                 "Revert Snapshot on Virtual Machines": "Revert Snapshot on Virtual Machines",
+                 "Delete Snapshot on Virtual Machines": "Delete Snapshot on Virtual Machines"
             }
         },
         {

@@ -152,7 +152,15 @@ describe("getCmdArgsForAction", (): void => {
         cmdArgs.should.contain("-snapshotOps restore -snapshotName \"dummySnap\\\"shotName\"");
     });
 
-    it("Should throw on failure to read snapshot name for restore action", (): void => {
+    it("Should read snapshot name for delete snapshot action", (): void => {
+        getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Delete Snapshot on Virtual Machines");
+
+        cmdArgs.should.contain("-snapshotOps delete -snapshotName \"dummySnapshotName\"");
+    });
+
+    it("Should throw on failure to read snapshot name for restore/create/delete action", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 
         expect( (): void => {

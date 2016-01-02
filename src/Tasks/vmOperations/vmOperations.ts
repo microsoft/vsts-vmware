@@ -40,6 +40,10 @@ export class VmOperations {
                 snapshotName  = this.escapeDoubleQuotes(tl.getInput("snapshotName", true));
                 cmdArgs += " -snapshotOps restore -snapshotName \"" + snapshotName  + "\"";
                 break;
+            case "Delete Snapshot on Virtual Machines":
+                snapshotName  = tl.getInput("snapshotName", true);
+                cmdArgs += " -snapshotOps delete -snapshotName \"" + snapshotName  + "\"";
+                break;
             default:
                 tl.error("Invalid action name : " + actionName);
                 tl.exit(1);
