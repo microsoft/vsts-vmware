@@ -35,6 +35,18 @@ public interface IVMWare {
     public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception;
 
     /**
+     *
+     * @param vmName
+     *            name of the virtual machine
+     * @param snapshotName
+     *            name of the snapshot to be deleted
+     * @param connData
+     *            connection information for vCenter
+     * @throws Exception
+     */
+    public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception;
+
+    /**
      * Gets the current active snapshot information for the VM
      * 
      * @param vmName
@@ -44,6 +56,19 @@ public interface IVMWare {
      *             on operation failure
      */
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception;
+
+    /**
+     *
+     * @param vmName
+     *            name of the virtual machine
+     * @param snapshotName
+     *            name of the snapshot to be found
+     * @param connData
+     *            connection information for vCenter
+     * @return true if found otherwise false
+     * @throws Exception
+     */
+    public boolean snapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception;
 
     /**
      * 

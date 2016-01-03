@@ -36,12 +36,45 @@ public abstract class VMWarePlatformTests {
         vmWareImpl.connect(connData);
     }
 
+    @Test
+    public void createSnapshotWithSaveVMMemoryShouldSucceed() throws Exception {
+        String vmName = "VMInDC1";
+        String newSnapshot = "NewSnapshot";
+
+        vmWareImpl.createSnapshot(vmName, newSnapshot, true, false, "Snapshot created during platform tests", connData);
+
+        assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(newSnapshot);
+
+        vmWareImpl.deleteSnapshot(vmName, newSnapshot, connData);
+    }
+
+    @Test
+    public void createSnapshotWithQuiesceShouldSucceed() throws Exception {
+        String vmName = "VMInDC2";
+        String newSnapshot = "NewSnapshot";
+
+        vmWareImpl.createSnapshot(vmName, newSnapshot, false, true, "Snapshot created during platform tests", connData);
+
+        assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(newSnapshot);
+
+        vmWareImpl.deleteSnapshot(vmName, newSnapshot, connData);
+    }
+
+
     // Common for restore/delete snapshot operations
     @Test
-    public void restoreSnapshotShouldThrowIfSnapshotDoesNotExist() {
+    public void restoreOrDeleteSnapshotShouldThrowIfSnapshotDoesNotExist() {
         Exception exp = null;
         try {
             vmWareImpl.restoreSnapshot("TestVM1", "InvalidSnapshot", connData);
+        } catch (Exception e) {
+            exp = e;
+        }
+        assertThat(exp).isNotNull();
+
+        exp = null;
+        try {
+            vmWareImpl.deleteSnapshot("TestVM1", "InvalidSnapshot", connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -61,37 +94,43 @@ public abstract class VMWarePlatformTests {
     }
 
     @Test
-    public void restoreOrCreateSnapshotShouldSucceedIfVmIsShutdown() throws Exception {
+    public void restoreOrCreateOrDeleteSnapshotShouldSucceedIfVmIsShutdown() throws Exception {
         String vmName = "PoweredOffVM";
         String newSnapshot = "NewSnapShot";
 
-        vmWareImpl.createSnapshot(vmName, newSnapshot, true, false, "Snapshot created during platform tests", connData);
+        vmWareImpl.createSnapshot(vmName, newSnapshot, false, false, "Snapshot created during platform tests", connData);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(newSnapshot);
 
         vmWareImpl.restoreSnapshot(vmName, snapshotTwo, connData);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(snapshotTwo);
+
+        vmWareImpl.deleteSnapshot(vmName, newSnapshot, connData);
+        assertThat(vmWareImpl.snapshotExists(vmName, newSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
-    public void restoreOrCreateSnapshotShouldSucceedIfMultipleVmWithSameNameExist() throws Exception {
+    public void restoreOrCreateOrDeleteSnapshotShouldSucceedIfMultipleVmWithSameNameExist() throws Exception {
         String vmName = "DuplicateVMName";
         String newSnapshot = "NewSnapShot";
 
-        vmWareImpl.createSnapshot(vmName, newSnapshot, false, true, "Snapshot created during platform tests", connData);
+        vmWareImpl.createSnapshot(vmName, newSnapshot, false, false, "Snapshot created during platform tests", connData);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(newSnapshot);
 
         vmWareImpl.restoreSnapshot(vmName, snapshotTwo, connData);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(snapshotTwo);
+
+        vmWareImpl.deleteSnapshot(vmName, newSnapshot, connData);
+        assertThat(vmWareImpl.snapshotExists(vmName, newSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
-    public void restoreOrCreateSnapshotShouldSucceedIfTemplateAndVmHaveSameName() throws Exception {
+    public void restoreOrCreateOrDeleteSnapshotShouldSucceedIfTemplateAndVmHaveSameName() throws Exception {
         String vmName1 = "TemplateVM";
         String vmName2 = "VMTemplate";
         String newSnapshot = "NewSnapshot";
 
-        vmWareImpl.createSnapshot(vmName1, newSnapshot, true, false, "Snapshot created during platform tests", connData);
-        vmWareImpl.createSnapshot(vmName2, newSnapshot, true, false, "Snapshot created during platform tests", connData);
+        vmWareImpl.createSnapshot(vmName1, newSnapshot, false, false, "Snapshot created during platform tests", connData);
+        vmWareImpl.createSnapshot(vmName2, newSnapshot, false, false, "Snapshot created during platform tests", connData);
 
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(newSnapshot);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(newSnapshot);
@@ -101,17 +140,23 @@ public abstract class VMWarePlatformTests {
 
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotTwo);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(snapshotTwo);
+
+        vmWareImpl.deleteSnapshot(vmName1, newSnapshot, connData);
+        vmWareImpl.deleteSnapshot(vmName2, newSnapshot, connData);
+
+        assertThat(vmWareImpl.snapshotExists(vmName1, newSnapshot, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.snapshotExists(vmName2, newSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
-    public void restoreOrCreateSnapshotSucceedForVMsDiffDataCenters() throws Exception {
+    public void restoreOrCreateOrDeleteSnapshotSucceedForVMsDiffDataCenters() throws Exception {
 
         String vmName1 = "VMInDC1";
         String vmName2 = "VMInDC2";
         String newSnapshot = "NewSnapshot";
 
-        vmWareImpl.createSnapshot(vmName1, newSnapshot, true, false, "Snapshot created during platform tests", connData);
-        vmWareImpl.createSnapshot(vmName2, newSnapshot, true, false, "Snapshot created during platform tests", connData);
+        vmWareImpl.createSnapshot(vmName1, newSnapshot, false, false, "Snapshot created during platform tests", connData);
+        vmWareImpl.createSnapshot(vmName2, newSnapshot, false, false, "Snapshot created during platform tests", connData);
 
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(newSnapshot);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(newSnapshot);
@@ -121,21 +166,30 @@ public abstract class VMWarePlatformTests {
 
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotTwo);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(snapshotTwo);
+
+        vmWareImpl.deleteSnapshot(vmName1, newSnapshot, connData);
+        vmWareImpl.deleteSnapshot(vmName2, newSnapshot, connData);
+
+        assertThat(vmWareImpl.snapshotExists(vmName1, newSnapshot, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.snapshotExists(vmName2, newSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
-    public void restoreOrCreateSnapshotShouldSucceedForVMsEvenIfCaseDoesNotMatch() throws Exception {
+    public void restoreOrCreateOrDeleteSnapshotShouldSucceedForVMsEvenIfCaseDoesNotMatch() throws Exception {
 
-        String vmName1 = "testvm1";
+        String vmName = "testvm1";
         String newSnapshot = "NewSnapshot";
 
-        vmWareImpl.createSnapshot(vmName1, newSnapshot, false, false, "Snapshot created during platform tests", connData);
+        vmWareImpl.createSnapshot(vmName, newSnapshot, false, false, "Snapshot created during platform tests", connData);
 
-        assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(newSnapshot);
+        assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(newSnapshot);
 
-        vmWareImpl.restoreSnapshot(vmName1, snapshotTwo, connData);
+        vmWareImpl.restoreSnapshot(vmName, snapshotTwo, connData);
 
-        assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotTwo);
+        assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(snapshotTwo);
 
+        vmWareImpl.deleteSnapshot(vmName, newSnapshot, connData);
+
+        assertThat(vmWareImpl.snapshotExists(vmName, newSnapshot, connData)).isEqualTo(false);
     }
 }

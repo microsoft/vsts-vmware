@@ -43,7 +43,6 @@ public class VMWareImpl implements IVMWare {
     private final String snapshot = "snapshot";
     private final String config = "config";
 
-
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.println("Getting current snapshot name for virtual machine ( " + vmName + " ).");
@@ -51,16 +50,29 @@ public class VMWareImpl implements IVMWare {
         return getCurrentSnapshotName(vmMor, vmName);
     }
 
+    public boolean snapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+        connect(connData);
+        System.out.printf("Finding snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
+        ManagedObjectReference vmMor = getVMMorByName(vmName);
+        try {
+            getSnapshotReference(vmMor, vmName, snapshotName);
+        } catch (Exception exp) {
+            System.out.println(exp.getMessage());
+            return false;
+        }
+        return true;
+    }
+
     public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
             String description, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Creating snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
         ManagedObjectReference vmMor = getVMMorByName(vmName);
-        ManagedObjectReference task = vimPort.createSnapshotTask(vmMor, snapshotName, description, saveVMMemory, quiesceFs);
+        ManagedObjectReference task = vimPort.createSnapshotTask(vmMor, snapshotName, description, saveVMMemory,
+                quiesceFs);
 
         if (waitAndGetTaskResult(task)) {
-            System.out.printf("Successfully created snapshot [%s] On virtual machine [%s].\n", snapshotName,
-                    vmName);
+            System.out.printf("Successfully created snapshot [%s] On virtual machine [%s].\n", snapshotName, vmName);
         } else {
             throw new Exception(
                     String.format("Failed to create snapshot [%s] on virtual machine [%s].\n", snapshotName, vmName));
@@ -71,8 +83,7 @@ public class VMWareImpl implements IVMWare {
     public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Restoring snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = null;
-        vmMor = getVMMorByName(vmName);
+        ManagedObjectReference vmMor = getVMMorByName(vmName);
         ManagedObjectReference cpMor = getSnapshotReference(vmMor, vmName, snapshotName);
         ManagedObjectReference task = vimPort.revertToSnapshotTask(cpMor, null, true);
 
@@ -82,6 +93,22 @@ public class VMWareImpl implements IVMWare {
         } else {
             throw new Exception(
                     String.format("Failed to revert snapshot [%s] on virtual machine [%s].\n", snapshotName, vmName));
+        }
+        return;
+    }
+
+    public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+        connect(connData);
+        System.out.printf("Deleting snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
+        ManagedObjectReference vmMor = getVMMorByName(vmName);
+        ManagedObjectReference cpMor = getSnapshotReference(vmMor, vmName, snapshotName);
+        ManagedObjectReference task = vimPort.removeSnapshotTask(cpMor, false, true);
+
+        if (waitAndGetTaskResult(task)) {
+            System.out.printf("Successfully deleted snapshot [%s] On virtual machine [%s].\n", snapshotName, vmName);
+        } else {
+            throw new Exception(
+                    String.format("Failed to delete snapshot [%s] on virtual machine [%s].\n", snapshotName, vmName));
         }
         return;
     }

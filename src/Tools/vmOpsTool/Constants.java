@@ -14,6 +14,7 @@ public class Constants {
     public static final String description = "-description";
     public static final String quiesceVmFs = "-quiesceVmFs";
     public static final String saveVmMemory = "-saveVmMemory";
+    public static final String deleteSnapshotAction = "delete";
 
     public static final String taskId = "735d144e-55fe-44d6-b687-db9031b6e70b";
 }

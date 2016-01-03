@@ -66,6 +66,22 @@ public class InMemoryVMWareImpl implements IVMWare {
         return;
     }
 
+    public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+        vmName = vmName.toLowerCase();
+        if (vmSnapshotInfo.containsKey(vmName)) {
+            List<String> vmCpList = vmSnapshotInfo.get(vmName);
+            if (vmCpList.contains(snapshotName)) {
+                vmCpList.remove(snapshotName);
+                vmSnapshotInfo.put(vmName, vmCpList);
+                vmActiveSnapshot.put(vmName, vmCpList.get(vmCpList.size() - 1));
+            } else {
+                throw new Exception("Snapshot not found !!");
+            }
+        } else {
+            throw new Exception("VM not found.");
+        }
+    }
+
     public void connect(ConnectionData connData) throws Exception {
         if (connData.password.equals("InvalidPassword")) {
             throw new Exception();
@@ -84,5 +100,15 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
 
         return currentSnapshotName;
+    }
+
+    public boolean snapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+
+        vmName = vmName.toLowerCase();
+        if (vmSnapshotInfo.containsKey(vmName)) {
+            return vmSnapshotInfo.containsValue(snapshotName);
+        } else {
+            throw new Exception("VM not found.");
+        }
     }
 }

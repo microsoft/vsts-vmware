@@ -31,7 +31,8 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionShouldCreateSnapshotForCreateOperation() throws Exception {
+    public void executeActionShouldSucceedForCreateAndDeleteSnapshotOperation() throws Exception {
+        // Create snapshot operation validation
         String createSnapshot = "Sample Snapshot";
         String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.snapshotOps, Constants.createSnapshotAction,
                 Constants.snapshotName, createSnapshot);
@@ -40,6 +41,15 @@ public class VmOpsToolUnitTests {
 
         assertThat(vmWareImpl.getCurrentSnapshot("vm1", connData)).isEqualTo(createSnapshot);
         assertThat(vmWareImpl.getCurrentSnapshot("vm2", connData)).isEqualTo(createSnapshot);
+
+        // Delete snapshot operation validation
+        cmdArgs = getCmdArgs("vm1, vm2", Constants.snapshotOps, Constants.deleteSnapshotAction, Constants.snapshotName,
+                createSnapshot);
+
+        vmOpsTool.executeAction(cmdArgs);
+
+        assertThat(vmWareImpl.snapshotExists("vm1", createSnapshot, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.snapshotExists("vm2", createSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
@@ -55,7 +65,8 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionShouldThrowForCreateSnapshotFailureOnAVM() throws Exception {
+    public void executeActionShouldThrowForCreateAndDeleteSnapshotFailureOnAVM() throws Exception {
+        // Delete snapshot operation throws on failure validation
         String vmSnapshot = "New Snapshot";
         String[] cmdArgs = getCmdArgs("vm1, vm3", Constants.snapshotOps, Constants.createSnapshotAction,
                 Constants.snapshotName, vmSnapshot);
@@ -69,6 +80,19 @@ public class VmOpsToolUnitTests {
 
         assertThat(exp).isNotNull();
         assertThat(vmWareImpl.getCurrentSnapshot("vm1", connData)).isEqualTo(vmSnapshot);
+
+        // Delete snapshot throws on failure validation
+        exp = null;
+        cmdArgs = getCmdArgs("vm1, vm3", Constants.snapshotOps, Constants.deleteSnapshotAction, Constants.snapshotName,
+                vmSnapshot);
+        try {
+            vmOpsTool.executeAction(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+
+        assertThat(exp).isNotNull();
+        assertThat(vmWareImpl.snapshotExists("vm1", vmSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
