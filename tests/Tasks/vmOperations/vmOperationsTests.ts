@@ -108,15 +108,36 @@ describe("getCmdArgsForAction", (): void => {
     var getInputStub;
     var logErrorStub;
     var exitStub;
+    var debugStub;
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
         getInputStub = sandbox.stub(tl, "getInput");
         logErrorStub = sandbox.stub(tl, "error");
         exitStub = sandbox.stub(tl, "exit");
+        debugStub = sandbox.stub(tl, "debug");
     });
 
     afterEach((): void => {
         sandbox.restore();
+    });
+
+    it("Should read snapshot name, snapshot vm memory, quiesce file system and description", (): void => {
+        getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
+        getInputStub.withArgs("description", false).returns("Sample description");
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot on Virtual Machines");
+
+        cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory false -quiesceGuestFileSystem false -description \"Sample description\"");
+        debugStub.should.have.been.calledOnce;
+    });
+
+    it("Should not throw on failure to read description for create snapshot action", (): void => {
+        getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot on Virtual Machines");
+
+        cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory false -quiesceGuestFileSystem false -description \"undefined\"");
+        getInputStub.should.have.callCount(2);
     });
 
     it("Should read snapshot name for restore snapshot action", (): void => {
@@ -127,7 +148,15 @@ describe("getCmdArgsForAction", (): void => {
         cmdArgs.should.contain("-snapshotOps restore -snapshotName \"dummySnap\\\"shotName\"");
     });
 
-    it("Should throw on failure to read snapshot name for restore action", (): void => {
+    it("Should read snapshot name for delete snapshot action", (): void => {
+        getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Delete Snapshot on Virtual Machines");
+
+        cmdArgs.should.contain("-snapshotOps delete -snapshotName \"dummySnapshotName\"");
+    });
+
+    it("Should throw on failure to read snapshot name for restore/create/delete action", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 
         expect( (): void => {

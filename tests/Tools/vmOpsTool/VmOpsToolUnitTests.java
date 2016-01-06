@@ -1,6 +1,8 @@
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -29,10 +31,32 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
+    public void executeActionShouldSucceedForCreateAndDeleteSnapshotOperation() throws Exception {
+        // Create snapshot operation validation
+        String createSnapshot = "Sample Snapshot";
+        String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.snapshotOps, Constants.createSnapshotAction,
+                Constants.snapshotName, createSnapshot);
+
+        vmOpsTool.executeAction(cmdArgs);
+
+        assertThat(vmWareImpl.getCurrentSnapshot("vm1", connData)).isEqualTo(createSnapshot);
+        assertThat(vmWareImpl.getCurrentSnapshot("vm2", connData)).isEqualTo(createSnapshot);
+
+        // Delete snapshot operation validation
+        cmdArgs = getCmdArgs("vm1, vm2", Constants.snapshotOps, Constants.deleteSnapshotAction, Constants.snapshotName,
+                createSnapshot);
+
+        vmOpsTool.executeAction(cmdArgs);
+
+        assertThat(vmWareImpl.snapshotExists("vm1", createSnapshot, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.snapshotExists("vm2", createSnapshot, connData)).isEqualTo(false);
+    }
+
+    @Test
     public void executeActionShouldRestoreSnapshotForRestoreOperation() throws Exception {
 
         String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.snapshotOps, Constants.restoreSnapshotAction,
-                vmSnapshotName);
+                Constants.snapshotName, vmSnapshotName);
 
         vmOpsTool.executeAction(cmdArgs);
 
@@ -41,9 +65,40 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionShouldThrowForRestoreSnapshotFailureOnAVM() {
+    public void executeActionShouldThrowForCreateAndDeleteSnapshotFailureOnAVM() throws Exception {
+        // Delete snapshot operation throws on failure validation
+        String vmSnapshot = "New Snapshot";
+        String[] cmdArgs = getCmdArgs("vm1, vm3", Constants.snapshotOps, Constants.createSnapshotAction,
+                Constants.snapshotName, vmSnapshot);
+        Exception exp = null;
+
+        try {
+            vmOpsTool.executeAction(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+
+        assertThat(exp).isNotNull();
+        assertThat(vmWareImpl.getCurrentSnapshot("vm1", connData)).isEqualTo(vmSnapshot);
+
+        // Delete snapshot throws on failure validation
+        exp = null;
+        cmdArgs = getCmdArgs("vm1, vm3", Constants.snapshotOps, Constants.deleteSnapshotAction, Constants.snapshotName,
+                vmSnapshot);
+        try {
+            vmOpsTool.executeAction(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+
+        assertThat(exp).isNotNull();
+        assertThat(vmWareImpl.snapshotExists("vm1", vmSnapshot, connData)).isEqualTo(false);
+    }
+
+    @Test
+    public void executeActionShouldThrowForRestoreSnapshotFailureOnAVM() throws Exception {
         String[] cmdArgs = getCmdArgs("vm1, vm3", Constants.snapshotOps, Constants.restoreSnapshotAction,
-                vmSnapshotName);
+                Constants.snapshotName, vmSnapshotName);
         Exception exp = null;
 
         try {
@@ -58,7 +113,8 @@ public class VmOpsToolUnitTests {
 
     @Test
     public void executeActionInvalidSnapshotOperationShouldFail() {
-        String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.snapshotOps, "invalid", vmSnapshotName);
+        String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.snapshotOps, "invalid", Constants.snapshotName,
+                vmSnapshotName);
         Exception exp = null;
 
         try {
@@ -71,7 +127,8 @@ public class VmOpsToolUnitTests {
 
     @Test
     public void executeActionForInvalidActionNameShouldFail() {
-        String[] cmdArgs = getCmdArgs("vm1, vm2", "-invalidOps", Constants.restoreSnapshotAction, vmSnapshotName);
+        String[] cmdArgs = getCmdArgs("vm1, vm2", "-invalidOps", Constants.restoreSnapshotAction,
+                Constants.snapshotName, vmSnapshotName);
         Exception exp = null;
 
         try {
@@ -83,7 +140,7 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionShouldIfRequiredInputIsNotPresent() {
+    public void executeActionShouldThrowIfRequiredInputIsNotPresent() {
         String[] cmdArgs = new String[] { Constants.vmOpsTool };
         Exception exp = null;
 
@@ -96,10 +153,24 @@ public class VmOpsToolUnitTests {
         assertThat(exp).isNotNull();
     }
 
-    private String[] getCmdArgs(String vmList, String actionName, String actionOption, String snapshotName) {
-        String[] cmdArgs = new String[] { Constants.vmOpsTool, Constants.vCenterUrl, vCenterUrl,
-                Constants.vCenterUserName, "dummyuser", Constants.vCenterPassword, "dummypassword", Constants.vmList,
-                vmList, actionName, actionOption, Constants.snapshotName, snapshotName };
-        return cmdArgs;
+    private String[] getCmdArgs(String vmList, String... vaArgs) {
+        List<String> cmdArgs = new ArrayList<String>();
+
+        cmdArgs.add(Constants.vmOpsTool);
+        cmdArgs.add(Constants.vCenterUrl);
+        cmdArgs.add(vCenterUrl);
+        cmdArgs.add(Constants.vCenterUserName);
+        cmdArgs.add("dummyuser");
+        cmdArgs.add(Constants.vCenterPassword);
+        cmdArgs.add("dummypassword");
+        cmdArgs.add(Constants.vmList);
+        cmdArgs.add(vmList);
+
+        for (String arg : vaArgs) {
+            cmdArgs.add(arg);
+        }
+
+        return cmdArgs.toArray(new String[cmdArgs.size()]);
+
     }
 }
