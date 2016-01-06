@@ -30,8 +30,8 @@ export class VmOperations {
         switch (actionName) {
             case "Take Snapshot on Virtual Machines":
                 snapshotName = tl.getInput("snapshotName", true);
-                var snapshotVMMemory: string = tl.getInput("snapshotVMMemory", false);
-                var quiesceGuestFileSystem: string = tl.getInput("quiesceGuestFileSystem", false);
+                var snapshotVMMemory = "false";
+                var quiesceGuestFileSystem = "false";
                 var description: string = tl.getInput("description", false);
                 cmdArgs += " -snapshotOps create -snapshotName \"" + snapshotName  + "\"" + " -snapshotVMMemory " +
                      snapshotVMMemory + " -quiesceGuestFileSystem " + quiesceGuestFileSystem + " -description \"" + description + "\"";

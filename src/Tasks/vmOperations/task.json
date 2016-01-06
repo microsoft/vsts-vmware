@@ -60,24 +60,6 @@
             "helpMarkDown": "Enter the name of the snapshot for applying to the virtual machines."
         },
         {
-            "name": "snapshotVMMemory",
-            "type": "boolean",
-            "label": "Snapshot VM(s) Memory",
-            "defaultValue": "true",
-            "visibleRule": "action = Take Snapshot on Virtual Machines",
-            "required": false,
-            "helpMarkDown": "Whether to snapshot VM(s) memory or not"
-        },
-        {
-            "name": "quiesceGuestFileSystem",
-            "type": "boolean",
-            "label": "Quiesce Guest File System",
-            "defaultValue": "true",
-            "visibleRule": "action = Take Snapshot on Virtual Machines",
-            "required": false,
-            "helpMarkDown": "Whether to quiesce VM(s) file system or not"
-        },
-        {
             "name": "description",
             "type": "multiLine",
             "label": "Notes",
