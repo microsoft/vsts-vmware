@@ -13,7 +13,7 @@
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 0
+        "Patch": 1
     },
     "demands": [
         "java"
@@ -38,7 +38,9 @@
             "required": true,
             "helpMarkDown" : "Action to be performed on the VMWare virtual machines.",
             "options": {
-                 "Revert Snapshot on Virtual Machines": "Revert Snapshot on Virtual Machines"
+                 "Take Snapshot on Virtual Machines": "Take Snapshot on Virtual Machines",
+                 "Revert Snapshot on Virtual Machines": "Revert Snapshot on Virtual Machines",
+                 "Delete Snapshot on Virtual Machines": "Delete Snapshot on Virtual Machines"
             }
         },
         {
@@ -56,6 +58,15 @@
             "defaultValue": "",
             "required": true,
             "helpMarkDown": "Enter the name of the snapshot for applying to the virtual machines."
+        },
+        {
+            "name": "description",
+            "type": "multiLine",
+            "label": "Notes",
+            "required": false,
+            "defaultValue": "",
+            "visibleRule": "action = Take Snapshot on Virtual Machines",
+            "helpMarkDown": "Description for associated operation"
         }
     ],
     "instanceNameFormat": "$(action) : $(vmList)",

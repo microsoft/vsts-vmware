@@ -40,13 +40,39 @@ public class VmOpsTool {
         if (argsMap.containsKey(Constants.snapshotOps)) {
             String actionName = argsMap.get(Constants.snapshotOps);
             String snapshotName = argsMap.get(Constants.snapshotName);
-            if (actionName.equalsIgnoreCase(Constants.restoreSnapshotAction)) {
-                System.out.printf("Initiating restore snapshot operation on vmList[%s]\n", vmList);
-                vmWareImpl.restoreSnapshot(vmList, snapshotName, connData);
-            } else {
-                System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]\n",
-                        Constants.taskId);
-                throw new Exception("Invalid action name ( " + actionName + " ) for snapshot operation");
+
+            String[] vmNames = vmList.split(",");
+            String failedVmList = "";
+            for (String vmName : vmNames) {
+                vmName = vmName.trim();
+                try {
+                    if (actionName.equals(Constants.restoreSnapshotAction)) {
+                        vmWareImpl.restoreSnapshot(vmName, snapshotName, connData);
+                    } else if (actionName.equals(Constants.createSnapshotAction)) {
+                        String description = argsMap.get(Constants.description);
+                        boolean saveVmMemory = Boolean.parseBoolean(argsMap.get(Constants.saveVmMemory));
+                        boolean quiesceVmFs = Boolean.parseBoolean(argsMap.get(Constants.quiesceVmFs));
+
+                        vmWareImpl.createSnapshot(vmName, snapshotName, saveVmMemory, quiesceVmFs, description,
+                                connData);
+                    } else if (actionName.equals(Constants.deleteSnapshotAction)) {
+                        vmWareImpl.deleteSnapshot(vmName, snapshotName, connData);
+                    } else {
+                        System.out.printf(
+                                "##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]\n",
+                                Constants.taskId);
+                        throw new Exception("Invalid action name ( " + actionName + " ) for snapshot operation");
+                    }
+                } catch (Exception exp) {
+                    System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occured.");
+                    failedVmList += vmName + " ";
+                    continue;
+                }
+            }
+
+            if (!failedVmList.isEmpty()) {
+                throw new Exception(String.format("Failed to [%s] snapshot [%s] on virtual machines [%s].", actionName,
+                        snapshotName, failedVmList));
             }
         } else {
             System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]\n",
