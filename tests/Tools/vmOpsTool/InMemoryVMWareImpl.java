@@ -14,23 +14,21 @@ public class InMemoryVMWareImpl implements IVMWare {
         snapshotList.add("Snapshot1");
         snapshotList.add("Snapshot2");
 
-        vmSnapshotInfo.put("testvm1", snapshotList);
+        vmSnapshotInfo.put("win2012r2", snapshotList);
         vmSnapshotInfo.put("poweredoffvm", snapshotList);
-        vmSnapshotInfo.put("duplicatevmname", snapshotList);
-        vmSnapshotInfo.put("templatevm", snapshotList);
-        vmSnapshotInfo.put("vmtemplate", snapshotList);
-        vmSnapshotInfo.put("vmindc1", snapshotList);
-        vmSnapshotInfo.put("vmindc2", snapshotList);
+        vmSnapshotInfo.put("win10", snapshotList);
+        vmSnapshotInfo.put("ubuntuvm", snapshotList);
+        vmSnapshotInfo.put("win8", snapshotList);
+        vmSnapshotInfo.put("win7", snapshotList);
         vmSnapshotInfo.put("vm1", snapshotList);
         vmSnapshotInfo.put("vm2", snapshotList);
 
-        vmActiveSnapshot.put("testvm1", activeSnapshot);
+        vmActiveSnapshot.put("win2012r2", activeSnapshot);
         vmActiveSnapshot.put("poweredoffvm", activeSnapshot);
-        vmActiveSnapshot.put("duplicatevmname", activeSnapshot);
-        vmActiveSnapshot.put("templatevm", activeSnapshot);
-        vmActiveSnapshot.put("vmtemplate", activeSnapshot);
-        vmActiveSnapshot.put("vmindc1", activeSnapshot);
-        vmActiveSnapshot.put("vmindc2", activeSnapshot);
+        vmActiveSnapshot.put("win10", activeSnapshot);
+        vmActiveSnapshot.put("ubuntuvm", activeSnapshot);
+        vmActiveSnapshot.put("win8", activeSnapshot);
+        vmActiveSnapshot.put("win7", activeSnapshot);
         vmActiveSnapshot.put("vm1", activeSnapshot);
         vmActiveSnapshot.put("vm2", activeSnapshot);
     }

@@ -38,7 +38,7 @@ public abstract class VMWarePlatformTests {
 
     @Test
     public void createSnapshotWithSaveVMMemoryShouldSucceed() throws Exception {
-        String vmName = "VMInDC1";
+        String vmName = "Win8";
         String newSnapshot = "NewSnapshot";
 
         vmWareImpl.createSnapshot(vmName, newSnapshot, true, false, "Snapshot created during platform tests", connData);
@@ -50,7 +50,7 @@ public abstract class VMWarePlatformTests {
 
     @Test
     public void createSnapshotWithQuiesceShouldSucceed() throws Exception {
-        String vmName = "VMInDC2";
+        String vmName = "Win7";
         String newSnapshot = "NewSnapshot";
 
         vmWareImpl.createSnapshot(vmName, newSnapshot, false, true, "Snapshot created during platform tests", connData);
@@ -66,7 +66,7 @@ public abstract class VMWarePlatformTests {
     public void restoreOrDeleteSnapshotShouldThrowIfSnapshotDoesNotExist() {
         Exception exp = null;
         try {
-            vmWareImpl.restoreSnapshot("TestVM1", "InvalidSnapshot", connData);
+            vmWareImpl.restoreSnapshot("Win2012R2", "InvalidSnapshot", connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -74,7 +74,7 @@ public abstract class VMWarePlatformTests {
 
         exp = null;
         try {
-            vmWareImpl.deleteSnapshot("TestVM1", "InvalidSnapshot", connData);
+            vmWareImpl.deleteSnapshot("Win2012R2", "InvalidSnapshot", connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -110,7 +110,7 @@ public abstract class VMWarePlatformTests {
 
     @Test
     public void restoreOrCreateOrDeleteSnapshotShouldSucceedIfMultipleVmWithSameNameExist() throws Exception {
-        String vmName = "DuplicateVMName";
+        String vmName = "Win10";
         String newSnapshot = "NewSnapShot";
 
         vmWareImpl.createSnapshot(vmName, newSnapshot, false, false, "Snapshot created during platform tests", connData);
@@ -125,34 +125,26 @@ public abstract class VMWarePlatformTests {
 
     @Test
     public void restoreOrCreateOrDeleteSnapshotShouldSucceedIfTemplateAndVmHaveSameName() throws Exception {
-        String vmName1 = "TemplateVM";
-        String vmName2 = "VMTemplate";
+        String vmName1 = "UbuntuVM";
         String newSnapshot = "NewSnapshot";
 
         vmWareImpl.createSnapshot(vmName1, newSnapshot, false, false, "Snapshot created during platform tests", connData);
-        vmWareImpl.createSnapshot(vmName2, newSnapshot, false, false, "Snapshot created during platform tests", connData);
-
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(newSnapshot);
-        assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(newSnapshot);
+
 
         vmWareImpl.restoreSnapshot(vmName1, snapshotTwo, connData);
-        vmWareImpl.restoreSnapshot(vmName2, snapshotTwo, connData);
-
         assertThat(vmWareImpl.getCurrentSnapshot(vmName1, connData)).isEqualTo(snapshotTwo);
-        assertThat(vmWareImpl.getCurrentSnapshot(vmName2, connData)).isEqualTo(snapshotTwo);
+
 
         vmWareImpl.deleteSnapshot(vmName1, newSnapshot, connData);
-        vmWareImpl.deleteSnapshot(vmName2, newSnapshot, connData);
-
         assertThat(vmWareImpl.snapshotExists(vmName1, newSnapshot, connData)).isEqualTo(false);
-        assertThat(vmWareImpl.snapshotExists(vmName2, newSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
     public void restoreOrCreateOrDeleteSnapshotSucceedForVMsDiffDataCenters() throws Exception {
 
-        String vmName1 = "VMInDC1";
-        String vmName2 = "VMInDC2";
+        String vmName1 = "Win8";
+        String vmName2 = "Win7";
         String newSnapshot = "NewSnapshot";
 
         vmWareImpl.createSnapshot(vmName1, newSnapshot, false, false, "Snapshot created during platform tests", connData);
@@ -177,7 +169,7 @@ public abstract class VMWarePlatformTests {
     @Test
     public void restoreOrCreateOrDeleteSnapshotShouldSucceedForVMsEvenIfCaseDoesNotMatch() throws Exception {
 
-        String vmName = "testvm1";
+        String vmName = "win2012r2";
         String newSnapshot = "NewSnapshot";
 
         vmWareImpl.createSnapshot(vmName, newSnapshot, false, false, "Snapshot created during platform tests", connData);
