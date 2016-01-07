@@ -129,7 +129,7 @@ var createVsix = function(manifestFile, srcBuildDirectory, packageDirectory, cb)
 }
 
 var getLatestTaskLib = function(cb) {
-    gutil.log('Getting latest vso-task-lib');
+    gutil.log('Getting latest vsts-task-lib');
     shell.mkdir('-p', path.join(tempPath, 'node_modules'));
     shell.cp("-f", "package.json", tempPath);
     shell.pushd(tempPath);

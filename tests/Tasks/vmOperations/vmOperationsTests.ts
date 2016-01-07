@@ -6,7 +6,7 @@ import mocha = require("mocha");
 import chai = require("chai");
 import sinon = require("sinon");
 import sinonChai = require("sinon-chai");
-import tl = require("vso-task-lib");
+import tl = require("vsts-task-lib/task");
 import Q = require("q");
 
 var expect = chai.expect;

@@ -34,7 +34,7 @@
             "name": "action", 
             "type": "pickList",
             "label": "Action",
-            "defaultValue": "",
+            "defaultValue": "Take Snapshot on Virtual Machines",
             "required": true,
             "helpMarkDown" : "Action to be performed on the VMWare virtual machines.",
             "options": {
