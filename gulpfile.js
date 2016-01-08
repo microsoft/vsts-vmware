@@ -129,7 +129,7 @@ var createVsix = function(manifestFile, srcBuildDirectory, packageDirectory, cb)
 }
 
 var getLatestTaskLib = function(cb) {
-    gutil.log('Getting latest vso-task-lib');
+    gutil.log('Getting latest vsts-task-lib');
     shell.mkdir('-p', path.join(tempPath, 'node_modules'));
     shell.cp("-f", "package.json", tempPath);
     shell.pushd(tempPath);
@@ -144,7 +144,7 @@ var getLatestTaskLib = function(cb) {
     shell.exec(cmdline, { silent: true }, function (code, output) {
         shell.popd();
         if (code !== 0) {
-            cb(createError('npm failed to install vso-task-lib. Output : ' + output));
+            cb(createError('npm failed to install vsts-task-lib. Output : ' + output));
         }
         else {
             cb();

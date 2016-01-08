@@ -18,7 +18,7 @@
     "demands": [
         "java"
     ],
-    "minimumAgentVersion": "1.93.0",
+    "minimumAgentVersion": "1.94.0",
     "groups": [
     ],
     "inputs": [
@@ -34,7 +34,7 @@
             "name": "action", 
             "type": "pickList",
             "label": "Action",
-            "defaultValue": "",
+            "defaultValue": "Take Snapshot on Virtual Machines",
             "required": true,
             "helpMarkDown" : "Action to be performed on the VMWare virtual machines.",
             "options": {

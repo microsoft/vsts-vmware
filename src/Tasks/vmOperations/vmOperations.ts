@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/tsd.d.ts" />
-/// <reference path="../../../typings/vso-task-lib/vso-task-lib.d.ts" />
+/// <reference path="../../../typings/vsts-task-lib/vsts-task-lib.d.ts" />
 
-import * as tl from "vso-task-lib";
+import * as tl from "vsts-task-lib/task";
 import * as util from "util";
 
 export class VmOperations {
@@ -59,7 +59,7 @@ export class VmOperations {
         var systemClassPath: string = tl.getVariable("classpath");
         var cmdArgs = "-classpath vmOpsTool-1.0.jar;" + systemClassPath + " VmOpsTool " + cmdArgsForAction + commonArgs;
         util.log("Invoking command to perform vm operations ...\n");
-        return tl.exec("java", cmdArgs, {failOnStdErr: true})
+        return tl.exec("java", cmdArgs, <any> {failOnStdErr: true})
             .then((code) => {
                 tl.debug("Exit code: " + code);
                 tl.exit(code);
