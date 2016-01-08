@@ -144,7 +144,7 @@ var getLatestTaskLib = function(cb) {
     shell.exec(cmdline, { silent: true }, function (code, output) {
         shell.popd();
         if (code !== 0) {
-            cb(createError('npm failed to install vso-task-lib. Output : ' + output));
+            cb(createError('npm failed to install vsts-task-lib. Output : ' + output));
         }
         else {
             cb();
