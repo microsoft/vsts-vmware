@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.microsoft.vmware</groupId>
-  <artifactId>module-main</artifactId>
+  <artifactId>vmware-integration</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
 
@@ -67,7 +67,17 @@
         </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <includes>
+            <include>**</include>
+          </includes>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
     </plugins>
-  </build> 
-
+  </build>
 </project>

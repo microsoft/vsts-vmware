@@ -4,8 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <packaging>pom</packaging>
+  <parent>
+    <groupId>com.microsoft.vmware</groupId>
+    <artifactId>vmware-integration</artifactId>
+    <version>1.0</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
 
+  <artifactId>vmware-integration-tools</artifactId>
+  <modules>
+    <module>vmOpsTool</module>
+  </modules>
+  <packaging>pom</packaging>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -45,15 +55,4 @@
     </plugins>
   </build> 
 
-  <modules>
-    <module>vmOpsTool</module>
-  </modules>
-  <parent>
-    <groupId>com.microsoft.vmware</groupId>
-    <artifactId>module-main</artifactId>
-    <version>1.0</version>
-    <relativePath>../../pom.xml</relativePath>
-  </parent>
-  <artifactId>Tools</artifactId>
-  <groupId>com.microsoft.vmware.tools</groupId>
 </project>
