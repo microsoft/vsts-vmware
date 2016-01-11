@@ -6,15 +6,16 @@
 
   <parent>
     <groupId>com.microsoft.vmware</groupId>
-    <artifactId>module-main</artifactId>
+    <artifactId>vmware-integration</artifactId>
     <version>1.0</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
-  <artifactId>Tools.Test</artifactId>
+
+  <artifactId>vmware-integration-tools-tests</artifactId>
   <packaging>jar</packaging>
   <dependencies>
     <dependency>
-      <groupId>com.microsoft.vmware.tools.vmopstool</groupId>
+      <groupId>com.microsoft.vmware</groupId>
       <artifactId>vmOpsTool</artifactId>
       <version>1.0</version>
       <type>jar</type>
@@ -36,17 +37,6 @@
     <testSourceDirectory>./vmOpsTool</testSourceDirectory>
     <outputDirectory>../../_build/tests/tools/vmOpsTool</outputDirectory>
     <plugins>
-
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <includes>
-            <include>**</include>
-          </includes>
-        </configuration>
-      </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -61,7 +51,6 @@
           <skipTests>${skip.unittests}</skipTests>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
@@ -82,7 +71,6 @@
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -113,7 +101,6 @@
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -161,7 +148,6 @@
           </dependency>
         </dependencies>
       </plugin>
-
     </plugins>
   </build>
 </project>

@@ -4,14 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.microsoft.vmware.tools</groupId>
-    <artifactId>Tools</artifactId>
+    <groupId>com.microsoft.vmware</groupId>
+    <artifactId>vmware-integration-tools</artifactId>
     <version>1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <groupId>com.microsoft.vmware.tools.vmopstool</groupId>
+
   <artifactId>vmOpsTool</artifactId>
   <packaging>jar</packaging>
+  <description>This project contains all the source code related to manage VM operations on VMWare vCenter Server</description>
 
   <dependencies>
     <dependency>
@@ -33,15 +34,6 @@
     <outputDirectory>../../../_build/src/tools/vmOpsTool</outputDirectory>
     <plugins>
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <includes>
-            <include>**</include>
-          </includes>
-        </configuration>
-      </plugin>
-      <plugin>
         <!-- Build an executable JAR -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -59,6 +51,4 @@
       </plugin>
     </plugins>
   </build>
-  <name>vmOpsTool</name>
-  <description>This project contains all the source code related to manage VM operations on VMWare vCenter Server</description>
 </project>
