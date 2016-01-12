@@ -100,7 +100,7 @@ public class VmOpsTool {
 
         System.out.println("Parsing input parameters...");
         for (String arg : cmdArgs) {
-            if (arg.charAt(0) == '-') {
+            if (!arg.equals("") && arg.charAt(0) == '-') {
                 key = arg;
             } else if (!arg.equals(Constants.vmOpsTool)){
                 value = arg;
