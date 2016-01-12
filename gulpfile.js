@@ -91,7 +91,7 @@ gulp.task("watch", function() {
 
 gulp.task("default", ["build"]);
 
-gulp.task("gettasklib", ["build"], function (cb) {
+gulp.task("gettasklib", function (cb) {
     getLatestTaskLib(cb);
 });
 
