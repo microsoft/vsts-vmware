@@ -31,6 +31,18 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
+    public void parseCmdArgsWithEmptyDescription() {
+        String[] cmdArgs = { Constants.vmOpsTool, Constants.description, "" };
+
+        Map<String, String> argsMap = VmOpsTool.parseCmdLine(cmdArgs);
+
+        assertThat(argsMap.size()).isEqualTo(1);
+        assertThat(argsMap.containsKey(Constants.vmOpsTool)).isEqualTo(false);
+        assertThat(argsMap.containsKey(Constants.description)).isEqualTo(true);
+        assertThat(argsMap.get(Constants.description)).isEqualTo("");
+    }
+
+    @Test
     public void executeActionShouldSucceedForCreateAndDeleteSnapshotOperation() throws Exception {
         // Create snapshot operation validation
         String createSnapshot = "Sample Snapshot";
