@@ -11,7 +11,7 @@ export function saveMachineGroup(machineGroup: MachineGroup): void {
     if (machineGroup.Name == null) {
         var errorMessage = "machine group's name is invalid";
         tl.error(errorMessage);
-        throw new Error(errorMessage + "1");
+        throw new Error(errorMessage);
     }
     tl.setVariable(machineGroup.Name, JSON.stringify(machineGroup));
 }
