@@ -28,7 +28,7 @@ describe("saveMachineGroup tets", (): void => {
     });
 
     it("should log and throw if machineGroup is null", (): void => {
-       var errorMessage = "invalid machineGroup";
+       var errorMessage = "invalid machine group";
 
        expect(() => Deployment.saveMachineGroup(null)).to.throw(errorMessage);
        logErrorStub.withArgs(errorMessage).should.have.been.calledOnce;
