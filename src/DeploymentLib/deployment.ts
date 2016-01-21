@@ -18,7 +18,7 @@ export function saveMachineGroup(machineGroup: MachineGroup): void {
     if (machineGroup == null) {
         logAndThrow("Invalid machine group");
     }
-    if (machineGroup.Name == null || machineGroup.Name.replace(/\s/g, "").length < 1) {
+    if (machineGroup.Name == null || machineGroup.Name.trim() == "") {
         logAndThrow("Invalid machine group name");
     }
 
