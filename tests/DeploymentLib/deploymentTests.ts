@@ -11,11 +11,17 @@ import tl = require("vsts-task-lib/task");
 
 var expect = chai.expect;
 
-describe("saveMachineGroup tets", (): void => {
-    var sandbox;
-    var setVariableStub;
-    var logErrorStub;
+var sandbox;
+var setVariableStub;
+var logErrorStub;
+function AssertIfFunctionLogsAndThrows(func: Function, errorMessage: string): void {
+    logErrorStub.withArgs(errorMessage).throws(new Error(errorMessage));
 
+    expect(func).to.throw(errorMessage);
+    logErrorStub.withArgs(errorMessage).should.have.been.calledOnce;
+}
+
+describe("saveMachineGroup tets", (): void => {
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
         setVariableStub = sandbox.stub(tl, "setVariable");
@@ -28,32 +34,22 @@ describe("saveMachineGroup tets", (): void => {
     });
 
     it("should log and throw if machineGroup is null", (): void => {
-       var errorMessage = "Invalid machine group";
-
-       expect(() => Deployment.saveMachineGroup(null)).to.throw(errorMessage);
-       logErrorStub.withArgs(errorMessage).should.have.been.calledOnce;
+       AssertIfFunctionLogsAndThrows(() => Deployment.saveMachineGroup(null), "Invalid machine group");
     });
 
     it("should log and throw if name of the machine group is not set", (): void => {
-        var errorMessage = "Invalid machine group name";
-
         var machineGroup = new MachineGroup();
-
-        expect(() => Deployment.saveMachineGroup(machineGroup)).to.throw(errorMessage);
-        logErrorStub.withArgs(errorMessage).should.have.been.calledOnce;
+        AssertIfFunctionLogsAndThrows(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
     });
 
     it("should log and throw if name of the machine group is null or empty or whitepsace", (): void => {
-        var errorMessage = "Invalid machine group name";
-
         var invalidValues = [null, "", "   ", "		" /* \t */];
         invalidValues.forEach(invalidName => {
             var machineGroup = new MachineGroup();
             machineGroup.Name = invalidName;
 
             sandbox.reset();
-            expect(() => Deployment.saveMachineGroup(machineGroup)).to.throw(errorMessage);
-            logErrorStub.withArgs(errorMessage).should.have.been.calledOnce;
+            AssertIfFunctionLogsAndThrows(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
         });
     });
 
