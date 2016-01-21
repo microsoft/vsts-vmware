@@ -1,5 +1,6 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
+import * as util from "util";
 import * as vmOperations from "../../../src/Tasks/vmOperations/vmOperations";
 
 import mocha = require("mocha");
@@ -29,6 +30,7 @@ describe("getCmdCommonArgs", (): void => {
         getEndPointUrlStub = sandbox.stub(tl, "getEndpointUrl");
         getEndpointAuthorizationStub = sandbox.stub(tl, "getEndpointAuthorization");
         logErrorStub = sandbox.stub(tl, "error");
+        sandbox.stub(tl, "debug");
     });
 
     afterEach((): void => {
@@ -180,7 +182,6 @@ describe("runMain", (): void => {
     var getCmdArgsForActionStub;
     var execCmdStub;
     var exitStub;
-    var debugStub;
     var errorStub;
     var getVariableStub;
 
@@ -189,11 +190,12 @@ describe("runMain", (): void => {
         getInputStub = sandbox.stub(tl, "getInput");
         execCmdStub = sandbox.stub(tl, "exec");
         exitStub = sandbox.stub(tl, "exit");
-        debugStub = sandbox.stub(tl, "debug");
         errorStub = sandbox.stub(tl, "error");
         getVariableStub = sandbox.stub(tl, "getVariable");
         getCmdCommonArgsStub = sandbox.stub(vmOperations.VmOperations, "getCmdCommonArgs");
         getCmdArgsForActionStub = sandbox.stub(vmOperations.VmOperations, "getCmdArgsForAction");
+        sandbox.stub(tl, "debug");
+        sandbox.stub(util, "log");
     });
 
     afterEach((): void => {
