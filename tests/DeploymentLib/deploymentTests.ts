@@ -14,10 +14,10 @@ var expect = chai.expect;
 var sandbox;
 var setVariableStub;
 var logErrorStub;
-function AssertIfFunctionLogsAndThrows(func: Function, errorMessage: string): void {
+function AssertLogAndError(call: Function, errorMessage: string): void {
     logErrorStub.withArgs(errorMessage).throws(new Error(errorMessage));
 
-    expect(func).to.throw(errorMessage);
+    expect(call).to.throw(errorMessage);
     logErrorStub.withArgs(errorMessage).should.have.been.calledOnce;
 }
 
@@ -34,12 +34,12 @@ describe("saveMachineGroup tets", (): void => {
     });
 
     it("should log and throw if machineGroup is null", (): void => {
-       AssertIfFunctionLogsAndThrows(() => Deployment.saveMachineGroup(null), "Invalid machine group");
+       AssertLogAndError(() => Deployment.saveMachineGroup(null), "Invalid machine group");
     });
 
     it("should log and throw if name of the machine group is not set", (): void => {
         var machineGroup = new MachineGroup();
-        AssertIfFunctionLogsAndThrows(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
+        AssertLogAndError(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
     });
 
     it("should log and throw if name of the machine group is null or empty or whitepsace", (): void => {
@@ -49,7 +49,7 @@ describe("saveMachineGroup tets", (): void => {
             machineGroup.Name = invalidName;
 
             sandbox.reset();
-            AssertIfFunctionLogsAndThrows(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
+            AssertLogAndError(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
         });
     });
 
