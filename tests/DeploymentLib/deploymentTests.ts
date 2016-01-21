@@ -2,6 +2,7 @@
 
 import * as Deployment from "../../src/DeploymentLib/deployment";
 import MachineGroup = Deployment.MachineGroup;
+import Machine = Deployment.Machine;
 
 import chai = require("chai");
 import mocha = require("mocha");
@@ -25,22 +26,48 @@ describe("saveMachineGroup tets", (): void => {
         sandbox.restore();
     });
 
+    it("should log and throw if machineGroup is null", (): void => {
+       var errorMessage = "invalid machineGroup";
+
+       expect(() => Deployment.saveMachineGroup(null)).to.throw(errorMessage);
+       logErrorStub.withArgs(errorMessage).should.have.been.calledOnce;
+    });
+
     it("should log and throw if name of the machine group is not set", (): void => {
+        var errorMessage = "machine group's name is invalid";
+
         var machineGroup = new MachineGroup();
 
-        try {
-            Deployment.saveMachineGroup(machineGroup);
-        }
-        catch (error) {
-            var errorMessage = "machine group's name is invalid";
-            error.message.should.equal(errorMessage);
+        expect(() => Deployment.saveMachineGroup(machineGroup)).to.throw(errorMessage);
+        logErrorStub.withArgs(errorMessage).should.have.been.calledOnce;
+    });
+
+    it("should log and throw if name of the machine group is null or empty or whitepsace", (): void => {
+        var errorMessage = "machine group's name is invalid";
+
+        var invalidValues = [null, "", "   "];
+        invalidValues.forEach(invalidName => {
+            var machineGroup = new MachineGroup();
+            machineGroup.Name = invalidName;
+
+            sandbox.reset();
+            expect(() => Deployment.saveMachineGroup(machineGroup)).to.throw(errorMessage);
             logErrorStub.withArgs(errorMessage).should.have.been.calledOnce;
-        }
+        });
     });
 
     it("should serialize and save MachineGroup as a task variable named as machine group's name", (): void => {
-        var machineGroup = new MachineGroup();
-        machineGroup.Name = "dummyMachineGroupName";
+        var machineGroup: MachineGroup = {
+            Name: "dummyMachineGroupName",
+            Machines: [
+                {
+                    Name: "dummyMachineName1",
+                    UserName: "dummyUserName",
+                    Password: "dummyPassword"
+                },
+                new Machine()
+            ]
+        };
 
         Deployment.saveMachineGroup(machineGroup);
 

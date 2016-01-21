@@ -2,13 +2,24 @@
 
 import * as tl from "vsts-task-lib/task";
 
-export class MachineGroup {
+export class Machine {
     public Name: string;
+    public UserName: string;
+    public Password: string;
 }
 
+export class MachineGroup {
+    public Name: string;
+    public Machines: Machine[];
+}
 
 export function saveMachineGroup(machineGroup: MachineGroup): void {
-    if (machineGroup.Name == null) {
+    if (machineGroup == null) {
+        var errorMessage = "invalid machineGroup";
+        tl.error(errorMessage);
+        throw new Error(errorMessage);
+    }
+    if (machineGroup.Name == null || machineGroup.Name.replace(/\s/g, "").length < 1) {
         var errorMessage = "machine group's name is invalid";
         tl.error(errorMessage);
         throw new Error(errorMessage);
