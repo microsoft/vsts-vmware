@@ -16,14 +16,14 @@ export class MachineGroup {
 
 export function saveMachineGroup(machineGroup: MachineGroup): void {
     if (machineGroup == null) {
-        logAndThrow("invalid machine group");
+        logAndThrow("Invalid machine group");
     }
     if (machineGroup.Name == null || machineGroup.Name.replace(/\s/g, "").length < 1) {
-        logAndThrow("invalid machine group name");
+        logAndThrow("Invalid machine group name");
     }
 
     tl.setVariable(machineGroup.Name, JSON.stringify(machineGroup));
-    tl.debug("saved machine group with name '" + machineGroup.Name + "'");
+    tl.debug("Saved machine group with name '" + machineGroup.Name + "'");
 }
 
 function logAndThrow(errorMessage: string): void {

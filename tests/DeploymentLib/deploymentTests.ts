@@ -28,14 +28,14 @@ describe("saveMachineGroup tets", (): void => {
     });
 
     it("should log and throw if machineGroup is null", (): void => {
-       var errorMessage = "invalid machine group";
+       var errorMessage = "Invalid machine group";
 
        expect(() => Deployment.saveMachineGroup(null)).to.throw(errorMessage);
        logErrorStub.withArgs(errorMessage).should.have.been.calledOnce;
     });
 
     it("should log and throw if name of the machine group is not set", (): void => {
-        var errorMessage = "invalid machine group name";
+        var errorMessage = "Invalid machine group name";
 
         var machineGroup = new MachineGroup();
 
@@ -44,7 +44,7 @@ describe("saveMachineGroup tets", (): void => {
     });
 
     it("should log and throw if name of the machine group is null or empty or whitepsace", (): void => {
-        var errorMessage = "invalid machine group name";
+        var errorMessage = "Invalid machine group name";
 
         var invalidValues = [null, "", "   "];
         invalidValues.forEach(invalidName => {
