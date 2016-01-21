@@ -35,7 +35,7 @@ describe("saveMachineGroup tets", (): void => {
     });
 
     it("should log and throw if name of the machine group is not set", (): void => {
-        var errorMessage = "machine group's name is invalid";
+        var errorMessage = "invalid machine group name";
 
         var machineGroup = new MachineGroup();
 
@@ -44,7 +44,7 @@ describe("saveMachineGroup tets", (): void => {
     });
 
     it("should log and throw if name of the machine group is null or empty or whitepsace", (): void => {
-        var errorMessage = "machine group's name is invalid";
+        var errorMessage = "invalid machine group name";
 
         var invalidValues = [null, "", "   "];
         invalidValues.forEach(invalidName => {
