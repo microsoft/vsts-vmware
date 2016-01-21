@@ -46,7 +46,7 @@ describe("saveMachineGroup tets", (): void => {
     it("should log and throw if name of the machine group is null or empty or whitepsace", (): void => {
         var errorMessage = "Invalid machine group name";
 
-        var invalidValues = [null, "", "   "];
+        var invalidValues = [null, "", "   ", "		" /* \t */];
         invalidValues.forEach(invalidName => {
             var machineGroup = new MachineGroup();
             machineGroup.Name = invalidName;
