@@ -20,6 +20,7 @@ describe("saveMachineGroup tets", (): void => {
         sandbox = sinon.sandbox.create();
         setVariableStub = sandbox.stub(tl, "setVariable");
         logErrorStub = sandbox.stub(tl, "error");
+        sandbox.stub(tl, "debug");
     });
 
     afterEach((): void => {

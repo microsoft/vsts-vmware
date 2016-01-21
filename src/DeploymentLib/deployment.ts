@@ -24,5 +24,7 @@ export function saveMachineGroup(machineGroup: MachineGroup): void {
         tl.error(errorMessage);
         throw new Error(errorMessage);
     }
+
     tl.setVariable(machineGroup.Name, JSON.stringify(machineGroup));
+    tl.debug("saved machine group with name '" + machineGroup.Name + "'");
 }
