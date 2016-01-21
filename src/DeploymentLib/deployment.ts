@@ -6,6 +6,7 @@ export class Machine {
     public Name: string;
     public UserName: string;
     public Password: string;
+    public Properties: { [key: string]: string };
 }
 
 export class MachineGroup {

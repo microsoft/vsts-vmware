@@ -64,7 +64,11 @@ describe("saveMachineGroup tets", (): void => {
                 {
                     Name: "dummyMachineName1",
                     UserName: "dummyUserName",
-                    Password: "dummyPassword"
+                    Password: "dummyPassword",
+                    Properties: {
+                        ["dummyPropetyKey1"]: "dummyPropertyValue1",
+                        ["dummyPropetyKey2"]: "dummyPropertyValue2"
+                    }
                 },
                 new Machine()
             ]
