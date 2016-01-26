@@ -11,22 +11,31 @@ import tl = require("vsts-task-lib/task");
 
 var expect = chai.expect;
 
-var sandbox;
-var setVariableStub;
-var logErrorStub;
-function AssertLogAndError(call: Function, errorMessage: string): void {
-    logErrorStub.withArgs(errorMessage).throws(new Error(errorMessage));
-
-    expect(call).to.throw(errorMessage);
-    logErrorStub.withArgs(errorMessage).should.have.been.calledOnce;
-}
-
 describe("saveMachineGroup tets", (): void => {
+    var sandbox;
+    var logErrorSpy;
+    var setVariableSpy;
+
+    function AssertThrowsAndLogs(call: Function, errorMessage: string): void {
+        expect(call).to.throw(errorMessage);
+        logErrorSpy.withArgs(errorMessage).should.have.been.calledOnce;
+    }
+
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
-        setVariableStub = sandbox.stub(tl, "setVariable");
-        logErrorStub = sandbox.stub(tl, "error");
-        sandbox.stub(tl, "debug");
+        setVariableSpy = sandbox.spy(tl, "setVariable");
+        logErrorSpy = sandbox.spy(tl, "error");
+
+        // mock the std and err streams of vsts-task-lib to reduce noise in test output 
+        var stdoutmock = {
+            write: function(message: string) {}
+        };
+        tl.setStdStream(stdoutmock);
+        tl.setErrStream(stdoutmock);
+
+        // vsts-task-lib calls process.exit in failure test cases
+        // we should eat that - test runner exits otherwise 
+        sandbox.stub(process, "exit");
     });
 
     afterEach((): void => {
@@ -34,12 +43,12 @@ describe("saveMachineGroup tets", (): void => {
     });
 
     it("should log and throw if machineGroup is null", (): void => {
-       AssertLogAndError(() => Deployment.saveMachineGroup(null), "Invalid machine group");
+        AssertThrowsAndLogs(() => Deployment.saveMachineGroup(null), "Invalid machine group");
     });
 
     it("should log and throw if name of the machine group is not set", (): void => {
         var machineGroup = new MachineGroup();
-        AssertLogAndError(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
+        AssertThrowsAndLogs(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
     });
 
     it("should log and throw if name of the machine group is null or empty or whitepsace", (): void => {
@@ -49,7 +58,7 @@ describe("saveMachineGroup tets", (): void => {
             machineGroup.Name = invalidName;
 
             sandbox.reset();
-            AssertLogAndError(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
+            AssertThrowsAndLogs(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
         });
     });
 
@@ -72,6 +81,6 @@ describe("saveMachineGroup tets", (): void => {
 
         Deployment.saveMachineGroup(machineGroup);
 
-        setVariableStub.withArgs(machineGroup.Name, JSON.stringify(machineGroup)).should.have.been.calledOnce;
+        setVariableSpy.withArgs(machineGroup.Name, JSON.stringify(machineGroup)).should.have.been.calledOnce;
     });
 });
