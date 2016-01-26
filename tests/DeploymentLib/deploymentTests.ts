@@ -11,7 +11,7 @@ import tl = require("vsts-task-lib/task");
 
 var expect = chai.expect;
 
-describe("saveMachineGroup tets", (): void => {
+describe("saveMachineGroup tests", (): void => {
     var sandbox;
     var logErrorSpy;
     var setVariableSpy;
