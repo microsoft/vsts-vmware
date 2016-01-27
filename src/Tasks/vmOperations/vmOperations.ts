@@ -12,9 +12,9 @@ export class VmOperations {
         var vCenterConnectionName: string = tl.getInput("vCenterConnection", true);
         var vCenterUrl: string = tl.getEndpointUrl(vCenterConnectionName, false) + "sdk/vimService";
         var endPointAuthCreds = tl.getEndpointAuthorization(vCenterConnectionName, false)["parameters"];
-        var vCenterUserName: string = this.escapeDoubleQuotes(endPointAuthCreds["username"]);
-        var vCenterPassword: string = this.escapeDoubleQuotes(endPointAuthCreds["password"]);
-        var vmList: string = this.escapeDoubleQuotes(tl.getInput("vmList", true));
+        var vCenterUserName: string = endPointAuthCreds["username"];
+        var vCenterPassword: string = endPointAuthCreds["password"];
+        var vmList: string = tl.getInput("vmList", true);
         this.validateVmListInput(vmList);
 
         cmdArgs += " -vCenterUrl \"" + vCenterUrl  + "\" -vCenterUserName \"" + vCenterUserName  + "\" -vCenterPassword \"" +
@@ -28,7 +28,7 @@ export class VmOperations {
         var cmdArgs = "";
         var snapshotName  = null;
         switch (actionName) {
-            case "Take Snapshot on Virtual Machines":
+            case "Take Snapshot of Virtual Machines":
                 snapshotName = tl.getInput("snapshotName", true);
                 var snapshotVMMemory = "false";
                 var quiesceGuestFileSystem = "false";
@@ -36,11 +36,11 @@ export class VmOperations {
                 cmdArgs += " -snapshotOps create -snapshotName \"" + snapshotName  + "\"" + " -snapshotVMMemory " +
                      snapshotVMMemory + " -quiesceGuestFileSystem " + quiesceGuestFileSystem + " -description \"" + description + "\"";
                 break;
-            case "Revert Snapshot on Virtual Machines":
-                snapshotName  = this.escapeDoubleQuotes(tl.getInput("snapshotName", true));
+            case "Revert Snapshot of Virtual Machines":
+                snapshotName  = tl.getInput("snapshotName", true);
                 cmdArgs += " -snapshotOps restore -snapshotName \"" + snapshotName  + "\"";
                 break;
-            case "Delete Snapshot on Virtual Machines":
+            case "Delete Snapshot of Virtual Machines":
                 snapshotName  = tl.getInput("snapshotName", true);
                 cmdArgs += " -snapshotOps delete -snapshotName \"" + snapshotName  + "\"";
                 break;
@@ -70,19 +70,13 @@ export class VmOperations {
             });
     }
 
-    private static escapeDoubleQuotes(str: any): string {
-        var strUpdated = str.replace("\"", "\\\"");
-        tl.debug(util.format("Input string: %s, Updated string:%s", str, strUpdated));
-        return strUpdated;
-    }
 
-    // tl.exit will exit the task and hence not exiting from here, we were not able to have
-    // a platform test for this behavior as process is exiting if you don't stub
     private static validateVmListInput(vmList: any): void {
         var vms = vmList.split(",");
         vms.forEach(vm => {
             if (!vm.trim()) {
                 tl.error("Invalid input for vmList: vmName cannot be empty string.");
+                tl.exit(1);
             }
         });
     }
