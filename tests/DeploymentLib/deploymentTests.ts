@@ -63,6 +63,8 @@ describe("saveMachineGroup tests", (): void => {
     });
 
     it("should serialize and save MachineGroup as a task variable named as machine group's name", (): void => {
+        var machineGroupOutputVariablePrefix = "Vsts.MGName_";
+
         var machineGroup: MachineGroup = {
             Name: "dummyMachineGroupName",
             Machines: [
@@ -81,6 +83,7 @@ describe("saveMachineGroup tests", (): void => {
 
         Deployment.saveMachineGroup(machineGroup);
 
-        setVariableSpy.withArgs(machineGroup.Name, JSON.stringify(machineGroup)).should.have.been.calledOnce;
+        setVariableSpy.withArgs(machineGroupOutputVariablePrefix + machineGroup.Name, JSON.stringify(machineGroup)).should.have.been.calledOnce;
+        setVariableSpy.withArgs(machineGroup.Name, machineGroupOutputVariablePrefix + machineGroup.Name).should.have.been.calledOnce;
     });
 });
