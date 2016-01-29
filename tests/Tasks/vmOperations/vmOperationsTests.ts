@@ -20,6 +20,7 @@ describe("getCmdCommonArgs", (): void => {
     var getEndPointUrlStub;
     var getEndpointAuthorizationStub;
     var logErrorStub;
+    var exitStub;
     var dummyConnectionName = "DummyConnectionName";
     var dummyEndpointUrl = "http://localhost:8080";
     var dummyVmList = "dummyvm1, dummyvm2";
@@ -30,6 +31,7 @@ describe("getCmdCommonArgs", (): void => {
         getEndPointUrlStub = sandbox.stub(tl, "getEndpointUrl");
         getEndpointAuthorizationStub = sandbox.stub(tl, "getEndpointAuthorization");
         logErrorStub = sandbox.stub(tl, "error");
+        exitStub = sandbox.stub(tl, "exit");
         sandbox.stub(tl, "debug");
     });
 
@@ -79,29 +81,17 @@ describe("getCmdCommonArgs", (): void => {
         getEndpointAuthorizationStub.should.have.thrown("Error");
     });
 
-    it("Should escape inputs with spaces, double quotes, comma, semi colon, uni code characters", (): void => {
-        getInputStub.withArgs("vCenterConnection", true).returns(dummyConnectionName);
-        getInputStub.withArgs("vmList", true).returns(dummyVmList);
-        getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
-        getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummydomain\\dummyuser", "password" : " dummyp\" assword , ; "}});
-
-        var cmdArgs = vmOperations.VmOperations.getCmdCommonArgs();
-
-        cmdArgs.should.contain(" -vCenterUserName \"dummydomain\\dummyuser\"");
-        cmdArgs.should.contain(" -vCenterPassword \" dummyp\\\" assword , ; \"");
-    });
-
     it("Should fail task for invalid vmList input, i.e vmname empty string", (): void => {
         getInputStub.withArgs("vCenterConnection", true).returns(dummyConnectionName);
         getInputStub.withArgs("vmList", true).returns("vm1, ,vm, vm2, vm3,");
         getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
-        getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummydomain\\dummyuser", "password" : " dummyp\" assword , ; "}});
+        getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummydomain\\dummyuser", "password" : " dummypassword , ; "}});
         logErrorStub.withArgs("Invalid input for vmList: vmName cannot be empty string.").returns(1);
 
         vmOperations.VmOperations.getCmdCommonArgs();
 
         logErrorStub.withArgs("Invalid input for vmList: vmName cannot be empty string.").should.have.been.calledTwice;
-
+        exitStub.withArgs(1).should.have.been.calledTwice;
     });
 });
 
@@ -127,7 +117,7 @@ describe("getCmdArgsForAction", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
         getInputStub.withArgs("description", false).returns("Sample description");
 
-        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot on Virtual Machines");
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot of Virtual Machines");
 
         cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory false -quiesceGuestFileSystem false -description \"Sample description\"");
         debugStub.should.have.been.calledOnce;
@@ -136,24 +126,24 @@ describe("getCmdArgsForAction", (): void => {
     it("Should not throw on failure to read description for create snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
 
-        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot on Virtual Machines");
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot of Virtual Machines");
 
         cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory false -quiesceGuestFileSystem false -description \"undefined\"");
         getInputStub.should.have.callCount(2);
     });
 
     it("Should read snapshot name for restore snapshot action", (): void => {
-        getInputStub.withArgs("snapshotName", true).returns("dummySnap\"shotName");
+        getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
 
-        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Revert Snapshot on Virtual Machines");
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Revert Snapshot of Virtual Machines");
 
-        cmdArgs.should.contain("-snapshotOps restore -snapshotName \"dummySnap\\\"shotName\"");
+        cmdArgs.should.contain("-snapshotOps restore -snapshotName \"dummySnapshotName\"");
     });
 
     it("Should read snapshot name for delete snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
 
-        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Delete Snapshot on Virtual Machines");
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Delete Snapshot of Virtual Machines");
 
         cmdArgs.should.contain("-snapshotOps delete -snapshotName \"dummySnapshotName\"");
     });
@@ -162,7 +152,7 @@ describe("getCmdArgsForAction", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 
         expect( (): void => {
-             vmOperations.VmOperations.getCmdArgsForAction("Revert Snapshot on Virtual Machines");
+             vmOperations.VmOperations.getCmdArgsForAction("Revert Snapshot of Virtual Machines");
              }).to.throw("Error");
         getInputStub.should.have.been.calledOnce;
     });
