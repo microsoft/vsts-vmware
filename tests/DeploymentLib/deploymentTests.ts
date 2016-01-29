@@ -15,7 +15,6 @@ var expect = chai.expect;
 describe("saveMachineGroup tests", (): void => {
     var sandbox;
     var logErrorSpy;
-    var setVariableSpy;
 
     function AssertThrowsAndLogs(call: Function, errorMessage: string): void {
         expect(call).to.throw(errorMessage);
@@ -24,7 +23,6 @@ describe("saveMachineGroup tests", (): void => {
 
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
-        setVariableSpy = sandbox.spy(tl, "setVariable");
         logErrorSpy = sandbox.spy(tl, "error");
 
         // mock the std and err streams of vsts-task-lib to reduce noise in test output 
