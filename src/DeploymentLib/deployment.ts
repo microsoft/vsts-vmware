@@ -22,9 +22,13 @@ export function saveMachineGroup(machineGroup: MachineGroup): void {
         throwAndLog("Invalid machine group name");
     }
 
-    tl.setVariable(machineGroup.Name, JSON.stringify(machineGroup));
+    var machineGroupOutputVariableName = machineGroupOutputVariablePrefix + machineGroup.Name;
+    tl.setVariable(machineGroupOutputVariableName, JSON.stringify(machineGroup));
+    tl.setVariable(machineGroup.Name, machineGroupOutputVariableName);
     tl.debug("Saved machine group with name '" + machineGroup.Name + "'");
 }
+
+var machineGroupOutputVariablePrefix = "Vsts.MGName_";
 
 function throwAndLog(errorMessage: string) {
     tl.error(errorMessage);
