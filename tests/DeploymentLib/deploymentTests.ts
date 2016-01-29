@@ -4,6 +4,7 @@ import * as Deployment from "../../src/DeploymentLib/deployment";
 import MachineGroup = Deployment.MachineGroup;
 import Machine = Deployment.Machine;
 
+import assert = require("assert");
 import chai = require("chai");
 import mocha = require("mocha");
 import sinon = require("sinon");
@@ -63,8 +64,6 @@ describe("saveMachineGroup tests", (): void => {
     });
 
     it("should serialize and save MachineGroup as a task variable named as machine group's name", (): void => {
-        var machineGroupOutputVariablePrefix = "Vsts.MGName_";
-
         var machineGroup: MachineGroup = {
             Name: "dummyMachineGroupName",
             Machines: [
@@ -83,7 +82,9 @@ describe("saveMachineGroup tests", (): void => {
 
         Deployment.saveMachineGroup(machineGroup);
 
-        setVariableSpy.withArgs(machineGroupOutputVariablePrefix + machineGroup.Name, JSON.stringify(machineGroup)).should.have.been.calledOnce;
-        setVariableSpy.withArgs(machineGroup.Name, machineGroupOutputVariablePrefix + machineGroup.Name).should.have.been.calledOnce;
+        var machineGroupOutoutVariableName = tl.getVariable(machineGroup.Name);
+        var machineGroupOutputVariableJson = tl.getVariable(machineGroupOutoutVariableName);
+        var outputMahcineGroup = JSON.parse(machineGroupOutputVariableJson);
+        assert.deepEqual(machineGroup, outputMahcineGroup);
     });
 });
