@@ -26,10 +26,32 @@ export class VmOperations {
 
     public static getCmdArgsForAction(actionName: string): string {
         var cmdArgs = "";
-        var snapshotName  = null;
         switch (actionName) {
+            case "Deploy Virtual Machines using Template":
+                var template = tl.getInput("template", true);
+                var targetLocation = tl.getInput("targetlocation", true);
+                var computeType = tl.getInput("computeType", true);
+                var description = tl.getInput("description", false);
+                var computeName = null;
+                switch (computeType) {
+                    case "ESXi Host":
+                        computeName = tl.getInput("hostname", true);
+                        break;
+                    case "Cluster":
+                        computeName = tl.getInput("clustername", true);
+                        break;
+                    case "Resource Pool":
+                        computeName = tl.getInput("resourcepoolname", true);
+                        break;
+                    default:
+                        tl.error("Invalid compute type : " + computeType);
+                        tl.exit(1);
+                }
+                cmdArgs += " -clonetemplate \"" + template  + "\"" + " -targetlocaltion \"" + targetLocation + "\"" +
+                      " -computetype \"" + computeType + "\"" + " -computename \"" + computeName + "\"" + " -description \"" + description + "\"";
+                break;
             case "Take Snapshot of Virtual Machines":
-                snapshotName = tl.getInput("snapshotName", true);
+                var snapshotName = tl.getInput("snapshotName", true);
                 var snapshotVMMemory = "false";
                 var quiesceGuestFileSystem = "false";
                 var description: string = tl.getInput("description", false);
@@ -37,11 +59,11 @@ export class VmOperations {
                      snapshotVMMemory + " -quiesceGuestFileSystem " + quiesceGuestFileSystem + " -description \"" + description + "\"";
                 break;
             case "Revert Snapshot of Virtual Machines":
-                snapshotName  = tl.getInput("snapshotName", true);
+                var snapshotName  = tl.getInput("snapshotName", true);
                 cmdArgs += " -snapshotOps restore -snapshotName \"" + snapshotName  + "\"";
                 break;
             case "Delete Snapshot of Virtual Machines":
-                snapshotName  = tl.getInput("snapshotName", true);
+                var snapshotName  = tl.getInput("snapshotName", true);
                 cmdArgs += " -snapshotOps delete -snapshotName \"" + snapshotName  + "\"";
                 break;
             default:

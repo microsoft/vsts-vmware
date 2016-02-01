@@ -62,7 +62,7 @@
             "helpMarkDown": "Enter the name of the template to use for creating virtual machines."
         },
         {
-            "name": "location",
+            "name": "targetlocation",
             "type": "string",
             "label": "Location",
             "defaultValue": "",

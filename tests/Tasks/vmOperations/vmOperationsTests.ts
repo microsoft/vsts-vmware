@@ -113,7 +113,7 @@ describe("getCmdArgsForAction", (): void => {
         sandbox.restore();
     });
 
-    it("Should read snapshot name, snapshot vm memory, quiesce file system and description", (): void => {
+    it("Should read snapshot name, snapshot vm memory, quiesce file system and description for create snapshot", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
         getInputStub.withArgs("description", false).returns("Sample description");
 
@@ -148,7 +148,47 @@ describe("getCmdArgsForAction", (): void => {
         cmdArgs.should.contain("-snapshotOps delete -snapshotName \"dummySnapshotName\"");
     });
 
-    it("Should throw on failure to read snapshot name for restore/create/delete action", (): void => {
+    it("Should read template, localtion, computeType, hostname and description", (): void => {
+        getInputStub.withArgs("template", true).returns("dummyTemplate");
+        getInputStub.withArgs("targetlocation", true).returns("dummyLocation");
+        getInputStub.withArgs("computeType", true).returns("ESXi Host");
+        getInputStub.withArgs("hostname", true).returns("Dummy Host");
+        getInputStub.withArgs("description", false).returns("Dummy description");
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Deploy Virtual Machines using Template");
+
+        cmdArgs.should.contain("-clonetemplate \"dummyTemplate\" -targetlocaltion \"dummyLocation\" -computetype \"ESXi Host\" -computename \"Dummy Host\" -description \"Dummy description\"");
+    });
+
+    it("Should read cluster name if compute is cluster and read empty description", (): void => {
+        getInputStub.withArgs("computeType", true).returns("Cluster");
+        getInputStub.withArgs("clustername", true).returns("Dummy Cluster");
+        getInputStub.withArgs("description", false).returns("");
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Deploy Virtual Machines using Template");
+
+        cmdArgs.should.contain("-computetype \"Cluster\" -computename \"Dummy Cluster\" -description \"\"");
+    });
+
+    it("Should read resource pool name if compute is resource pool", (): void => {
+        getInputStub.withArgs("computeType", true).returns("Resource Pool");
+        getInputStub.withArgs("resourcepoolname", true).returns("Dummy Resource Pool");
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Deploy Virtual Machines using Template");
+
+        cmdArgs.should.contain("-computetype \"Resource Pool\" -computename \"Dummy Resource Pool\"");
+    });
+
+    it("Should log error and exit for invalid compute type", (): void => {
+        getInputStub.withArgs("computeType", true).returns("Invalid Compute");
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Deploy Virtual Machines using Template");
+
+        logErrorStub.should.have.been.calledOnce;
+        exitStub.withArgs(1).should.have.been.calledOnce;
+    });
+
+    it("Should throw on failure to read snapshot name for restore/create/delete snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 
         expect( (): void => {
