@@ -111,17 +111,17 @@ describe("saveMachineGroup tests", (): void => {
                        ["Italian"]: "Proprietà",
                        ["Japanese"]: "プロパティ",
                        ["Klignon (plqaD)"]: "",
-                       ["Korean"]: "속성",
-                       ["Latvian"]: "Īpašuma",
-                       ["Persian"]: "ملک",
-                       ["Polish"]: "Właściwość",
-                       ["Queretaro Otomi"]: "Ha̲i",
-                       ["Russian"]: "Недвижимость",
-                       ["Serbian"]: "Својство",
-                       ["Thai"]: "คุณสมบัติ",
-                       ["Turkish"]: "Özelliği",
-                       ["Urdu"]: "خاصیت",
-                       ["Vietnamese"]: "Bất động sản"
+                       ["속성"]: "Korean",
+                       ["Īpašuma"]: "Latvian",
+                       ["ملک"]: "Persian",
+                       ["Właściwość"]: "Polish",
+                       ["Ha̲i"]: "Queretaro Otomi",
+                       ["Недвижимость"]: "Russian",
+                       ["Својство"]: "Serbian",
+                       ["คุณสมบัติ"]: "Thai",
+                       ["Özelliği"]: "Turkish",
+                       ["خاصیت"]: "Urdu",
+                       ["Bất động sản"]: "Vietnamese"
                    }
                }
            ]
