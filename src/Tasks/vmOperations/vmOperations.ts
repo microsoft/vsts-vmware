@@ -91,7 +91,6 @@ export class VmOperations {
             });
     }
 
-
     private static validateVmListInput(vmList: any): void {
         var vms = vmList.split(",");
         vms.forEach(vm => {
