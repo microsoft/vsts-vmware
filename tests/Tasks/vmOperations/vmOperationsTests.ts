@@ -190,7 +190,6 @@ describe("runMain", (): void => {
         sandbox.restore();
     });
 
-    // var systemClassPath = getVariableStub.withArgs("classpath").returns("c:\Windows");
     var commonArgs = " -vCenterUrl \"http://localhost:8080\" -vCenterUserName \"dummydomain\\dummyuser\" -vCenterPassword \"  pas\\\" w,o ;d\" ";
     var cmdArgsForAction = " -snapshotOps restore -snapshotName \"dummysnapshot\"";
     var cmdArgs = "-jar vmOpsTool-1.0.jar" + cmdArgsForAction + commonArgs;
