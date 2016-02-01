@@ -16,9 +16,15 @@ describe("saveMachineGroup tests", (): void => {
     var sandbox;
     var logErrorSpy;
 
-    function AssertThrowsAndLogs(call: Function, errorMessage: string): void {
+    function assertThrowsAndLogs(call: Function, errorMessage: string): void {
         expect(call).to.throw(errorMessage);
         logErrorSpy.withArgs(errorMessage).should.have.been.calledOnce;
+    }
+
+    function getMachineGroup(machineGroupName: string): MachineGroup {
+        var machineGroupOutoutVariableName = tl.getVariable(machineGroupName);
+        var machineGroupOutputVariableJson = tl.getVariable(machineGroupOutoutVariableName);
+        return JSON.parse(machineGroupOutputVariableJson);
     }
 
     beforeEach((): void => {
@@ -42,12 +48,12 @@ describe("saveMachineGroup tests", (): void => {
     });
 
     it("should log and throw if machineGroup is null", (): void => {
-        AssertThrowsAndLogs(() => Deployment.saveMachineGroup(null), "Invalid machine group");
+        assertThrowsAndLogs(() => Deployment.saveMachineGroup(null), "Invalid machine group");
     });
 
     it("should log and throw if name of the machine group is not set", (): void => {
         var machineGroup = new MachineGroup();
-        AssertThrowsAndLogs(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
+        assertThrowsAndLogs(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
     });
 
     it("should log and throw if name of the machine group is null or empty or whitepsace", (): void => {
@@ -57,7 +63,7 @@ describe("saveMachineGroup tests", (): void => {
             machineGroup.Name = invalidName;
 
             sandbox.reset();
-            AssertThrowsAndLogs(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
+            assertThrowsAndLogs(() => Deployment.saveMachineGroup(machineGroup), "Invalid machine group name");
         });
     });
 
@@ -80,9 +86,50 @@ describe("saveMachineGroup tests", (): void => {
 
         Deployment.saveMachineGroup(machineGroup);
 
-        var machineGroupOutoutVariableName = tl.getVariable(machineGroup.Name);
-        var machineGroupOutputVariableJson = tl.getVariable(machineGroupOutoutVariableName);
-        var outputMahcineGroup = JSON.parse(machineGroupOutputVariableJson);
+        var outputMahcineGroup = getMachineGroup(machineGroup.Name);
         assert.deepEqual(machineGroup, outputMahcineGroup);
+    });
+
+    it("should work with localized characters", (): void => {
+       var machineGroup: MachineGroup = {
+           Name: "مجموعة آلة",
+           Machines: [
+               {
+                   Name: "機器",
+                   UserName: "Μηχάνημα",
+                   Password: "מכונת",
+                   Properties: {
+                       ["Arabic"]: "الملكية",
+                       ["Bulgarian"]: "Собственост",
+                       ["Chinese Simplified"]: "属性",
+                       ["Chinese Traditional"]: "屬性",
+                       ["English"]: "Property",
+                       ["French"]: "Propriété",
+                       ["Greek"]: "Το κατάλυμα",
+                       ["Hebrew"]: "המאפיין",
+                       ["Hindi"]: "संपत्ति",
+                       ["Italian"]: "Proprietà",
+                       ["Japanese"]: "プロパティ",
+                       ["Klignon (plqaD)"]: "",
+                       ["Korean"]: "속성",
+                       ["Latvian"]: "Īpašuma",
+                       ["Persian"]: "ملک",
+                       ["Polish"]: "Właściwość",
+                       ["Queretaro Otomi"]: "Ha̲i",
+                       ["Russian"]: "Недвижимость",
+                       ["Serbian"]: "Својство",
+                       ["Thai"]: "คุณสมบัติ",
+                       ["Turkish"]: "Özelliği",
+                       ["Urdu"]: "خاصیت",
+                       ["Vietnamese"]: "Bất động sản"
+                   }
+               }
+           ]
+       };
+
+       Deployment.saveMachineGroup(machineGroup);
+
+       var outputMahcineGroup = getMachineGroup(machineGroup.Name);
+       assert.deepEqual(machineGroup, outputMahcineGroup);
     });
 });
