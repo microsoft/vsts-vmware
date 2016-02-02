@@ -71,10 +71,7 @@
                         "type": "ms.vss-endpoint.endpoint-auth-scheme-basic"
                     }
                 ],
-                "helpLink": {
-                    "text": "Learn More",
-                    "url": "http://aka.ms/vmwareconnection"
-                }
+                "helpMarkDown": "<a href=\"http://aka.ms/vmwareconnection\" target=\"_blank\"><b>Learn More</b></a>"
             }
         },
         {
