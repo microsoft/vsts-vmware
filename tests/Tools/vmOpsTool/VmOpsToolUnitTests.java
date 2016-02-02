@@ -2,6 +2,7 @@
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,7 @@ public class VmOpsToolUnitTests {
 
     @Test
     public void parseCmdArgsWithAllRequiredInputs() {
-        String[] cmdArgs = { Constants.vmOpsTool, Constants.vCenterUrl, vCenterUrl };
+        String[] cmdArgs = {Constants.vmOpsTool, Constants.vCenterUrl, vCenterUrl};
 
         Map<String, String> argsMap = VmOpsTool.parseCmdLine(cmdArgs);
 
@@ -32,7 +33,7 @@ public class VmOpsToolUnitTests {
 
     @Test
     public void parseCmdArgsWithEmptyDescription() {
-        String[] cmdArgs = { Constants.vmOpsTool, Constants.description, "" };
+        String[] cmdArgs = {Constants.vmOpsTool, Constants.description, ""};
 
         Map<String, String> argsMap = VmOpsTool.parseCmdLine(cmdArgs);
 
@@ -40,6 +41,34 @@ public class VmOpsToolUnitTests {
         assertThat(argsMap.containsKey(Constants.vmOpsTool)).isEqualTo(false);
         assertThat(argsMap.containsKey(Constants.description)).isEqualTo(true);
         assertThat(argsMap.get(Constants.description)).isEqualTo("");
+    }
+
+    @Test
+    public void executeActionShouldSucceedForCloneVMActionWithValidInputs() throws Exception {
+        String[] cmdArgs = getCmdArgs("newVM1, newVM2", Constants.cloneTemplate, "dummyTemplate", Constants.targetLocation,
+                "dummyLocation", Constants.computeType, "DummyCompute", Constants.computeName, "DummyName", Constants.description, "Dummy description");
+
+        vmOpsTool.executeAction(cmdArgs);
+
+        assertThat(vmWareImpl.vmExists("newVM1", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.vmExists("newVM2", connData)).isEqualTo(true);
+    }
+
+    @Test
+    public void executeActionShouldThrowForCloneVMFailureOnAVM() throws Exception {
+        String[] cmdArgs = getCmdArgs("newVM1, newVM3", Constants.cloneTemplate, "dummyTemplate", Constants.targetLocation,
+                "dummyLocation", Constants.computeType, "DummyCompute", Constants.computeName, "DummyName", Constants.description, "Dummy description");
+
+        Exception exp = null;
+
+        try {
+            vmOpsTool.executeAction(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+
+        assertThat(exp).isNotNull();
+        assertThat(vmWareImpl.vmExists("newVM1", connData)).isEqualTo(true);
     }
 
     @Test
@@ -153,7 +182,7 @@ public class VmOpsToolUnitTests {
 
     @Test
     public void executeActionShouldThrowIfRequiredInputIsNotPresent() {
-        String[] cmdArgs = new String[] { Constants.vmOpsTool };
+        String[] cmdArgs = new String[]{Constants.vmOpsTool};
         Exception exp = null;
 
         try {
@@ -166,7 +195,7 @@ public class VmOpsToolUnitTests {
     }
 
     private String[] getCmdArgs(String vmList, String... vaArgs) {
-        List<String> cmdArgs = new ArrayList<String>();
+        List<String> cmdArgs = new ArrayList<>();
 
         cmdArgs.add(Constants.vmOpsTool);
         cmdArgs.add(Constants.vCenterUrl);
@@ -178,9 +207,7 @@ public class VmOpsToolUnitTests {
         cmdArgs.add(Constants.vmList);
         cmdArgs.add(vmList);
 
-        for (String arg : vaArgs) {
-            cmdArgs.add(arg);
-        }
+        Collections.addAll(cmdArgs, vaArgs);
 
         return cmdArgs.toArray(new String[cmdArgs.size()]);
 

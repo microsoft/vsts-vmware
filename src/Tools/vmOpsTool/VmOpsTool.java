@@ -13,18 +13,16 @@ public class VmOpsTool {
         try {
             new VmOpsTool(new VMWareImpl()).executeAction(args);
         } catch (Exception exp) {
-            System.err.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occured");
+            System.err.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred");
             System.exit(1);
         }
     }
 
     /**
      * parse the command line arguments and performs the vm operation
-     * 
-     * @param args
-     *            command line arguments
-     * @throws Exception
-     *             on failure
+     *
+     * @param args command line arguments
+     * @throws Exception on failure
      */
     public void executeAction(String[] args) throws Exception {
 
@@ -36,61 +34,88 @@ public class VmOpsTool {
         String vmList = argsMap.get(Constants.vmList);
 
         ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword);
+        String[] vmNames = vmList.split(",");
+        String failedVmList = "";
+        String errorMessage = "";
 
-        if (argsMap.containsKey(Constants.snapshotOps)) {
-            String actionName = argsMap.get(Constants.snapshotOps);
-            String snapshotName = argsMap.get(Constants.snapshotName);
+        for (String vmName : vmNames) {
+            vmName = vmName.trim();
 
-            String[] vmNames = vmList.split(",");
-            String failedVmList = "";
-            for (String vmName : vmNames) {
-                vmName = vmName.trim();
-                try {
-                    switch (actionName) {
-                        case Constants.restoreSnapshotAction:
-                            vmWareImpl.restoreSnapshot(vmName, snapshotName, connData);
-                            break;
-                        case Constants.createSnapshotAction:
-                            String description = argsMap.get(Constants.description);
-                            boolean saveVmMemory = Boolean.parseBoolean(argsMap.get(Constants.saveVmMemory));
-                            boolean quiesceVmFs = Boolean.parseBoolean(argsMap.get(Constants.quiesceVmFs));
+            if (argsMap.containsKey(Constants.snapshotOps)) {
 
-                            vmWareImpl.createSnapshot(vmName, snapshotName, saveVmMemory, quiesceVmFs, description,
-                                    connData);
-                            break;
-                        case Constants.deleteSnapshotAction:
-                            vmWareImpl.deleteSnapshot(vmName, snapshotName, connData);
-                            break;
-                        default:
-                            System.out.printf(
-                                    "##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]\n",
-                                    Constants.taskId);
-                            throw new Exception("Invalid action name ( " + actionName + " ) for snapshot operation");
-                    }
-                } catch (Exception exp) {
-                    System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occured.");
-                    failedVmList += vmName + " ";
-                }
+                String actionName = argsMap.get(Constants.snapshotOps);
+                String snapshotName = argsMap.get(Constants.snapshotName);
+                errorMessage = String.format("Failed to [%s] snapshot [%s] on virtual machines ", actionName, snapshotName);
+                failedVmList += executeSnapshotAction(argsMap, vmName, snapshotName, actionName, connData);
+
+            } else if (argsMap.containsKey(Constants.cloneTemplate)) {
+                errorMessage = "Create vm from template operation failed for virtual machines ";
+                failedVmList += executeCloneVmAction(argsMap, vmName, connData);
+            } else {
+                System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]\n",
+                        Constants.taskId);
+                throw new Exception("Invalid action input for the operation.");
             }
-
-            if (!failedVmList.isEmpty()) {
-                throw new Exception(String.format("Failed to [%s] snapshot [%s] on virtual machines [%s].", actionName,
-                        snapshotName, failedVmList));
-            }
-        } else {
-            System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]\n",
-                    Constants.taskId);
-            throw new Exception("Invalid action input for the operation.");
         }
+
+        if (!failedVmList.isEmpty()) {
+            throw new Exception(String.format("[%s] [%s].", errorMessage, failedVmList));
+        }
+    }
+
+    private String executeCloneVmAction(Map<String, String> argsMap, String vmName, ConnectionData connData) {
+        String failedVm = "";
+        String targetLocation = argsMap.get(Constants.targetLocation);
+        String computeType = argsMap.get(Constants.computeType);
+        String computeName = argsMap.get(Constants.computeName);
+        String description = argsMap.get(Constants.description);
+
+        try {
+            vmWareImpl.cloneVMFromTemplate(vmName, targetLocation, computeType, computeName, description, connData);
+        } catch (Exception exp) {
+            System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred.");
+            failedVm += vmName + " ";
+        }
+        return failedVm;
+    }
+
+    private String executeSnapshotAction(Map<String, String> argsMap, String vmName, String snapshotName, String actionName, ConnectionData connData) {
+        String failedVm = "";
+        try {
+            switch (actionName) {
+                case Constants.restoreSnapshotAction:
+                    vmWareImpl.restoreSnapshot(vmName, snapshotName, connData);
+                    break;
+                case Constants.createSnapshotAction:
+                    String description = argsMap.get(Constants.description);
+                    boolean saveVmMemory = Boolean.parseBoolean(argsMap.get(Constants.saveVmMemory));
+                    boolean quiesceVmFs = Boolean.parseBoolean(argsMap.get(Constants.quiesceVmFs));
+
+                    vmWareImpl.createSnapshot(vmName, snapshotName, saveVmMemory, quiesceVmFs, description,
+                            connData);
+                    break;
+                case Constants.deleteSnapshotAction:
+                    vmWareImpl.deleteSnapshot(vmName, snapshotName, connData);
+                    break;
+                default:
+                    System.out.printf(
+                            "##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]\n",
+                            Constants.taskId);
+                    throw new Exception("Invalid action name ( " + actionName + " ) for snapshot operation");
+            }
+        } catch (Exception exp) {
+            System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred.");
+            failedVm += vmName + " ";
+        }
+        return failedVm;
     }
 
     /**
      * Duplicate keys, key missing, value missing all those cases we are not
      * expecting as the command construction is done by type script layer. Hence
      * parse logic is not handling any of these cases
-     * 
-     * @param cmdArgs
-     *            array of input command line options
+     *
+     * @param cmdArgs array of input command line options
      * @return map of key value pairs of input parameters
      */
     public static Map<String, String> parseCmdLine(String[] cmdArgs) {
@@ -102,7 +127,7 @@ public class VmOpsTool {
         for (String arg : cmdArgs) {
             if (!arg.equals("") && arg.charAt(0) == '-') {
                 key = arg;
-            } else if (!arg.equals(Constants.vmOpsTool)){
+            } else if (!arg.equals(Constants.vmOpsTool)) {
                 value = arg;
                 argsMap.put(key, value);
             }

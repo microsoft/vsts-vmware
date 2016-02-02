@@ -1,8 +1,4 @@
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.xml.ws.BindingProvider;
 
@@ -63,8 +59,16 @@ public class VMWareImpl implements IVMWare {
         return true;
     }
 
+    public boolean vmExists(String vmName, ConnectionData connData) throws Exception {
+        return false;
+    }
+
+    public void cloneVMFromTemplate(String vmName, String targetLocation, String computeType, String computeName, String description, ConnectionData connData) throws Exception {
+
+    }
+
     public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
-            String description, ConnectionData connData) throws Exception {
+                               String description, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Creating snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
         ManagedObjectReference vmMor = getVMMorByName(vmName);
@@ -77,7 +81,6 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to create snapshot [%s] on virtual machine [%s].\n", snapshotName, vmName));
         }
-        return;
     }
 
     public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
@@ -94,7 +97,6 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to revert snapshot [%s] on virtual machine [%s].\n", snapshotName, vmName));
         }
-        return;
     }
 
     public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
@@ -110,7 +112,6 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to delete snapshot [%s] on virtual machine [%s].\n", snapshotName, vmName));
         }
-        return;
     }
 
     private ManagedObjectReference getVMMorByName(String vmName) throws Exception {
@@ -129,8 +130,8 @@ public class VMWareImpl implements IVMWare {
         boolean retVal = false;
 
         System.out.println("Waiting for operation completion.");
-        Object[] result = waitForTaskResult(task, new String[] { "info.state", "info.error" }, new String[] { "state" },
-                new Object[][] { new Object[] { TaskInfoState.SUCCESS, TaskInfoState.ERROR } });
+        Object[] result = waitForTaskResult(task, new String[]{"info.state", "info.error"}, new String[]{"state"},
+                new Object[][]{new Object[]{TaskInfoState.SUCCESS, TaskInfoState.ERROR}});
 
         if (result[0].equals(TaskInfoState.SUCCESS)) {
             retVal = true;
@@ -140,7 +141,7 @@ public class VMWareImpl implements IVMWare {
     }
 
     private Object[] waitForTaskResult(ManagedObjectReference taskMor, String[] filterProps, String[] endWaitProps,
-            Object[][] expectedVals) throws Exception {
+                                       Object[][] expectedVals) throws Exception {
         try {
 
             Object[] endVals = new Object[endWaitProps.length];
@@ -177,11 +178,11 @@ public class VMWareImpl implements IVMWare {
                     }
                 }
 
-                Object expectedVal = null;
+                Object expectedVal;
                 for (int chgi = 0; chgi < endVals.length && !reached; ++chgi) {
                     for (int vali = 0; vali < expectedVals[chgi].length && !reached; ++vali) {
                         expectedVal = expectedVals[chgi][vali];
-                        reached = expectedVal.equals(endVals[chgi]) || reached;
+                        reached = expectedVal.equals(endVals[chgi]);
                     }
                 }
             }
@@ -207,11 +208,11 @@ public class VMWareImpl implements IVMWare {
     }
 
     private ManagedObjectReference getSnapshotReference(ManagedObjectReference vmMor, String vmName,
-            String snapshotName) throws Exception {
+                                                        String snapshotName) throws Exception {
         System.out.printf("Querying snapshot information for virtual machine (%s).\n", vmName);
         VirtualMachineSnapshotInfo vmSnapshotInfo = (VirtualMachineSnapshotInfo) getMorProperties(vmMor,
-                new String[] { snapshot }).get(snapshot);
-        ManagedObjectReference snapshotMor = null;
+                new String[]{snapshot}).get(snapshot);
+        ManagedObjectReference snapshotMor;
         String snapshotNotFoundErr = "No snapshot found on virtual machine (" + vmName + ") with name " + snapshotName;
 
         if (vmSnapshotInfo != null) {
@@ -234,7 +235,7 @@ public class VMWareImpl implements IVMWare {
     private String getCurrentSnapshotName(ManagedObjectReference vmMor, String vmName) throws Exception {
         System.out.printf("Querying snapshot information for virtual machine (%s).\n", vmName);
         VirtualMachineSnapshotInfo vmSnapshotInfo = (VirtualMachineSnapshotInfo) getMorProperties(vmMor,
-                new String[] { snapshot }).get(snapshot);
+                new String[]{snapshot}).get(snapshot);
         String currentSnapshotName = "";
 
         if (vmSnapshotInfo != null) {
@@ -249,7 +250,7 @@ public class VMWareImpl implements IVMWare {
     }
 
     private String getCurrentSnapshotNameFromTree(List<VirtualMachineSnapshotTree> vmRootSnapshotList,
-            ManagedObjectReference currentSnapshotMor) {
+                                                  ManagedObjectReference currentSnapshotMor) {
         String currentSnapshot = "";
 
         for (VirtualMachineSnapshotTree vmSnapshot : vmRootSnapshotList) {
@@ -267,7 +268,7 @@ public class VMWareImpl implements IVMWare {
     }
 
     private ManagedObjectReference findSnapshotInTree(List<VirtualMachineSnapshotTree> vmSnapshotList,
-            String snapshotName) {
+                                                      String snapshotName) {
         ManagedObjectReference snapshotMor = null;
 
         for (VirtualMachineSnapshotTree vmSnapshot : vmSnapshotList) {
@@ -285,16 +286,16 @@ public class VMWareImpl implements IVMWare {
 
     private Map<String, Object> getMorProperties(ManagedObjectReference vmMor, String[] propList) throws Exception {
         PropertyFilterSpec propFilterSpec = createPropFilterSpecForObject(vmMor, propList);
-        RetrieveResult results = null;
+        RetrieveResult results;
         try {
-            results = vimPort.retrievePropertiesEx(serviceContent.getPropertyCollector(), Arrays.asList(propFilterSpec),
+            results = vimPort.retrievePropertiesEx(serviceContent.getPropertyCollector(), Collections.singletonList(propFilterSpec),
                     new RetrieveOptions());
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=PREREQ_RetriveObjectPropertiesFailed;TaskId=%s;]\n",
                     Constants.taskId);
             throw new Exception("Failed to properties for managed object : " + exp.getMessage());
         }
-        final Map<String, Object> propMap = new HashMap<String, Object>();
+        final Map<String, Object> propMap = new HashMap<>();
         if (results != null) {
             for (ObjectContent objContent : results.getObjects()) {
                 List<DynamicProperty> properties = objContent.getPropSet();
@@ -323,16 +324,16 @@ public class VMWareImpl implements IVMWare {
     }
 
     private Map<String, ManagedObjectReference> getObjectsInContainerByType(ManagedObjectReference container,
-            String morefType) throws Exception {
+                                                                            String morefType) throws Exception {
         PropertyFilterSpec propertyFilterSpecs = createRecursiveFilterSpec(container, morefType,
-                new String[] { config });
+                new String[]{config});
 
         try {
             System.out.printf("Querying %s objects on vCenter server.\n", morefType);
             RetrieveResult results = vimPort.retrievePropertiesEx(serviceContent.getPropertyCollector(),
-                    Arrays.asList(propertyFilterSpecs), new RetrieveOptions());
-            String token = null;
-            final Map<String, ManagedObjectReference> morMap = new HashMap<String, ManagedObjectReference>();
+                    Collections.singletonList(propertyFilterSpecs), new RetrieveOptions());
+            String token;
+            final Map<String, ManagedObjectReference> morMap = new HashMap<>();
             token = createMap(results, morMap);
 
             while (token != null && !token.isEmpty()) {
@@ -349,7 +350,7 @@ public class VMWareImpl implements IVMWare {
 
     private String createMap(final RetrieveResult results, final Map<String, ManagedObjectReference> morMap) {
         String token = null;
-        VirtualMachineConfigInfo vmConfig = null;
+        VirtualMachineConfigInfo vmConfig;
 
         if (results != null) {
             token = results.getToken();
@@ -365,11 +366,11 @@ public class VMWareImpl implements IVMWare {
     }
 
     private PropertyFilterSpec createRecursiveFilterSpec(ManagedObjectReference container, String morefType,
-            String[] filterProps) throws Exception {
+                                                         String[] filterProps) throws Exception {
         try {
             ManagedObjectReference viewManager = serviceContent.getViewManager();
             ManagedObjectReference containerView = vimPort.createContainerView(viewManager, container,
-                    Arrays.asList(morefType), true);
+                    Collections.singletonList(morefType), true);
 
             // Create property specification to specify list properties to
             // extract from given object type
@@ -415,7 +416,7 @@ public class VMWareImpl implements IVMWare {
                 vimPort = vimService.getVimPort();
 
                 Map<String, Object> reqContext = ((BindingProvider) vimPort).getRequestContext();
-                reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, connData.url.toString());
+                reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, connData.url);
                 reqContext.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
                 ManagedObjectReference serviceInstance = new ManagedObjectReference();
                 serviceInstance.setType("ServiceInstance");
@@ -432,7 +433,6 @@ public class VMWareImpl implements IVMWare {
             throw new Exception("Failed to connect: " + exp.getMessage());
         }
         System.out.println("Successfully established session with vCenter server.");
-        return;
     }
 
     private boolean isSessionActive() {

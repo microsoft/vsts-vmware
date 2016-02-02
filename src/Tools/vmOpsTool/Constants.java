@@ -7,6 +7,10 @@ public class Constants {
     public static final String vCenterPassword = "-vCenterPassword";
     public static final String vmList = "-vmList";
     public static final String snapshotOps = "-snapshotOps";
+    public static final String cloneTemplate = "-clonetemplate";
+    public static final String targetLocation = "-targetlocaltion";
+    public static final String computeType = "-computetype";
+    public static final String computeName = "-computename";
     public static final String snapshotName = "-snapshotName";
     public static final String restoreSnapshotAction = "restore";
     public static final String createSnapshotAction = "create";
@@ -17,4 +21,5 @@ public class Constants {
     public static final String deleteSnapshotAction = "delete";
 
     public static final String taskId = "735d144e-55fe-44d6-b687-db9031b6e70b";
+
 }
