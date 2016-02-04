@@ -68,7 +68,7 @@
             "defaultValue": "",
             "required": true,
             "visibleRule": "action = Deploy Virtual Machines using Template",
-            "helpMarkDown": "Enter a datacenter or VM folder name to create the new virtual machine in."
+            "helpMarkDown": "Enter a datacenter name to create the new virtual machine in."
         },
         {
             "name": "computeType",
@@ -110,6 +110,15 @@
             "required": true,
             "visibleRule": "computeType = Resource Pool",
             "helpMarkDown": "Name of the resource pool to run the Virtual Machines."
+        },
+        {
+            "name": "datastore",
+            "type": "string",
+            "label": "Datastore",
+            "defaultValue": "",
+            "required": true,
+            "visibleRule": "action = Deploy Virtual Machines using Template",
+            "helpMarkDown": "Enter a datastore name in which store the configuration and disk files."
         },
         {
             "name": "snapshotName",

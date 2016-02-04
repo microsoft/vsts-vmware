@@ -31,6 +31,7 @@ export class VmOperations {
                 var template = tl.getInput("template", true);
                 var targetLocation = tl.getInput("targetlocation", true);
                 var computeType = tl.getInput("computeType", true);
+                var datastore = tl.getInput("datastore", true);
                 var description = tl.getInput("description", false);
                 var computeName = null;
                 switch (computeType) {
@@ -48,7 +49,8 @@ export class VmOperations {
                         tl.exit(1);
                 }
                 cmdArgs += " -clonetemplate \"" + template  + "\"" + " -targetlocaltion \"" + targetLocation + "\"" +
-                      " -computetype \"" + computeType + "\"" + " -computename \"" + computeName + "\"" + " -description \"" + description + "\"";
+                      " -computetype \"" + computeType + "\"" + " -computename \"" + computeName + "\"" + " -datastore \"" +
+                      datastore + "\"" + " -description \"" + description + "\"";
                 break;
             case "Take Snapshot of Virtual Machines":
                 var snapshotName = tl.getInput("snapshotName", true);

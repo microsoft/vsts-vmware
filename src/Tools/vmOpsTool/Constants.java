@@ -11,6 +11,7 @@ public class Constants {
     public static final String targetLocation = "-targetlocaltion";
     public static final String computeType = "-computetype";
     public static final String computeName = "-computename";
+    public static final String datastore = "-datastore";
     public static final String snapshotName = "-snapshotName";
     public static final String restoreSnapshotAction = "restore";
     public static final String createSnapshotAction = "create";
