@@ -66,7 +66,14 @@ public interface IVMWare {
      * @param connData       connection information for vCenter
      * @throws Exception
      */
-    void cloneVMFromTemplate(String vmName, String targetLocation, String computeType, String computeName, String description, ConnectionData connData) throws Exception;
+    void cloneVMFromTemplate(String templateName, String vmName, String targetLocation, String computeType, String computeName, String datastore, String description, ConnectionData connData) throws Exception;
+
+    /**
+     * @param vmName   name of the virtual machine
+     * @param connData vCenter connection information
+     * @throws Exception
+     */
+    void deleteVM(String vmName, ConnectionData connData) throws Exception;
 
     /**
      * @param connData for connecting to vCenter Server

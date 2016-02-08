@@ -63,15 +63,23 @@ public class VmOpsTool {
         }
     }
 
+    /**
+     * @param argsMap  map of command line arguments
+     * @param vmName   name of the virtual machine
+     * @param connData vCenter connection information
+     * @return vmName if operation fails
+     */
     private String executeCloneVmAction(Map<String, String> argsMap, String vmName, ConnectionData connData) {
         String failedVm = "";
+        String templateName = argsMap.get(Constants.cloneTemplate);
         String targetLocation = argsMap.get(Constants.targetLocation);
         String computeType = argsMap.get(Constants.computeType);
         String computeName = argsMap.get(Constants.computeName);
+        String datastore = argsMap.get(Constants.computeName);
         String description = argsMap.get(Constants.description);
 
         try {
-            vmWareImpl.cloneVMFromTemplate(vmName, targetLocation, computeType, computeName, description, connData);
+            vmWareImpl.cloneVMFromTemplate(templateName, vmName, targetLocation, computeType, computeName, datastore, description, connData);
         } catch (Exception exp) {
             System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred.");
             failedVm += vmName + " ";
@@ -79,6 +87,14 @@ public class VmOpsTool {
         return failedVm;
     }
 
+    /**
+     * @param argsMap      map of command line arguments
+     * @param vmName       name of the virtual machine
+     * @param snapshotName name of the virtual machine snapshot
+     * @param actionName   type of snapshot action
+     * @param connData     vCenter connection information
+     * @return vmName if operation fails
+     */
     private String executeSnapshotAction(Map<String, String> argsMap, String vmName, String snapshotName, String actionName, ConnectionData connData) {
         String failedVm = "";
         try {
