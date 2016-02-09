@@ -2,6 +2,8 @@
 
 Connect to a VMWare vCenter server, and easily provision VMs, and perform actions on them like snapshot, revert snapshot, start, stop, delete etc. In this release, the action for reverting to snapshots on virtual machines is available and other actions will be released in the subsequent updates of the extension.
 
+VMware, vCenter Server, and vSphere are registered trademarks or trademarks of VMware, Inc. in the United States and/or other jurisdictions.
+
 **Usage**
 
 The extension installs the following components:
@@ -48,3 +50,6 @@ The extension uses the vSphere SDK to call VMware API functions to access vSpher
  6. Snapshot Name: Enter the name of the snapshot that will be applied to the VMs. Note that the snapshot should exist for the VM, else the task will error out.
 
  ![Task](Images/Task.png)
+ 
+ 
+ 
