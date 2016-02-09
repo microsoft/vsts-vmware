@@ -50,6 +50,3 @@ The extension uses the vSphere SDK to call VMware API functions to access vSpher
  6. Snapshot Name: Enter the name of the snapshot that will be applied to the VMs. Note that the snapshot should exist for the VM, else the task will error out.
 
  ![Task](Images/Task.png)
- 
- 
- 

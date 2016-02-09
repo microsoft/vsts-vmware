@@ -72,7 +72,7 @@ public class VmOpsTool {
             vmWareImpl.deleteVM(vmName, connData);
         } catch (Exception exp) {
             System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred.");
-            failedVm += vmName + " ";
+            failedVm = vmName + " ";
         }
         return failedVm;
     }
@@ -96,7 +96,7 @@ public class VmOpsTool {
             vmWareImpl.cloneVMFromTemplate(templateName, vmName, targetLocation, computeType, computeName, datastore, description, connData);
         } catch (Exception exp) {
             System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred.");
-            failedVm += vmName + " ";
+            failedVm = vmName + " ";
         }
         return failedVm;
     }
@@ -135,7 +135,7 @@ public class VmOpsTool {
             }
         } catch (Exception exp) {
             System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred.");
-            failedVm += vmName + " ";
+            failedVm = vmName + " ";
         }
         return failedVm;
     }
