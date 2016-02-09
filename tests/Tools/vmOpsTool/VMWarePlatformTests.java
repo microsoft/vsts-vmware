@@ -9,7 +9,7 @@ public abstract class VMWarePlatformTests {
     private ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword);
     private IVMWare vmWareImpl = getVmWareImpl();
     private String snapshotOne = "Snapshot1";
-    private String templateName = "UbuntuVM";
+    private String templateName = "Ubuntu";
     private String snapshotTwo = "Snapshot2";
 
     public abstract IVMWare getVmWareImpl();

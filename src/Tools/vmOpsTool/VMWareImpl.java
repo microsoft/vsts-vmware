@@ -12,10 +12,10 @@ public class VMWareImpl implements IVMWare {
     private final String hostSystem = "HostSystem";
     private final String clusterComputeResource = "ClusterComputeResource";
     private final String resourcePool = "ResourcePool";
+    private final String datastore = "Datastore";
 
     // vCenter Managed Object properties
     private final String vmFolder = "vmFolder";
-    private final String datastore = "datastore";
     private final String parent = "parent";
     private final String resourcepoolProp = "resourcePool";
     private final String snapshot = "snapshot";
@@ -32,14 +32,14 @@ public class VMWareImpl implements IVMWare {
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.println("Getting current snapshot name for virtual machine [ " + vmName + " ].");
-        ManagedObjectReference vmMor = getMorByName(vmName, virtualMachine, false);
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, virtualMachine, false);
         return getCurrentSnapshotName(vmMor, vmName);
     }
 
     public boolean snapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Finding snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getMorByName(vmName, virtualMachine, false);
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, virtualMachine, false);
         try {
             getSnapshotReference(vmMor, vmName, snapshotName);
         } catch (Exception exp) {
@@ -53,7 +53,7 @@ public class VMWareImpl implements IVMWare {
         connect(connData);
         System.out.printf("Finding virtual machine (%s) on vCenter server.\n", vmName);
         try {
-            getMorByName(vmName, virtualMachine, false);
+            getMorByName(rootFolder, vmName, virtualMachine, false);
         } catch (Exception exp) {
             System.out.println(exp.getMessage());
             return false;
@@ -63,7 +63,7 @@ public class VMWareImpl implements IVMWare {
 
     public void deleteVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
-        ManagedObjectReference vmMor = getMorByName(vmName, virtualMachine, false);
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, virtualMachine, false);
         ManagedObjectReference task = vimPort.destroyTask(vmMor);
 
         if (waitAndGetTaskResult(task)) {
@@ -78,12 +78,12 @@ public class VMWareImpl implements IVMWare {
         connect(connData);
 
         System.out.printf("Finding template [%s] on vCenter server.\n", templateName);
-        ManagedObjectReference templateMor = getMorByName(templateName, virtualMachine, true);
+        ManagedObjectReference templateMor = getMorByName(rootFolder, templateName, virtualMachine, true);
 
         System.out.printf("Searching for datacenter with name [%s].\n", targetLocation);
-        ManagedObjectReference targetDC = getMorByName(targetLocation, dataCenter, false);
+        ManagedObjectReference targetDC = getMorByName(rootFolder, targetLocation, dataCenter, false);
         ManagedObjectReference targetVmFolder = (ManagedObjectReference) getMorProperties(targetDC, new String[]{vmFolder}).get(vmFolder);
-        ManagedObjectReference targetDS = (ManagedObjectReference) getMorProperties(targetDC, new String[]{datastore}).get(newDatastore);
+        ManagedObjectReference targetDS = getMorByName(targetDC, newDatastore, datastore, false);
 
         VirtualMachineCloneSpec cloneSpec = getVirtualMachineCloneSpec(computeType, computeName, targetDS);
 
@@ -102,7 +102,7 @@ public class VMWareImpl implements IVMWare {
                                String description, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Creating snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getMorByName(vmName, virtualMachine, false);
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, virtualMachine, false);
         ManagedObjectReference task = vimPort.createSnapshotTask(vmMor, snapshotName, description, saveVMMemory,
                 quiesceFs);
 
@@ -117,7 +117,7 @@ public class VMWareImpl implements IVMWare {
     public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Restoring snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getMorByName(vmName, virtualMachine, false);
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, virtualMachine, false);
         ManagedObjectReference cpMor = getSnapshotReference(vmMor, vmName, snapshotName);
         ManagedObjectReference task = vimPort.revertToSnapshotTask(cpMor, null, true);
 
@@ -133,7 +133,7 @@ public class VMWareImpl implements IVMWare {
     public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Deleting snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getMorByName(vmName, virtualMachine, false);
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, virtualMachine, false);
         ManagedObjectReference cpMor = getSnapshotReference(vmMor, vmName, snapshotName);
         ManagedObjectReference task = vimPort.removeSnapshotTask(cpMor, false, true);
 
@@ -145,8 +145,8 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    private ManagedObjectReference getMorByName(String mobName, String morefType, boolean isTemplate) throws Exception {
-        Map<String, ManagedObjectReference> mobrMap = getObjectsInContainerByType(rootFolder, morefType, isTemplate);
+    private ManagedObjectReference getMorByName(ManagedObjectReference rootContainer, String mobName, String morefType, boolean isTemplate) throws Exception {
+        Map<String, ManagedObjectReference> mobrMap = getObjectsInContainerByType(rootContainer, morefType, isTemplate);
 
         if (!mobrMap.containsKey(mobName.toLowerCase())) {
             System.out.printf("##vso[task.logissue type=error;code=USERINPUT_ObjectNotFound;TaskId=%s;]\n",
@@ -462,17 +462,17 @@ public class VMWareImpl implements IVMWare {
         ManagedObjectReference targetResourcePool;
         switch (computeType) {
             case "ESXi Host":
-                ManagedObjectReference targetHost = getMorByName(computeName, hostSystem, false);
+                ManagedObjectReference targetHost = getMorByName(rootFolder, computeName, hostSystem, false);
                 targetCluster = (ManagedObjectReference) getMorProperties(targetHost, new String[]{parent}).get(parent);
                 targetResourcePool = (ManagedObjectReference) getMorProperties(targetCluster, new String[]{resourcepoolProp}).get(resourcepoolProp);
                 relocSpec.setHost(targetHost);
                 break;
             case "Cluster":
-                targetCluster = getMorByName(computeName, clusterComputeResource, false);
+                targetCluster = getMorByName(rootFolder, computeName, clusterComputeResource, false);
                 targetResourcePool = (ManagedObjectReference) getMorProperties(targetCluster, new String[]{resourcepoolProp}).get(resourcepoolProp);
                 break;
             case "Resource Pool":
-                targetResourcePool = getMorByName(computeName, resourcePool, false);
+                targetResourcePool = getMorByName(rootFolder, computeName, resourcePool, false);
                 break;
             default:
                 System.out.printf("##vso[task.logissue type=error;code=INFRAISSUE_InvalidComputeType;TaskId=%s;]\n",

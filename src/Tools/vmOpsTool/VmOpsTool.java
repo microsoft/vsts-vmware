@@ -89,7 +89,7 @@ public class VmOpsTool {
         String targetLocation = argsMap.get(Constants.targetLocation);
         String computeType = argsMap.get(Constants.computeType);
         String computeName = argsMap.get(Constants.computeName);
-        String datastore = argsMap.get(Constants.computeName);
+        String datastore = argsMap.get(Constants.datastore);
         String description = argsMap.get(Constants.description);
 
         try {
