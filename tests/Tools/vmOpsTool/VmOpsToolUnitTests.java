@@ -44,7 +44,7 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionShouldSucceedForCloneVMActionWithValidInputs() throws Exception {
+    public void executeActionShouldSucceedForCloneAndDeleteVMActionWithValidInputs() throws Exception {
         String[] cmdArgs = getCmdArgs("newVM1, newVM2", Constants.cloneTemplate, "dummyTemplate", Constants.targetLocation,
                 "dummyLocation", Constants.computeType, "DummyCompute", Constants.computeName, "DummyName", Constants.description, "Dummy description");
 
@@ -52,10 +52,17 @@ public class VmOpsToolUnitTests {
 
         assertThat(vmWareImpl.vmExists("newVM1", connData)).isEqualTo(true);
         assertThat(vmWareImpl.vmExists("newVM2", connData)).isEqualTo(true);
+
+        // Delete vm validation
+        cmdArgs = getCmdArgs("newVM1, newVM2", Constants.deleteVm, Constants.deleteVmAction);
+
+        vmOpsTool.executeAction(cmdArgs);
+        assertThat(vmWareImpl.vmExists("newVM1", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.vmExists("newVM2", connData)).isEqualTo(false);
     }
 
     @Test
-    public void executeActionShouldThrowForCloneVMFailureOnAVM() throws Exception {
+    public void executeActionShouldThrowForCloneAndDeleteVMFailureOnAVM() throws Exception {
         String[] cmdArgs = getCmdArgs("newVM1, newVM3", Constants.cloneTemplate, "dummyTemplate", Constants.targetLocation,
                 "dummyLocation", Constants.computeType, "DummyCompute", Constants.computeName, "DummyName", Constants.description, "Dummy description");
 
@@ -69,6 +76,19 @@ public class VmOpsToolUnitTests {
 
         assertThat(exp).isNotNull();
         assertThat(vmWareImpl.vmExists("newVM1", connData)).isEqualTo(true);
+
+        // Delete vm validation
+        cmdArgs = getCmdArgs("newVM1, newVM3", Constants.deleteVm, Constants.deleteVmAction);
+        exp = null;
+
+        try {
+            vmOpsTool.executeAction(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+
+        assertThat(exp).isNotNull();
+        assertThat(vmWareImpl.vmExists("newVM1", connData)).isEqualTo(false);
     }
 
     @Test

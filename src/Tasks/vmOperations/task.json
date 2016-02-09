@@ -13,12 +13,12 @@
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 1
+        "Patch": 0
     },
     "demands": [
         "java"
     ],
-    "minimumAgentVersion": "1.94.0",
+    "minimumAgentVersion": "1.95.0",
     "groups": [
     ],
     "inputs": [
@@ -41,7 +41,8 @@
                  "Deploy Virtual Machines using Template": "Deploy Virtual Machines using Template",
                  "Take Snapshot of Virtual Machines": "Take Snapshot of Virtual Machines",
                  "Revert Snapshot of Virtual Machines": "Revert Snapshot of Virtual Machines",
-                 "Delete Snapshot of Virtual Machines": "Delete Snapshot of Virtual Machines"
+                "Delete Snapshot of Virtual Machines": "Delete Snapshot of Virtual Machines",
+                "Delete Virtual Machines": "Delete Virtual Machines"
             }
         },
         {

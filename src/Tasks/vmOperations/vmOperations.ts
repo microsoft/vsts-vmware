@@ -68,6 +68,9 @@ export class VmOperations {
                 var snapshotName  = tl.getInput("snapshotName", true);
                 cmdArgs += " -snapshotOps delete -snapshotName \"" + snapshotName  + "\"";
                 break;
+            case "Delete Virtual Machines":
+                cmdArgs += " -deletevm delete";
+                break;
             default:
                 tl.error("Invalid action name : " + actionName);
                 tl.exit(1);

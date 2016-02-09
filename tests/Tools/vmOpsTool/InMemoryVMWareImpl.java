@@ -142,6 +142,9 @@ public class InMemoryVMWareImpl implements IVMWare {
     }
 
     public void deleteVM(String vmName, ConnectionData connData) throws Exception {
+        if (vmName.equals("newVM3")) {
+            throw new Exception("delete vm operation failed for newVM3");
+        }
         vmSnapshotInfo.remove(vmName);
         vmActiveSnapshot.remove(vmName);
     }

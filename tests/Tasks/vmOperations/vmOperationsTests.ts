@@ -190,6 +190,13 @@ describe("getCmdArgsForAction", (): void => {
         exitStub.withArgs(1).should.have.been.calledOnce;
     });
 
+    it("Should construct command action for delete vm action", (): void => {
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Delete Virtual Machines");
+
+        cmdArgs.should.contain("-deletevm delete");
+    });
+
     it("Should throw on failure to read snapshot name for restore/create/delete snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 

@@ -62,6 +62,7 @@ public class VMWareImpl implements IVMWare {
     }
 
     public void deleteVM(String vmName, ConnectionData connData) throws Exception {
+        connect(connData);
         ManagedObjectReference vmMor = getMorByName(vmName, virtualMachine, false);
         ManagedObjectReference task = vimPort.destroyTask(vmMor);
 
@@ -150,7 +151,7 @@ public class VMWareImpl implements IVMWare {
         if (!mobrMap.containsKey(mobName.toLowerCase())) {
             System.out.printf("##vso[task.logissue type=error;code=USERINPUT_ObjectNotFound;TaskId=%s;]\n",
                     Constants.taskId);
-            throw new Exception("Managed object with name " + mobName + " not found.");
+            throw new Exception(morefType + " with name [ " + mobName + " ] not found.");
         }
 
         return mobrMap.get(mobName.toLowerCase());

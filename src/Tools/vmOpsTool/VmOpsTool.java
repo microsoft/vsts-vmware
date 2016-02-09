@@ -51,6 +51,9 @@ public class VmOpsTool {
             } else if (argsMap.containsKey(Constants.cloneTemplate)) {
                 errorMessage = "Create vm from template operation failed for virtual machines ";
                 failedVmList += executeCloneVmAction(argsMap, vmName, connData);
+            } else if (argsMap.containsKey(Constants.deleteVm)) {
+                errorMessage = "delete vm operation failed for virtual machines ";
+                failedVmList += executeDeleteVmAction(argsMap, vmName, connData);
             } else {
                 System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]\n",
                         Constants.taskId);
@@ -59,8 +62,19 @@ public class VmOpsTool {
         }
 
         if (!failedVmList.isEmpty()) {
-            throw new Exception(String.format("[%s] [%s].", errorMessage, failedVmList));
+            throw new Exception(String.format("%s [%s].", errorMessage, failedVmList));
         }
+    }
+
+    private String executeDeleteVmAction(Map<String, String> argsMap, String vmName, ConnectionData connData) {
+        String failedVm = "";
+        try {
+            vmWareImpl.deleteVM(vmName, connData);
+        } catch (Exception exp) {
+            System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred.");
+            failedVm += vmName + " ";
+        }
+        return failedVm;
     }
 
     /**
