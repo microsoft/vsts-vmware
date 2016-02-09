@@ -119,7 +119,7 @@
             "defaultValue": "",
             "required": true,
             "visibleRule": "action = Deploy Virtual Machines using Template",
-            "helpMarkDown": "Enter a datastore name in which store the configuration and disk files."
+            "helpMarkDown": "Enter a datastore name in which to store the configuration and disk files."
         },
         {
             "name": "snapshotName",

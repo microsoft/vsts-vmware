@@ -58,6 +58,7 @@ public interface IVMWare {
     boolean vmExists(String vmName, ConnectionData connData) throws Exception;
 
     /**
+     * @param templateName   name of the virtual machine template to be cloned
      * @param vmName         name of the virtual machine
      * @param targetLocation target location either a dc or vm folder
      * @param computeType    type of the compute esxi/cluster/resourcepool
