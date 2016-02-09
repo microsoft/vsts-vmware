@@ -28,10 +28,10 @@ public class VmOpsTool {
 
         Map<String, String> argsMap = parseCmdLine(args);
 
-        String vCenterUrl = argsMap.get(Constants.vCenterUrl);
-        String vCenterUserName = argsMap.get(Constants.vCenterUserName);
-        String vCenterPassword = argsMap.get(Constants.vCenterPassword);
-        String vmList = argsMap.get(Constants.vmList);
+        String vCenterUrl = argsMap.get(Constants.V_CENTER_URL);
+        String vCenterUserName = argsMap.get(Constants.V_CENTER_USER_NAME);
+        String vCenterPassword = argsMap.get(Constants.V_CENTER_PASSWORD);
+        String vmList = argsMap.get(Constants.VM_LIST);
 
         ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword);
         String[] vmNames = vmList.split(",");
@@ -41,22 +41,22 @@ public class VmOpsTool {
         for (String vmName : vmNames) {
             vmName = vmName.trim();
 
-            if (argsMap.containsKey(Constants.snapshotOps)) {
+            if (argsMap.containsKey(Constants.SNAPSHOT_OPS)) {
 
-                String actionName = argsMap.get(Constants.snapshotOps);
-                String snapshotName = argsMap.get(Constants.snapshotName);
+                String actionName = argsMap.get(Constants.SNAPSHOT_OPS);
+                String snapshotName = argsMap.get(Constants.SNAPSHOT_NAME);
                 errorMessage = String.format("Failed to [%s] snapshot [%s] on virtual machines ", actionName, snapshotName);
                 failedVmList += executeSnapshotAction(argsMap, vmName, snapshotName, actionName, connData);
 
-            } else if (argsMap.containsKey(Constants.cloneTemplate)) {
+            } else if (argsMap.containsKey(Constants.CLONE_TEMPLATE)) {
                 errorMessage = "Create vm from template operation failed for virtual machines ";
                 failedVmList += executeCloneVmAction(argsMap, vmName, connData);
-            } else if (argsMap.containsKey(Constants.deleteVm)) {
+            } else if (argsMap.containsKey(Constants.DELETE_VM)) {
                 errorMessage = "delete vm operation failed for virtual machines ";
                 failedVmList += executeDeleteVmAction(argsMap, vmName, connData);
             } else {
                 System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]\n",
-                        Constants.taskId);
+                        Constants.TASK_ID);
                 throw new Exception("Invalid action input for the operation.");
             }
         }
@@ -85,12 +85,12 @@ public class VmOpsTool {
      */
     private String executeCloneVmAction(Map<String, String> argsMap, String vmName, ConnectionData connData) {
         String failedVm = "";
-        String templateName = argsMap.get(Constants.cloneTemplate);
-        String targetLocation = argsMap.get(Constants.targetLocation);
-        String computeType = argsMap.get(Constants.computeType);
-        String computeName = argsMap.get(Constants.computeName);
-        String datastore = argsMap.get(Constants.datastore);
-        String description = argsMap.get(Constants.description);
+        String templateName = argsMap.get(Constants.CLONE_TEMPLATE);
+        String targetLocation = argsMap.get(Constants.TARGET_LOCATION);
+        String computeType = argsMap.get(Constants.COMPUTE_TYPE);
+        String computeName = argsMap.get(Constants.COMPUTE_NAME);
+        String datastore = argsMap.get(Constants.DATASTORE);
+        String description = argsMap.get(Constants.DESCRIPTION);
 
         try {
             vmWareImpl.cloneVMFromTemplate(templateName, vmName, targetLocation, computeType, computeName, datastore, description, connData);
@@ -113,24 +113,24 @@ public class VmOpsTool {
         String failedVm = "";
         try {
             switch (actionName) {
-                case Constants.restoreSnapshotAction:
+                case Constants.RESTORE_SNAPSHOT_ACTION:
                     vmWareImpl.restoreSnapshot(vmName, snapshotName, connData);
                     break;
-                case Constants.createSnapshotAction:
-                    String description = argsMap.get(Constants.description);
-                    boolean saveVmMemory = Boolean.parseBoolean(argsMap.get(Constants.saveVmMemory));
-                    boolean quiesceVmFs = Boolean.parseBoolean(argsMap.get(Constants.quiesceVmFs));
+                case Constants.CREATE_SNAPSHOT_ACTION:
+                    String description = argsMap.get(Constants.DESCRIPTION);
+                    boolean saveVmMemory = Boolean.parseBoolean(argsMap.get(Constants.SAVE_VM_MEMORY));
+                    boolean quiesceVmFs = Boolean.parseBoolean(argsMap.get(Constants.QUIESCE_VM_FS));
 
                     vmWareImpl.createSnapshot(vmName, snapshotName, saveVmMemory, quiesceVmFs, description,
                             connData);
                     break;
-                case Constants.deleteSnapshotAction:
+                case Constants.DELETE_SNAPSHOT_ACTION:
                     vmWareImpl.deleteSnapshot(vmName, snapshotName, connData);
                     break;
                 default:
                     System.out.printf(
                             "##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]\n",
-                            Constants.taskId);
+                            Constants.TASK_ID);
                     throw new Exception("Invalid action name ( " + actionName + " ) for snapshot operation");
             }
         } catch (Exception exp) {
@@ -157,7 +157,7 @@ public class VmOpsTool {
         for (String arg : cmdArgs) {
             if (!arg.equals("") && arg.charAt(0) == '-') {
                 key = arg;
-            } else if (!arg.equals(Constants.vmOpsTool)) {
+            } else if (!arg.equals(Constants.VM_OPS_TOOL)) {
                 value = arg;
                 argsMap.put(key, value);
             }

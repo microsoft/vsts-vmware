@@ -99,7 +99,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         return currentSnapshotName;
     }
 
-    public boolean snapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+    public boolean isSnapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception {
 
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
@@ -109,7 +109,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public boolean vmExists(String vmName, ConnectionData connData) throws Exception {
+    public boolean isVmExists(String vmName, ConnectionData connData) throws Exception {
         return vmSnapshotInfo.containsKey(vmName);
     }
 

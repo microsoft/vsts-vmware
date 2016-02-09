@@ -35,7 +35,7 @@ public abstract class VMWarePlatformTests {
 
         vmWareImpl.cloneVMFromTemplate(templateName, newVmName, targetLocation, computeType, computeName, datastore, description, connData);
 
-        assertThat(vmWareImpl.vmExists(newVmName, connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVmExists(newVmName, connData)).isEqualTo(true);
 
         vmWareImpl.deleteVM(newVmName, connData);
     }
@@ -45,13 +45,13 @@ public abstract class VMWarePlatformTests {
         String newVmName = "newVmOnCluster";
         String targetLocation = "fareastdc";
         String computeType = "Cluster";
-        String computeName = "manualcluster";
-        String datastore = "datastore1";
+        String computeName = "fareastcluster";
+        String datastore = "SharedStorage";
         String description = "Creating new VM from ubuntuVM template on cluster";
 
         vmWareImpl.cloneVMFromTemplate(templateName, newVmName, targetLocation, computeType, computeName, datastore, description, connData);
 
-        assertThat(vmWareImpl.vmExists(newVmName, connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVmExists(newVmName, connData)).isEqualTo(true);
 
         vmWareImpl.deleteVM(newVmName, connData);
     }
@@ -62,12 +62,12 @@ public abstract class VMWarePlatformTests {
         String targetLocation = "fareastdc";
         String computeType = "Resource Pool";
         String computeName = "fareastrp";
-        String datastore = "datastore1";
+        String datastore = "SharedStorage";
         String description = "Creating new VM from ubuntuVM template on resource pool";
 
         vmWareImpl.cloneVMFromTemplate(templateName, newVmName, targetLocation, computeType, computeName, datastore, description, connData);
 
-        assertThat(vmWareImpl.vmExists(newVmName, connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVmExists(newVmName, connData)).isEqualTo(true);
 
         vmWareImpl.deleteVM(newVmName, connData);
     }
@@ -265,7 +265,7 @@ public abstract class VMWarePlatformTests {
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(snapshotTwo);
 
         vmWareImpl.deleteSnapshot(vmName, newSnapshot, connData);
-        assertThat(vmWareImpl.snapshotExists(vmName, newSnapshot, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isSnapshotExists(vmName, newSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
@@ -280,7 +280,7 @@ public abstract class VMWarePlatformTests {
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(snapshotTwo);
 
         vmWareImpl.deleteSnapshot(vmName, newSnapshot, connData);
-        assertThat(vmWareImpl.snapshotExists(vmName, newSnapshot, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isSnapshotExists(vmName, newSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
@@ -297,7 +297,7 @@ public abstract class VMWarePlatformTests {
 
 
         vmWareImpl.deleteSnapshot(vmName1, newSnapshot, connData);
-        assertThat(vmWareImpl.snapshotExists(vmName1, newSnapshot, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isSnapshotExists(vmName1, newSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
@@ -322,8 +322,8 @@ public abstract class VMWarePlatformTests {
         vmWareImpl.deleteSnapshot(vmName1, newSnapshot, connData);
         vmWareImpl.deleteSnapshot(vmName2, newSnapshot, connData);
 
-        assertThat(vmWareImpl.snapshotExists(vmName1, newSnapshot, connData)).isEqualTo(false);
-        assertThat(vmWareImpl.snapshotExists(vmName2, newSnapshot, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isSnapshotExists(vmName1, newSnapshot, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isSnapshotExists(vmName2, newSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
@@ -342,6 +342,6 @@ public abstract class VMWarePlatformTests {
 
         vmWareImpl.deleteSnapshot(vmName, newSnapshot, connData);
 
-        assertThat(vmWareImpl.snapshotExists(vmName, newSnapshot, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isSnapshotExists(vmName, newSnapshot, connData)).isEqualTo(false);
     }
 }

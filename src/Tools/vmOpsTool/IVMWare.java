@@ -47,7 +47,7 @@ public interface IVMWare {
      * @return true if found otherwise false
      * @throws Exception
      */
-    boolean snapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception;
+    boolean isSnapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception;
 
     /**
      * @param vmName   name of the virtual machine
@@ -55,7 +55,7 @@ public interface IVMWare {
      * @return true if found otherwise false
      * @throws Exception
      */
-    boolean vmExists(String vmName, ConnectionData connData) throws Exception;
+    boolean isVmExists(String vmName, ConnectionData connData) throws Exception;
 
     /**
      * @param templateName   name of the virtual machine template to be cloned
