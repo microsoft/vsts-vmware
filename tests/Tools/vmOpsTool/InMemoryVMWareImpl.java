@@ -116,8 +116,8 @@ public class InMemoryVMWareImpl implements IVMWare {
 
     public void cloneVMFromTemplate(String templateName, String vmName, String targetLocation, String computeType, String computeName,
                                     String datastore, String description, ConnectionData connData) throws Exception {
-        if (vmName.equals("newVM3")) {
-            throw new Exception("Clone VM from template operation failed for newVM3");
+        if (vmName.equals("VMNameThatFailsInClone")) {
+            throw new Exception("Clone VM from template operation failed for VMNameThatFailsInClone");
         }
 
         if (templateName.equals("InvalidTemplate")) {
@@ -142,8 +142,8 @@ public class InMemoryVMWareImpl implements IVMWare {
     }
 
     public void deleteVM(String vmName, ConnectionData connData) throws Exception {
-        if (vmName.equals("newVM3")) {
-            throw new Exception("delete vm operation failed for newVM3");
+        if (vmName.equals("VMNameThatFailsInDelete")) {
+            throw new Exception("delete vm operation failed for VMNameThatFailsInDelete");
         }
         vmSnapshotInfo.remove(vmName);
         vmActiveSnapshot.remove(vmName);

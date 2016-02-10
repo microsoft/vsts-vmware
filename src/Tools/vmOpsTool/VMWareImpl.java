@@ -55,7 +55,7 @@ public class VMWareImpl implements IVMWare {
         try {
             getMorByName(rootFolder, vmName, VIRTUAL_MACHINE, false);
         } catch (Exception exp) {
-            System.out.println(exp.getMessage());
+            System.err.println(exp.getMessage());
             return false;
         }
         return true;
@@ -389,14 +389,17 @@ public class VMWareImpl implements IVMWare {
             token = results.getToken();
             for (ObjectContent objectContent : results.getObjects()) {
                 ManagedObjectReference mor = objectContent.getObj();
-                if (filterProperty.equals(CONFIG)) {
-                    VirtualMachineConfigInfo vmConfig = (VirtualMachineConfigInfo) objectContent.getPropSet().get(0).getVal();
-                    if (vmConfig != null && vmConfig.isTemplate() == isTemplate) {
-                        morMap.put(vmConfig.getName().toLowerCase(), mor);
+                List<DynamicProperty> propertySet = objectContent.getPropSet();
+                if (propertySet != null && propertySet.get(0) != null) {
+                    if (filterProperty.equals(CONFIG)) {
+                        VirtualMachineConfigInfo vmConfig = (VirtualMachineConfigInfo) propertySet.get(0).getVal();
+                        if (vmConfig != null && vmConfig.isTemplate() == isTemplate) {
+                            morMap.put(vmConfig.getName().toLowerCase(), mor);
+                        }
+                    } else {
+                        String mobName = (String) propertySet.get(0).getVal();
+                        morMap.put(mobName.toLowerCase(), mor);
                     }
-                } else {
-                    String mobName = (String) objectContent.getPropSet().get(0).getVal();
-                    morMap.put(mobName.toLowerCase(), mor);
                 }
             }
         }

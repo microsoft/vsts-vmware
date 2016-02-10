@@ -9,7 +9,7 @@ public class Constants {
     public static final String SNAPSHOT_OPS = "-snapshotOps";
     public static final String DELETE_VM = "-deletevm";
     public static final String CLONE_TEMPLATE = "-clonetemplate";
-    public static final String TARGET_LOCATION = "-targetlocaltion";
+    public static final String TARGET_LOCATION = "-targetlocation";
     public static final String COMPUTE_TYPE = "-computetype";
     public static final String COMPUTE_NAME = "-computename";
     public static final String DATASTORE = "-datastore";

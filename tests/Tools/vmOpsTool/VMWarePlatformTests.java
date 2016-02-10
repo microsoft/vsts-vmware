@@ -29,7 +29,7 @@ public abstract class VMWarePlatformTests {
         String newVmName = "newVmOnEsxiHost";
         String targetLocation = "redmonddc";
         String computeType = "ESXi Host";
-        String computeName = "10.150.64.116";
+        String computeName = "idcvstt-lab318.corp.microsoft.com";
         String datastore = "datastore1";
         String description = "Creating new VM from ubuntuVM template on ESXi host";
 

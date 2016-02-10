@@ -63,7 +63,7 @@ public class VmOpsToolUnitTests {
 
     @Test
     public void executeActionShouldThrowForCloneAndDeleteVMFailureOnAVM() throws Exception {
-        String[] cmdArgs = getCmdArgs("newVM1, newVM3", Constants.CLONE_TEMPLATE, "dummyTemplate", Constants.TARGET_LOCATION,
+        String[] cmdArgs = getCmdArgs("newVM1, VMNameThatFailsInClone", Constants.CLONE_TEMPLATE, "dummyTemplate", Constants.TARGET_LOCATION,
                 "dummyLocation", Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName", Constants.DESCRIPTION, "Dummy description");
 
         Exception exp = null;
@@ -78,7 +78,7 @@ public class VmOpsToolUnitTests {
         assertThat(vmWareImpl.isVmExists("newVM1", connData)).isEqualTo(true);
 
         // Delete vm validation
-        cmdArgs = getCmdArgs("newVM1, newVM3", Constants.DELETE_VM, Constants.DELETE_VM_ACTION);
+        cmdArgs = getCmdArgs("newVM1, VMNameThatFailsInDelete", Constants.DELETE_VM, Constants.DELETE_VM_ACTION);
         exp = null;
 
         try {

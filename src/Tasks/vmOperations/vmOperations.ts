@@ -48,7 +48,7 @@ export class VmOperations {
                         tl.error("Invalid compute type : " + computeType);
                         tl.exit(1);
                 }
-                cmdArgs += " -clonetemplate \"" + template  + "\"" + " -targetlocaltion \"" + targetLocation + "\"" +
+                cmdArgs += " -clonetemplate \"" + template  + "\"" + " -targetlocation \"" + targetLocation + "\"" +
                       " -computetype \"" + computeType + "\"" + " -computename \"" + computeName + "\"" + " -datastore \"" +
                       datastore + "\"" + " -description \"" + description + "\"";
                 break;

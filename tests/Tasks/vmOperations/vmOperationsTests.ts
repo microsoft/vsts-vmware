@@ -148,7 +148,7 @@ describe("getCmdArgsForAction", (): void => {
         cmdArgs.should.contain("-snapshotOps delete -snapshotName \"dummySnapshotName\"");
     });
 
-    it("Should read template, localtion, computeType, hostname, datastore and description", (): void => {
+    it("Should read template, location, computeType, hostname, datastore and description", (): void => {
         getInputStub.withArgs("template", true).returns("dummyTemplate");
         getInputStub.withArgs("targetlocation", true).returns("dummyLocation");
         getInputStub.withArgs("computeType", true).returns("ESXi Host");
@@ -158,7 +158,7 @@ describe("getCmdArgsForAction", (): void => {
 
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Deploy Virtual Machines using Template");
 
-        cmdArgs.should.contain("-clonetemplate \"dummyTemplate\" -targetlocaltion \"dummyLocation\" -computetype \"ESXi Host\" -computename \"Dummy Host\" -datastore \"Dummy Datastore\" -description \"Dummy description\"");
+        cmdArgs.should.contain("-clonetemplate \"dummyTemplate\" -targetlocation \"dummyLocation\" -computetype \"ESXi Host\" -computename \"Dummy Host\" -datastore \"Dummy Datastore\" -description \"Dummy description\"");
     });
 
     it("Should read cluster name if compute is cluster and read empty description", (): void => {
