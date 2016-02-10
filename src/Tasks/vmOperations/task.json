@@ -46,14 +46,6 @@
             }
         },
         {
-            "name": "vmList",
-            "type": "string",
-            "label": "Virtual Machine Names",
-            "defaultValue": "",
-            "required": true,
-            "helpMarkDown": "Provide a comma separated list of the virtual machine's names. For example, FabrikamWeb, FabrikamDB, FabrikamTest."
-        },
-        {
             "name": "template",
             "type": "string",
             "label": "Template",
@@ -61,6 +53,14 @@
             "required": true,
             "visibleRule": "action = Deploy Virtual Machines using Template",
             "helpMarkDown": "Enter the name of the template to use for creating virtual machines."
+        },
+        {
+            "name": "vmList",
+            "type": "string",
+            "label": "Virtual Machine Names",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "Provide a comma separated list of the virtual machine's names. For example, FabrikamWeb, FabrikamDB, FabrikamTest."
         },
         {
             "name": "targetlocation",
