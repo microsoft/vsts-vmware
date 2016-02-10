@@ -38,9 +38,9 @@
             "required": true,
             "helpMarkDown" : "Select the action to perform on the VMWare Virtual Machines.",
             "options": {
-                 "Deploy Virtual Machines using Template": "Deploy Virtual Machines using Template",
-                 "Take Snapshot of Virtual Machines": "Take Snapshot of Virtual Machines",
-                 "Revert Snapshot of Virtual Machines": "Revert Snapshot of Virtual Machines",
+                "Deploy Virtual Machines using Template": "Deploy Virtual Machines using Template",
+                "Take Snapshot of Virtual Machines": "Take Snapshot of Virtual Machines",
+                "Revert Snapshot of Virtual Machines": "Revert Snapshot of Virtual Machines",
                 "Delete Snapshot of Virtual Machines": "Delete Snapshot of Virtual Machines",
                 "Delete Virtual Machines": "Delete Virtual Machines"
             }
