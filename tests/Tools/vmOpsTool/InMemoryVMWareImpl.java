@@ -5,9 +5,9 @@ import java.util.Map;
 
 public class InMemoryVMWareImpl implements IVMWare {
 
-    private Map<String, List<String>> vmSnapshotInfo = new HashMap<String, List<String>>();
-    private Map<String, String> vmActiveSnapshot = new HashMap<String, String>();
-    private List<String> snapshotList = new ArrayList<String>();
+    private Map<String, List<String>> vmSnapshotInfo = new HashMap<>();
+    private Map<String, String> vmActiveSnapshot = new HashMap<>();
+    private List<String> snapshotList = new ArrayList<>();
     private String activeSnapshot = "Snapshot2";
 
     public InMemoryVMWareImpl() {
@@ -34,7 +34,7 @@ public class InMemoryVMWareImpl implements IVMWare {
     }
 
     public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
-            String description, ConnectionData connData) throws Exception {
+                               String description, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
             List<String> vmCpList = vmSnapshotInfo.get(vmName);
@@ -47,7 +47,7 @@ public class InMemoryVMWareImpl implements IVMWare {
     }
 
     public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
-        List<String> cpList = null;
+        List<String> cpList;
 
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
@@ -61,7 +61,6 @@ public class InMemoryVMWareImpl implements IVMWare {
         } else {
             throw new Exception("VM not found.");
         }
-        return;
     }
 
     public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
@@ -88,7 +87,7 @@ public class InMemoryVMWareImpl implements IVMWare {
 
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
 
-        String currentSnapshotName = null;
+        String currentSnapshotName;
 
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
@@ -100,13 +99,53 @@ public class InMemoryVMWareImpl implements IVMWare {
         return currentSnapshotName;
     }
 
-    public boolean snapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+    public boolean isSnapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception {
 
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
-            return vmSnapshotInfo.containsValue(snapshotName);
+            return vmSnapshotInfo.get(vmName).contains(snapshotName);
         } else {
             throw new Exception("VM not found.");
         }
+    }
+
+    public boolean isVmExists(String vmName, ConnectionData connData) throws Exception {
+        return vmSnapshotInfo.containsKey(vmName);
+    }
+
+
+    public void cloneVMFromTemplate(String templateName, String vmName, String targetLocation, String computeType, String computeName,
+                                    String datastore, String description, ConnectionData connData) throws Exception {
+        if (vmName.equals("VMNameThatFailsInClone")) {
+            throw new Exception("Clone VM from template operation failed for VMNameThatFailsInClone");
+        }
+
+        if (templateName.equals("InvalidTemplate")) {
+            throw new Exception("Template does not exists");
+        }
+
+        if (targetLocation.equals("InvalidDc")) {
+            throw new Exception("Target datacenter does not exists");
+        }
+
+        if (computeName.equals("InvalidHost") || computeName.equals("InvalidCluster") || computeName.equals("InvalidRp")) {
+            throw new Exception("Invalid compute name");
+        }
+
+        if (computeType.equals("Invalid Compute")) {
+            throw new Exception("Invalid compute resource");
+        }
+
+
+        vmSnapshotInfo.put(vmName, new ArrayList<>());
+        vmActiveSnapshot.put(vmName, "");
+    }
+
+    public void deleteVM(String vmName, ConnectionData connData) throws Exception {
+        if (vmName.equals("VMNameThatFailsInDelete")) {
+            throw new Exception("delete vm operation failed for VMNameThatFailsInDelete");
+        }
+        vmSnapshotInfo.remove(vmName);
+        vmActiveSnapshot.remove(vmName);
     }
 }

@@ -26,10 +26,34 @@ export class VmOperations {
 
     public static getCmdArgsForAction(actionName: string): string {
         var cmdArgs = "";
-        var snapshotName  = null;
         switch (actionName) {
+            case "Deploy Virtual Machines using Template":
+                var template = tl.getInput("template", true);
+                var targetLocation = tl.getInput("targetlocation", true);
+                var computeType = tl.getInput("computeType", true);
+                var datastore = tl.getInput("datastore", true);
+                var description = tl.getInput("description", false);
+                var computeName = null;
+                switch (computeType) {
+                    case "ESXi Host":
+                        computeName = tl.getInput("hostname", true);
+                        break;
+                    case "Cluster":
+                        computeName = tl.getInput("clustername", true);
+                        break;
+                    case "Resource Pool":
+                        computeName = tl.getInput("resourcepoolname", true);
+                        break;
+                    default:
+                        tl.error("Invalid compute type : " + computeType);
+                        tl.exit(1);
+                }
+                cmdArgs += " -clonetemplate \"" + template  + "\"" + " -targetlocation \"" + targetLocation + "\"" +
+                      " -computetype \"" + computeType + "\"" + " -computename \"" + computeName + "\"" + " -datastore \"" +
+                      datastore + "\"" + " -description \"" + description + "\"";
+                break;
             case "Take Snapshot of Virtual Machines":
-                snapshotName = tl.getInput("snapshotName", true);
+                var snapshotName = tl.getInput("snapshotName", true);
                 var snapshotVMMemory = "false";
                 var quiesceGuestFileSystem = "false";
                 var description: string = tl.getInput("description", false);
@@ -37,12 +61,15 @@ export class VmOperations {
                      snapshotVMMemory + " -quiesceGuestFileSystem " + quiesceGuestFileSystem + " -description \"" + description + "\"";
                 break;
             case "Revert Snapshot of Virtual Machines":
-                snapshotName  = tl.getInput("snapshotName", true);
+                var snapshotName  = tl.getInput("snapshotName", true);
                 cmdArgs += " -snapshotOps restore -snapshotName \"" + snapshotName  + "\"";
                 break;
             case "Delete Snapshot of Virtual Machines":
-                snapshotName  = tl.getInput("snapshotName", true);
+                var snapshotName  = tl.getInput("snapshotName", true);
                 cmdArgs += " -snapshotOps delete -snapshotName \"" + snapshotName  + "\"";
+                break;
+            case "Delete Virtual Machines":
+                cmdArgs += " -deletevm delete";
                 break;
             default:
                 tl.error("Invalid action name : " + actionName);
@@ -56,7 +83,8 @@ export class VmOperations {
         var actionName: string = tl.getInput("action", true);
         var commonArgs: string = this.getCmdCommonArgs();
         var cmdArgsForAction: string = this.getCmdArgsForAction(actionName);
-        var cmdArgs = "-jar vmOpsTool-1.0.jar" + cmdArgsForAction + commonArgs;
+        var systemClassPath: string = tl.getVariable("CLASSPATH");
+        var cmdArgs = "-classpath vmOpsTool-1.0.jar;" + systemClassPath + " VmOpsTool " + cmdArgsForAction + commonArgs;
         util.log("Invoking command to perform vm operations ...\n");
         return tl.exec("java", cmdArgs, <any> {failOnStdErr: true})
             .then((code) => {
@@ -68,7 +96,6 @@ export class VmOperations {
                 tl.exit(1);
             });
     }
-
 
     private static validateVmListInput(vmList: any): void {
         var vms = vmList.split(",");

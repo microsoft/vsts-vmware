@@ -1,4 +1,4 @@
-public class InMemoryVMWareImplPlatformTests extends VMWarePlatformTests{
+public class InMemoryVMWareImplPlatformTests extends VMWarePlatformTests {
 
     @Override
     public IVMWare getVmWareImpl() {

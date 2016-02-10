@@ -1,36 +1,26 @@
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.xml.ws.BindingProvider;
 
-import com.vmware.vim25.DynamicProperty;
-import com.vmware.vim25.ManagedObjectReference;
-import com.vmware.vim25.ObjectContent;
-import com.vmware.vim25.ObjectSpec;
-import com.vmware.vim25.ObjectUpdate;
-import com.vmware.vim25.PropertyChange;
-import com.vmware.vim25.PropertyChangeOp;
-import com.vmware.vim25.PropertyFilterSpec;
-import com.vmware.vim25.PropertyFilterUpdate;
-import com.vmware.vim25.PropertySpec;
-import com.vmware.vim25.RetrieveOptions;
-import com.vmware.vim25.RetrieveResult;
-import com.vmware.vim25.ServiceContent;
-import com.vmware.vim25.TaskInfoState;
-import com.vmware.vim25.TraversalSpec;
-import com.vmware.vim25.UpdateSet;
-import com.vmware.vim25.UserSession;
-import com.vmware.vim25.VimPortType;
-import com.vmware.vim25.VimService;
-import com.vmware.vim25.VirtualMachineConfigInfo;
-import com.vmware.vim25.VirtualMachineSnapshotInfo;
-import com.vmware.vim25.VirtualMachineSnapshotTree;
-import com.vmware.vim25.WaitOptions;
+import com.vmware.vim25.*;
 
 public class VMWareImpl implements IVMWare {
+
+    // vCenter Managed Object Types
+    private final String VIRTUAL_MACHINE = "VirtualMachine";
+    private final String DATA_CENTER = "Datacenter";
+    private final String HOST_SYSTEM = "HostSystem";
+    private final String CLUSTER_COMPUTE_RESOURCE = "ClusterComputeResource";
+    private final String RESOURCE_POOL = "ResourcePool";
+    private final String DATA_STORE = "Datastore";
+
+    // vCenter Managed Object properties
+    private final String VM_FOLDER = "vmFolder";
+    private final String PARENT = "parent";
+    private final String RESOURCE_POOL_PROP = "resourcePool";
+    private final String SNAPSHOT = "snapshot";
+    private final String CONFIG = "config";
+    private final String NAME = "name";
 
     private VimService vimService;
     private VimPortType vimPort;
@@ -38,22 +28,18 @@ public class VMWareImpl implements IVMWare {
     private UserSession userSession;
     private ManagedObjectReference rootFolder;
 
-    // vCenter Managed Object Types and MOR properties
-    private final String virtualMachine = "VirtualMachine";
-    private final String snapshot = "snapshot";
-    private final String config = "config";
 
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
-        System.out.println("Getting current snapshot name for virtual machine ( " + vmName + " ).");
-        ManagedObjectReference vmMor = getVMMorByName(vmName);
+        System.out.println("Getting current snapshot name for virtual machine [ " + vmName + " ].");
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, VIRTUAL_MACHINE, false);
         return getCurrentSnapshotName(vmMor, vmName);
     }
 
-    public boolean snapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+    public boolean isSnapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Finding snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getVMMorByName(vmName);
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, VIRTUAL_MACHINE, false);
         try {
             getSnapshotReference(vmMor, vmName, snapshotName);
         } catch (Exception exp) {
@@ -63,11 +49,62 @@ public class VMWareImpl implements IVMWare {
         return true;
     }
 
+    public boolean isVmExists(String vmName, ConnectionData connData) throws Exception {
+        connect(connData);
+        System.out.printf("Finding virtual machine (%s) on vCenter server.\n", vmName);
+        try {
+            getMorByName(rootFolder, vmName, VIRTUAL_MACHINE, false);
+        } catch (Exception exp) {
+            System.err.println(exp.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    public void deleteVM(String vmName, ConnectionData connData) throws Exception {
+        connect(connData);
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, VIRTUAL_MACHINE, false);
+        ManagedObjectReference task = vimPort.destroyTask(vmMor);
+
+        if (waitAndGetTaskResult(task)) {
+            System.out.printf("Successfully delete virtual machine [%s] from vCenter Server.\n", vmName);
+        } else {
+            throw new Exception(
+                    String.format("Failed to delete virtual machine [%s] from vCenter Server.\n", vmName));
+        }
+    }
+
+    public void cloneVMFromTemplate(String templateName, String vmName, String targetLocation, String computeType, String computeName, String newDatastore, String description, ConnectionData connData) throws Exception {
+        connect(connData);
+
+        System.out.printf("Finding template [%s] on vCenter server.\n", templateName);
+        ManagedObjectReference templateMor = getMorByName(rootFolder, templateName, VIRTUAL_MACHINE, true);
+
+        System.out.printf("Searching for datacenter with name [%s].\n", targetLocation);
+        ManagedObjectReference targetDC = getMorByName(rootFolder, targetLocation, DATA_CENTER, false);
+        ManagedObjectReference targetVmFolder = (ManagedObjectReference) getMorProperties(targetDC, new String[]{VM_FOLDER}).get(VM_FOLDER);
+
+        System.out.printf("Searching for datastore with name [%s].\n", newDatastore);
+        ManagedObjectReference targetDS = getMorByName(targetDC, newDatastore, DATA_STORE, false);
+
+        VirtualMachineCloneSpec cloneSpec = getVirtualMachineCloneSpec(computeType, computeName, targetDC, targetDS);
+
+        System.out.printf("Creating new virtual machine [%s] using template [%s].\n", vmName, templateName);
+        ManagedObjectReference task = vimPort.cloneVMTask(templateMor, targetVmFolder, vmName, cloneSpec);
+
+        if (waitAndGetTaskResult(task)) {
+            System.out.printf("Successfully created virtual machine [%s] using template [%s].\n", vmName, templateName);
+        } else {
+            throw new Exception(
+                    String.format("Failed to create virtual machine [%s] using template [%s].\n", vmName, templateName));
+        }
+    }
+
     public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
-            String description, ConnectionData connData) throws Exception {
+                               String description, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Creating snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getVMMorByName(vmName);
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, VIRTUAL_MACHINE, false);
         ManagedObjectReference task = vimPort.createSnapshotTask(vmMor, snapshotName, description, saveVMMemory,
                 quiesceFs);
 
@@ -77,13 +114,12 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to create snapshot [%s] on virtual machine [%s].\n", snapshotName, vmName));
         }
-        return;
     }
 
     public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Restoring snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getVMMorByName(vmName);
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, VIRTUAL_MACHINE, false);
         ManagedObjectReference cpMor = getSnapshotReference(vmMor, vmName, snapshotName);
         ManagedObjectReference task = vimPort.revertToSnapshotTask(cpMor, null, true);
 
@@ -94,13 +130,12 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to revert snapshot [%s] on virtual machine [%s].\n", snapshotName, vmName));
         }
-        return;
     }
 
     public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Deleting snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getVMMorByName(vmName);
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, VIRTUAL_MACHINE, false);
         ManagedObjectReference cpMor = getSnapshotReference(vmMor, vmName, snapshotName);
         ManagedObjectReference task = vimPort.removeSnapshotTask(cpMor, false, true);
 
@@ -110,27 +145,26 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to delete snapshot [%s] on virtual machine [%s].\n", snapshotName, vmName));
         }
-        return;
     }
 
-    private ManagedObjectReference getVMMorByName(String vmName) throws Exception {
-        Map<String, ManagedObjectReference> vmsMap = getObjectsInContainerByType(rootFolder, virtualMachine);
+    private ManagedObjectReference getMorByName(ManagedObjectReference rootContainer, String mobName, String morefType, boolean isTemplate) throws Exception {
+        Map<String, ManagedObjectReference> mobrMap = getObjectsInContainerByType(rootContainer, morefType, isTemplate);
 
-        if (!vmsMap.containsKey(vmName.toLowerCase())) {
-            System.out.printf("##vso[task.logissue type=error;code=USERINPUT_VmNotFound;TaskId=%s;]\n",
-                    Constants.taskId);
-            throw new Exception("Virtual machine with name " + vmName + " not found.");
+        if (!mobrMap.containsKey(mobName.toLowerCase())) {
+            System.out.printf("##vso[task.logissue type=error;code=USERINPUT_ObjectNotFound;TaskId=%s;]\n",
+                    Constants.TASK_ID);
+            throw new Exception(morefType + " with name [ " + mobName + " ] not found.");
         }
 
-        return vmsMap.get(vmName.toLowerCase());
+        return mobrMap.get(mobName.toLowerCase());
     }
 
     private boolean waitAndGetTaskResult(ManagedObjectReference task) throws Exception {
         boolean retVal = false;
 
         System.out.println("Waiting for operation completion.");
-        Object[] result = waitForTaskResult(task, new String[] { "info.state", "info.error" }, new String[] { "state" },
-                new Object[][] { new Object[] { TaskInfoState.SUCCESS, TaskInfoState.ERROR } });
+        Object[] result = waitForTaskResult(task, new String[]{"info.state", "info.error"}, new String[]{"state"},
+                new Object[][]{new Object[]{TaskInfoState.SUCCESS, TaskInfoState.ERROR}});
 
         if (result[0].equals(TaskInfoState.SUCCESS)) {
             retVal = true;
@@ -140,7 +174,7 @@ public class VMWareImpl implements IVMWare {
     }
 
     private Object[] waitForTaskResult(ManagedObjectReference taskMor, String[] filterProps, String[] endWaitProps,
-            Object[][] expectedVals) throws Exception {
+                                       Object[][] expectedVals) throws Exception {
         try {
 
             Object[] endVals = new Object[endWaitProps.length];
@@ -177,11 +211,11 @@ public class VMWareImpl implements IVMWare {
                     }
                 }
 
-                Object expectedVal = null;
+                Object expectedVal;
                 for (int chgi = 0; chgi < endVals.length && !reached; ++chgi) {
                     for (int vali = 0; vali < expectedVals[chgi].length && !reached; ++vali) {
                         expectedVal = expectedVals[chgi][vali];
-                        reached = expectedVal.equals(endVals[chgi]) || reached;
+                        reached = expectedVal.equals(endVals[chgi]);
                     }
                 }
             }
@@ -189,7 +223,7 @@ public class VMWareImpl implements IVMWare {
             return filterVals;
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=PREREQ_WaitForResultFailed;TaskId=%s;]\n",
-                    Constants.taskId);
+                    Constants.TASK_ID);
             throw new Exception("Failed to get operation result: " + exp.getMessage());
         }
     }
@@ -207,11 +241,11 @@ public class VMWareImpl implements IVMWare {
     }
 
     private ManagedObjectReference getSnapshotReference(ManagedObjectReference vmMor, String vmName,
-            String snapshotName) throws Exception {
+                                                        String snapshotName) throws Exception {
         System.out.printf("Querying snapshot information for virtual machine (%s).\n", vmName);
         VirtualMachineSnapshotInfo vmSnapshotInfo = (VirtualMachineSnapshotInfo) getMorProperties(vmMor,
-                new String[] { snapshot }).get(snapshot);
-        ManagedObjectReference snapshotMor = null;
+                new String[]{SNAPSHOT}).get(SNAPSHOT);
+        ManagedObjectReference snapshotMor;
         String snapshotNotFoundErr = "No snapshot found on virtual machine (" + vmName + ") with name " + snapshotName;
 
         if (vmSnapshotInfo != null) {
@@ -220,12 +254,12 @@ public class VMWareImpl implements IVMWare {
 
             if (snapshotMor == null) {
                 System.out.printf("##vso[task.logissue type=error;code=USERINPUT_SnapshotNotFound;TaskId=%s;]\n",
-                        Constants.taskId);
+                        Constants.TASK_ID);
                 throw new Exception(snapshotNotFoundErr);
             }
         } else {
             System.out.printf("##vso[task.logissue type=error;code=USERINPUT_SnapshotNotFound;TaskId=%s;]\n",
-                    Constants.taskId);
+                    Constants.TASK_ID);
             throw new Exception(snapshotNotFoundErr);
         }
         return snapshotMor;
@@ -234,7 +268,7 @@ public class VMWareImpl implements IVMWare {
     private String getCurrentSnapshotName(ManagedObjectReference vmMor, String vmName) throws Exception {
         System.out.printf("Querying snapshot information for virtual machine (%s).\n", vmName);
         VirtualMachineSnapshotInfo vmSnapshotInfo = (VirtualMachineSnapshotInfo) getMorProperties(vmMor,
-                new String[] { snapshot }).get(snapshot);
+                new String[]{SNAPSHOT}).get(SNAPSHOT);
         String currentSnapshotName = "";
 
         if (vmSnapshotInfo != null) {
@@ -249,7 +283,7 @@ public class VMWareImpl implements IVMWare {
     }
 
     private String getCurrentSnapshotNameFromTree(List<VirtualMachineSnapshotTree> vmRootSnapshotList,
-            ManagedObjectReference currentSnapshotMor) {
+                                                  ManagedObjectReference currentSnapshotMor) {
         String currentSnapshot = "";
 
         for (VirtualMachineSnapshotTree vmSnapshot : vmRootSnapshotList) {
@@ -267,7 +301,7 @@ public class VMWareImpl implements IVMWare {
     }
 
     private ManagedObjectReference findSnapshotInTree(List<VirtualMachineSnapshotTree> vmSnapshotList,
-            String snapshotName) {
+                                                      String snapshotName) {
         ManagedObjectReference snapshotMor = null;
 
         for (VirtualMachineSnapshotTree vmSnapshot : vmSnapshotList) {
@@ -283,18 +317,18 @@ public class VMWareImpl implements IVMWare {
         return snapshotMor;
     }
 
-    private Map<String, Object> getMorProperties(ManagedObjectReference vmMor, String[] propList) throws Exception {
-        PropertyFilterSpec propFilterSpec = createPropFilterSpecForObject(vmMor, propList);
-        RetrieveResult results = null;
+    private Map<String, Object> getMorProperties(ManagedObjectReference mor, String[] propList) throws Exception {
+        PropertyFilterSpec propFilterSpec = createPropFilterSpecForObject(mor, propList);
+        RetrieveResult results;
         try {
-            results = vimPort.retrievePropertiesEx(serviceContent.getPropertyCollector(), Arrays.asList(propFilterSpec),
+            results = vimPort.retrievePropertiesEx(serviceContent.getPropertyCollector(), Collections.singletonList(propFilterSpec),
                     new RetrieveOptions());
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=PREREQ_RetriveObjectPropertiesFailed;TaskId=%s;]\n",
-                    Constants.taskId);
+                    Constants.TASK_ID);
             throw new Exception("Failed to properties for managed object : " + exp.getMessage());
         }
-        final Map<String, Object> propMap = new HashMap<String, Object>();
+        final Map<String, Object> propMap = new HashMap<>();
         if (results != null) {
             for (ObjectContent objContent : results.getObjects()) {
                 List<DynamicProperty> properties = objContent.getPropSet();
@@ -323,41 +357,49 @@ public class VMWareImpl implements IVMWare {
     }
 
     private Map<String, ManagedObjectReference> getObjectsInContainerByType(ManagedObjectReference container,
-            String morefType) throws Exception {
+                                                                            String morefType, boolean isTemplate) throws Exception {
+        String filterProperty = morefType.equals(VIRTUAL_MACHINE) ? CONFIG : NAME;
         PropertyFilterSpec propertyFilterSpecs = createRecursiveFilterSpec(container, morefType,
-                new String[] { config });
+                new String[]{filterProperty});
 
         try {
             System.out.printf("Querying %s objects on vCenter server.\n", morefType);
             RetrieveResult results = vimPort.retrievePropertiesEx(serviceContent.getPropertyCollector(),
-                    Arrays.asList(propertyFilterSpecs), new RetrieveOptions());
-            String token = null;
-            final Map<String, ManagedObjectReference> morMap = new HashMap<String, ManagedObjectReference>();
-            token = createMap(results, morMap);
+                    Collections.singletonList(propertyFilterSpecs), new RetrieveOptions());
+            String token;
+            final Map<String, ManagedObjectReference> morMap = new HashMap<>();
+            token = createMap(results, filterProperty, isTemplate, morMap);
 
             while (token != null && !token.isEmpty()) {
                 results = vimPort.continueRetrievePropertiesEx(serviceContent.getPropertyCollector(), token);
-                token = createMap(results, morMap);
+                token = createMap(results, filterProperty, isTemplate, morMap);
             }
             return morMap;
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=PREREQ_QueryObjectsFailed;TaskId=%s;]\n",
-                    Constants.taskId);
+                    Constants.TASK_ID);
             throw new Exception("Failed to fetch objects: " + exp.getMessage());
         }
     }
 
-    private String createMap(final RetrieveResult results, final Map<String, ManagedObjectReference> morMap) {
+    private String createMap(final RetrieveResult results, String filterProperty, boolean isTemplate, final Map<String, ManagedObjectReference> morMap) {
         String token = null;
-        VirtualMachineConfigInfo vmConfig = null;
 
         if (results != null) {
             token = results.getToken();
             for (ObjectContent objectContent : results.getObjects()) {
                 ManagedObjectReference mor = objectContent.getObj();
-                vmConfig = (VirtualMachineConfigInfo) objectContent.getPropSet().get(0).getVal();
-                if (vmConfig != null && !vmConfig.isTemplate()) {
-                    morMap.put(vmConfig.getName().toLowerCase(), mor);
+                List<DynamicProperty> propertySet = objectContent.getPropSet();
+                if (propertySet != null && propertySet.get(0) != null) {
+                    if (filterProperty.equals(CONFIG)) {
+                        VirtualMachineConfigInfo vmConfig = (VirtualMachineConfigInfo) propertySet.get(0).getVal();
+                        if (vmConfig != null && vmConfig.isTemplate() == isTemplate) {
+                            morMap.put(vmConfig.getName().toLowerCase(), mor);
+                        }
+                    } else {
+                        String mobName = (String) propertySet.get(0).getVal();
+                        morMap.put(mobName.toLowerCase(), mor);
+                    }
                 }
             }
         }
@@ -365,11 +407,11 @@ public class VMWareImpl implements IVMWare {
     }
 
     private PropertyFilterSpec createRecursiveFilterSpec(ManagedObjectReference container, String morefType,
-            String[] filterProps) throws Exception {
+                                                         String[] filterProps) throws Exception {
         try {
             ManagedObjectReference viewManager = serviceContent.getViewManager();
             ManagedObjectReference containerView = vimPort.createContainerView(viewManager, container,
-                    Arrays.asList(morefType), true);
+                    Collections.singletonList(morefType), true);
 
             // Create property specification to specify list properties to
             // extract from given object type
@@ -402,9 +444,49 @@ public class VMWareImpl implements IVMWare {
             return propertyFilterSpec;
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=PREREQ_CreateFilterSpecFailed;TaskId=%s;]\n",
-                    Constants.taskId);
+                    Constants.TASK_ID);
             throw new Exception("Failed to create filter spec: " + exp.getMessage());
         }
+    }
+
+    private VirtualMachineCloneSpec getVirtualMachineCloneSpec(String computeType, String computeName, ManagedObjectReference newDCMor, ManagedObjectReference newDSMor) throws Exception {
+
+        VirtualMachineRelocateSpec relocSpec = getVirtualMachineRelocationSpec(computeType, computeName, newDCMor, newDSMor);
+
+        VirtualMachineCloneSpec cloneSpec = new VirtualMachineCloneSpec();
+        cloneSpec.setLocation(relocSpec);
+        cloneSpec.setPowerOn(false);
+        cloneSpec.setTemplate(false);
+
+        return cloneSpec;
+    }
+
+    private VirtualMachineRelocateSpec getVirtualMachineRelocationSpec(String computeType, String computeName, ManagedObjectReference newDCMor, ManagedObjectReference newDSMor) throws Exception {
+        VirtualMachineRelocateSpec relocSpec = new VirtualMachineRelocateSpec();
+        ManagedObjectReference targetCluster;
+        ManagedObjectReference targetResourcePool;
+        switch (computeType) {
+            case "ESXi Host":
+                ManagedObjectReference targetHost = getMorByName(newDCMor, computeName, HOST_SYSTEM, false);
+                targetCluster = (ManagedObjectReference) getMorProperties(targetHost, new String[]{PARENT}).get(PARENT);
+                targetResourcePool = (ManagedObjectReference) getMorProperties(targetCluster, new String[]{RESOURCE_POOL_PROP}).get(RESOURCE_POOL_PROP);
+                relocSpec.setHost(targetHost);
+                break;
+            case "Cluster":
+                targetCluster = getMorByName(newDCMor, computeName, CLUSTER_COMPUTE_RESOURCE, false);
+                targetResourcePool = (ManagedObjectReference) getMorProperties(targetCluster, new String[]{RESOURCE_POOL_PROP}).get(RESOURCE_POOL_PROP);
+                break;
+            case "Resource Pool":
+                targetResourcePool = getMorByName(newDCMor, computeName, RESOURCE_POOL, false);
+                break;
+            default:
+                System.out.printf("##vso[task.logissue type=error;code=INFRAISSUE_InvalidComputeType;TaskId=%s;]\n",
+                        Constants.TASK_ID);
+                throw new Exception("Invalid compute resource type: " + computeType);
+        }
+        relocSpec.setPool(targetResourcePool);
+        relocSpec.setDatastore(newDSMor);
+        return relocSpec;
     }
 
     public void connect(ConnectionData connData) throws Exception {
@@ -415,7 +497,7 @@ public class VMWareImpl implements IVMWare {
                 vimPort = vimService.getVimPort();
 
                 Map<String, Object> reqContext = ((BindingProvider) vimPort).getRequestContext();
-                reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, connData.url.toString());
+                reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, connData.url);
                 reqContext.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
                 ManagedObjectReference serviceInstance = new ManagedObjectReference();
                 serviceInstance.setType("ServiceInstance");
@@ -428,11 +510,10 @@ public class VMWareImpl implements IVMWare {
             }
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=USERINPUT_ConnectionFailed;TaskId=%s;]\n",
-                    Constants.taskId);
+                    Constants.TASK_ID);
             throw new Exception("Failed to connect: " + exp.getMessage());
         }
         System.out.println("Successfully established session with vCenter server.");
-        return;
     }
 
     private boolean isSessionActive() {

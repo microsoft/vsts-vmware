@@ -2,6 +2,8 @@
 
 Connect to a VMWare vCenter server, and easily provision VMs, and perform actions on them like snapshot, revert snapshot, start, stop, delete etc. In this release, the action for reverting to snapshots on virtual machines is available and other actions will be released in the subsequent updates of the extension.
 
+VMware, vCenter Server, and vSphere are registered trademarks or trademarks of VMware, Inc. in the United States and/or other jurisdictions.
+
 **Usage**
 
 The extension installs the following components:
