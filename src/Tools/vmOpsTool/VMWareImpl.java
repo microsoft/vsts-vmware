@@ -503,6 +503,10 @@ public class VMWareImpl implements IVMWare {
                 serviceInstance.setType("ServiceInstance");
                 serviceInstance.setValue("ServiceInstance");
 
+                if (connData.skipCACheck) {
+                    SkipCACheck.AllowUntrustedConnections();
+                }
+
                 serviceContent = vimPort.retrieveServiceContent(serviceInstance);
                 rootFolder = serviceContent.getRootFolder();
                 userSession = vimPort.login(serviceContent.getSessionManager(), connData.userName, connData.password,

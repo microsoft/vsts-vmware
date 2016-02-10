@@ -17,7 +17,7 @@ public class VmOpsToolUnitTests {
     private String vCenterPassword = "Password~1";
     private String vmSnapshotName = "Snapshot1";
 
-    private ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword);
+    private ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword, true);
 
     @Test
     public void parseCmdArgsWithAllRequiredInputs() {

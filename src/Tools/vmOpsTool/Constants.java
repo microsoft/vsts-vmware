@@ -6,6 +6,7 @@ public class Constants {
     public static final String V_CENTER_USER_NAME = "-vCenterUserName";
     public static final String V_CENTER_PASSWORD = "-vCenterPassword";
     public static final String VM_LIST = "-vmList";
+    public static final String SKIP_CA_CHECK = "-skipca";
     public static final String SNAPSHOT_OPS = "-snapshotOps";
     public static final String DELETE_VM = "-deletevm";
     public static final String CLONE_TEMPLATE = "-clonetemplate";
