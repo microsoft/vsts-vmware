@@ -15,14 +15,11 @@ public class SkipCACheck {
         TrustManager[] trustAllCerts = new TrustManager[1];
         TrustManager trustManager = new TrustAllTrustManager();
         trustAllCerts[0] = trustManager;
+
         SSLContext sslContext = SSLContext.getInstance("SSL");
-
         SSLSessionContext serverSessionContext = sslContext.getServerSessionContext();
-
-
         serverSessionContext.setSessionTimeout(30 * 60);
         sslContext.init(null, trustAllCerts, null);
-
         setDefaultSSLSocketFactory(sslContext.getSocketFactory());
         setDefaultHostnameVerifier(verifier);
     }
