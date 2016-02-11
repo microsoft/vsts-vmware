@@ -80,7 +80,7 @@ public class InMemoryVMWareImpl implements IVMWare {
     }
 
     public void connect(ConnectionData connData) throws Exception {
-        if (connData.password.equals("InvalidPassword") || !connData.skipCACheck) {
+        if (connData.getPassword().equals("InvalidPassword") || !connData.isSkipCACheck()) {
             throw new Exception();
         }
     }
