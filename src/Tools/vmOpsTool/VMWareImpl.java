@@ -87,7 +87,7 @@ public class VMWareImpl implements IVMWare {
         System.out.printf("Searching for datastore with name [%s].\n", newDatastore);
         ManagedObjectReference targetDS = getMorByName(targetDC, newDatastore, DATA_STORE, false);
 
-        VirtualMachineCloneSpec cloneSpec = getVirtualMachineCloneSpec(computeType, computeName, targetDC, targetDS);
+        VirtualMachineCloneSpec cloneSpec = getVirtualMachineCloneSpec(computeType, computeName, description, targetDC, targetDS);
 
         System.out.printf("Creating new virtual machine [%s] using template [%s].\n", vmName, templateName);
         ManagedObjectReference task = vimPort.cloneVMTask(templateMor, targetVmFolder, vmName, cloneSpec);
@@ -449,11 +449,14 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    private VirtualMachineCloneSpec getVirtualMachineCloneSpec(String computeType, String computeName, ManagedObjectReference newDCMor, ManagedObjectReference newDSMor) throws Exception {
+    private VirtualMachineCloneSpec getVirtualMachineCloneSpec(String computeType, String computeName, String description, ManagedObjectReference newDCMor, ManagedObjectReference newDSMor) throws Exception {
 
         VirtualMachineRelocateSpec relocSpec = getVirtualMachineRelocationSpec(computeType, computeName, newDCMor, newDSMor);
+        VirtualMachineConfigSpec configSpec = new VirtualMachineConfigSpec();
+        configSpec.setAnnotation(description);
 
         VirtualMachineCloneSpec cloneSpec = new VirtualMachineCloneSpec();
+        cloneSpec.setConfig(configSpec);
         cloneSpec.setLocation(relocSpec);
         cloneSpec.setPowerOn(false);
         cloneSpec.setTemplate(false);
