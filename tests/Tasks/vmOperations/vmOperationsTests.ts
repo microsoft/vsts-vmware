@@ -39,12 +39,13 @@ describe("getCmdCommonArgs", (): void => {
         sandbox.restore();
     });
 
-    it("Successfully read all the common params (url, username, password, vmList)", (): void => {
+    it("Successfully read all the common params (url, username, password, vmList, skipca)", (): void => {
 
         getInputStub.withArgs("vCenterConnection", true).returns(dummyConnectionName);
         getInputStub.withArgs("vmList", true).returns(dummyVmList);
         getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
         getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummyuser", "password" : "dummypassword"}});
+        getInputStub.withArgs("skipca", false).returns("true");
 
         var cmdArgs = vmOperations.VmOperations.getCmdCommonArgs();
 
@@ -52,6 +53,7 @@ describe("getCmdCommonArgs", (): void => {
         cmdArgs.should.contain("-vCenterUserName \"dummyuser\"");
         cmdArgs.should.contain("-vCenterPassword \"dummypassword\"");
         cmdArgs.should.contain("-vmList \"" + dummyVmList + "\"");
+        cmdArgs.should.contain("-skipca true");
     });
 
     it("Should throw on failure to get connected service name", (): void => {
@@ -79,6 +81,18 @@ describe("getCmdCommonArgs", (): void => {
         expect(vmOperations.VmOperations.getCmdCommonArgs).to.throw("Error");
         getEndpointAuthorizationStub.should.have.been.calledOnce;
         getEndpointAuthorizationStub.should.have.thrown("Error");
+    });
+
+    it("Should throw on failure read skipca check", (): void => {
+        getInputStub.withArgs("vCenterConnection", true).returns(dummyConnectionName);
+        getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
+        getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummyuser", "password" : "dummypassword"}});
+        getInputStub.withArgs("vmList", true).returns("vm1");
+        getInputStub.withArgs("skipca", false).throws();
+
+        expect(vmOperations.VmOperations.getCmdCommonArgs).to.throw("Error");
+        getInputStub.withArgs("skipca", false).should.have.been.calledOnce;
+        getInputStub.withArgs("skipca", false).should.have.thrown("Error");
     });
 
     it("Should fail task for invalid vmList input, i.e vmname empty string", (): void => {

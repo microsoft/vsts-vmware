@@ -65,7 +65,7 @@
         {
             "name": "targetlocation",
             "type": "string",
-            "label": "Location",
+            "label": "Datacenter",
             "defaultValue": "",
             "required": true,
             "visibleRule": "action = Deploy Virtual Machines using Template",
@@ -138,6 +138,14 @@
             "defaultValue": "",
             "visibleRule": "action = Take Snapshot of Virtual Machines || action = Deploy Virtual Machines using Template",
             "helpMarkDown": "Additional description for the action."
+        },
+        {
+            "name": "skipca",
+            "type": "boolean",
+            "label": "Skip Certification Authority check",
+            "required": false,
+            "defaultValue": "true",
+            "helpMarkDown": "Select the option to skip validating the authenticity of the machine's certificate by a trusted certification authority."
         }
     ],
     "instanceNameFormat": "$(action) : $(vmList)",

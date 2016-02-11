@@ -15,10 +15,11 @@ export class VmOperations {
         var vCenterUserName: string = endPointAuthCreds["username"];
         var vCenterPassword: string = endPointAuthCreds["password"];
         var vmList: string = tl.getInput("vmList", true);
+        var skipca: string = tl.getInput("skipca", false);
         this.validateVmListInput(vmList);
 
         cmdArgs += " -vCenterUrl \"" + vCenterUrl  + "\" -vCenterUserName \"" + vCenterUserName  + "\" -vCenterPassword \"" +
-                 vCenterPassword + "\" -vmList \"" + vmList + "\"";
+                 vCenterPassword + "\" -vmList \"" + vmList + "\"" + " -skipca " + skipca;
         tl.debug(util.format("common args: -vCenterUrl \"%s\" -vCenterUserName \"%s\" -vCenterPassword \"%s\" -vmList \"%s\"",
                 vCenterUrl, vCenterUserName, "**********", vmList));
         return cmdArgs;

@@ -32,8 +32,9 @@ public class VmOpsTool {
         String vCenterUserName = argsMap.get(Constants.V_CENTER_USER_NAME);
         String vCenterPassword = argsMap.get(Constants.V_CENTER_PASSWORD);
         String vmList = argsMap.get(Constants.VM_LIST);
+        boolean skipCACheck = Boolean.parseBoolean(argsMap.get(Constants.SKIP_CA_CHECK));
 
-        ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword);
+        ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword, skipCACheck);
         String[] vmNames = vmList.split(",");
         String failedVmList = "";
         String errorMessage = "";

@@ -1,8 +1,8 @@
-import java.util.*;
+import com.sun.xml.ws.client.BindingProviderProperties;
+import com.vmware.vim25.*;
 
 import javax.xml.ws.BindingProvider;
-
-import com.vmware.vim25.*;
+import java.util.*;
 
 public class VMWareImpl implements IVMWare {
 
@@ -497,15 +497,21 @@ public class VMWareImpl implements IVMWare {
                 vimPort = vimService.getVimPort();
 
                 Map<String, Object> reqContext = ((BindingProvider) vimPort).getRequestContext();
-                reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, connData.url);
+                reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, connData.getUrl());
                 reqContext.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
+                reqContext.put(BindingProviderProperties.REQUEST_TIMEOUT, 30 * 60 * 1000);
+                reqContext.put(BindingProviderProperties.CONNECT_TIMEOUT, 5 * 60 * 1000);
                 ManagedObjectReference serviceInstance = new ManagedObjectReference();
                 serviceInstance.setType("ServiceInstance");
                 serviceInstance.setValue("ServiceInstance");
 
+                if (connData.isSkipCACheck()) {
+                    SkipCACheck.AllowUntrustedConnections();
+                }
+
                 serviceContent = vimPort.retrieveServiceContent(serviceInstance);
                 rootFolder = serviceContent.getRootFolder();
-                userSession = vimPort.login(serviceContent.getSessionManager(), connData.userName, connData.password,
+                userSession = vimPort.login(serviceContent.getSessionManager(), connData.getUserName(), connData.getPassword(),
                         null);
             }
         } catch (Exception exp) {

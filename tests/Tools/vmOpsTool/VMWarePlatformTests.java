@@ -6,7 +6,7 @@ public abstract class VMWarePlatformTests {
     private String vCenterUserName = "Administrator@vsphere.local";
     private String vCenterPassword = "Password~1";
     private String vCenterUrl = getvCenterUrl();
-    private ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword);
+    private ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword, true);
     private IVMWare vmWareImpl = getVmWareImpl();
     private String snapshotOne = "Snapshot1";
     private String templateName = "Ubuntu";
@@ -182,10 +182,21 @@ public abstract class VMWarePlatformTests {
     }
 
     @Test
-    public void connectShouldThrowConnectionToServerFailsAuthentication() {
+    public void connectShouldThrowForInvalidCredentials() {
         Exception exp = null;
         try {
-            vmWareImpl.connect(new ConnectionData(vCenterUrl, vCenterUserName, "InvalidPassword"));
+            vmWareImpl.connect(new ConnectionData(vCenterUrl, vCenterUserName, "InvalidPassword", true));
+        } catch (Exception e) {
+            exp = e;
+        }
+        assertThat(exp).isNotNull();
+    }
+
+    @Test
+    public void connectShouldThrowWithoutSkipCACheck() {
+        Exception exp = null;
+        try {
+            vmWareImpl.connect(new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword, false));
         } catch (Exception e) {
             exp = e;
         }
