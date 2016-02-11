@@ -192,7 +192,6 @@ public abstract class VMWarePlatformTests {
         assertThat(exp).isNotNull();
     }
 
-    @Test
     public void connectShouldThrowWithoutSkipCACheck() {
         Exception exp = null;
         try {
