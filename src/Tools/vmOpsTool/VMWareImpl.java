@@ -48,7 +48,7 @@ public class VMWareImpl implements IVMWare {
 
                 if (connData.isSkipCACheck()) {
                     SkipCACheck.AllowUntrustedConnections();
-                }
+    }
 
                 serviceContent = vimPort.retrieveServiceContent(serviceInstance);
                 rootFolder = serviceContent.getRootFolder();
@@ -56,7 +56,7 @@ public class VMWareImpl implements IVMWare {
                         null);
                 System.out.printf("Searching for datacenter with name [%s].\n", connData.getTargetDC());
                 targetDCMor = getMorByName(rootFolder, connData.getTargetDC(), DATA_CENTER, false);
-            }
+    }
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=USERINPUT_ConnectionFailed;TaskId=%s;]\n",
                     Constants.TASK_ID);
@@ -545,8 +545,10 @@ public class VMWareImpl implements IVMWare {
     private VirtualMachineCloneSpec getVirtualMachineCloneSpec(String computeType, String computeName, String targetDS) throws Exception {
 
         VirtualMachineRelocateSpec relocSpec = getVirtualMachineRelocationSpec(computeType, computeName, targetDS);
-
+        VirtualMachineConfigSpec configSpec = new VirtualMachineConfigSpec();
+        configSpec.setAnnotation(description);
         VirtualMachineCloneSpec cloneSpec = new VirtualMachineCloneSpec();
+        cloneSpec.setConfig(configSpec);
         cloneSpec.setLocation(relocSpec);
         cloneSpec.setPowerOn(false);
         cloneSpec.setTemplate(false);
