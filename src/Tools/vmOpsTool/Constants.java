@@ -10,6 +10,7 @@ public class Constants {
     public static final String SNAPSHOT_OPS = "-snapshotOps";
     public static final String DELETE_VM = "-deletevm";
     public static final String CLONE_TEMPLATE = "-clonetemplate";
+    public static final String POWER_OPS = "-powerops";
     public static final String TARGET_LOCATION = "-targetlocation";
     public static final String COMPUTE_TYPE = "-computetype";
     public static final String COMPUTE_NAME = "-computename";
@@ -23,6 +24,7 @@ public class Constants {
     public static final String SAVE_VM_MEMORY = "-saveVmMemory";
     public static final String DELETE_SNAPSHOT_ACTION = "delete";
     public static final String DELETE_VM_ACTION = "delete";
+    public static final String START_VM_ACTION = "start";
 
     public static final String TASK_ID = "735d144e-55fe-44d6-b687-db9031b6e70b";
 

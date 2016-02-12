@@ -85,6 +85,12 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
+    public void startVM(String vmName, ConnectionData connData) throws Exception {
+        if (vmName.equals("VmThatFailsInStart")) {
+            throw new Exception("start vm operation failed for VmThatFailsInStart");
+        }
+    }
+
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
 
         String currentSnapshotName;
@@ -111,6 +117,10 @@ public class InMemoryVMWareImpl implements IVMWare {
 
     public boolean isVmExists(String vmName, ConnectionData connData) throws Exception {
         return vmSnapshotInfo.containsKey(vmName);
+    }
+
+    public boolean isVmPoweredOn(String vmName, ConnectionData connData) throws Exception {
+        return true;
     }
 
 

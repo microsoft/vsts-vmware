@@ -232,6 +232,28 @@ public abstract class VMWarePlatformTests {
         vmWareImpl.deleteSnapshot(vmName, newSnapshot, connData);
     }
 
+    @Test
+    public void startOnRunningVmShouldNotThrow() throws Exception {
+        String vmName = "Win2012R2";
+        vmWareImpl.startVM(vmName, connData);
+        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
+        vmWareImpl.startVM(vmName, connData);
+        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
+    }
+
+    @Test
+    public void startVmShouldSucceedForPoweredOffWindowsVM() throws Exception {
+        String vmName = "Win7";
+        vmWareImpl.startVM(vmName, connData);
+        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
+    }
+
+    public void startVmShouldSucceedForPoweredOffLinuxVM() throws Exception {
+        String vmName = "UbuntuVM";
+        vmWareImpl.startVM(vmName, connData);
+        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
+    }
+
     // Common for restore/delete snapshot operations
     @Test
     public void restoreOrDeleteSnapshotShouldThrowIfSnapshotDoesNotExist() {

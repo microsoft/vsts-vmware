@@ -62,6 +62,32 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
+    public void executeActionShouldSucceedForStartVMActionWithValidInputs() throws Exception {
+        String[] cmdArgs = getCmdArgs("newVM1, newVM2", Constants.POWER_OPS, Constants.START_VM_ACTION);
+
+        vmOpsTool.executeAction(cmdArgs);
+
+        assertThat(vmWareImpl.isVmPoweredOn("newVM1", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVmPoweredOn("newVM2", connData)).isEqualTo(true);
+    }
+
+    @Test
+    public void executeActionShouldThrowForStartVMActionFailureOnAVM() throws Exception {
+        String[] cmdArgs = getCmdArgs("newVM1, VmThatFailsInStart", Constants.POWER_OPS, Constants.START_VM_ACTION);
+
+        Exception exp = null;
+
+        try {
+            vmOpsTool.executeAction(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+
+        assertThat(exp).isNotNull();
+        assertThat(vmWareImpl.isVmPoweredOn("newVM1", connData)).isEqualTo(true);
+    }
+
+    @Test
     public void executeActionShouldThrowForCloneAndDeleteVMFailureOnAVM() throws Exception {
         String[] cmdArgs = getCmdArgs("newVM1, VMNameThatFailsInClone", Constants.CLONE_TEMPLATE, "dummyTemplate", Constants.TARGET_LOCATION,
                 "dummyLocation", Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName", Constants.DESCRIPTION, "Dummy description");

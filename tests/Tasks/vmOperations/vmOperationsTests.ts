@@ -162,7 +162,7 @@ describe("getCmdArgsForAction", (): void => {
         cmdArgs.should.contain("-snapshotOps delete -snapshotName \"dummySnapshotName\"");
     });
 
-    it("Should read template, location, computeType, hostname, datastore and description", (): void => {
+    it("Should read template, location, computeType, hostname, datastore and description for clone template", (): void => {
         getInputStub.withArgs("template", true).returns("dummyTemplate");
         getInputStub.withArgs("targetlocation", true).returns("dummyLocation");
         getInputStub.withArgs("computeType", true).returns("ESXi Host");
@@ -209,6 +209,12 @@ describe("getCmdArgsForAction", (): void => {
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Delete Virtual Machines");
 
         cmdArgs.should.contain("-deletevm delete");
+    });
+
+    it("Should construct command action for start vm operation", (): void => {
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Power On Virtual Machines");
+
+        cmdArgs.should.contain("-powerops start");
     });
 
     it("Should throw on failure to read snapshot name for restore/create/delete snapshot action", (): void => {

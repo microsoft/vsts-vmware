@@ -72,6 +72,9 @@ export class VmOperations {
             case "Delete Virtual Machines":
                 cmdArgs += " -deletevm delete";
                 break;
+            case "Power On Virtual Machines":
+                cmdArgs += " -powerops start";
+                break;
             default:
                 tl.error("Invalid action name : " + actionName);
                 tl.exit(1);

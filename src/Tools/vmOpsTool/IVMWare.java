@@ -58,6 +58,14 @@ public interface IVMWare {
     boolean isVmExists(String vmName, ConnectionData connData) throws Exception;
 
     /**
+     * @param vmName name of the virtual machine
+     * @param connData connection information for vCenter
+     * @return true if powered on, otherwise false
+     * @throws Exception
+     */
+    boolean isVmPoweredOn(String vmName, ConnectionData connData) throws Exception;
+
+    /**
      * @param templateName   name of the virtual machine template to be cloned
      * @param vmName         name of the virtual machine
      * @param targetLocation target location either a dc or vm folder
@@ -81,4 +89,11 @@ public interface IVMWare {
      * @throws Exception on failure to connect
      */
     void connect(ConnectionData connData) throws Exception;
+
+    /**
+     * @param vmName   name of the virtual machine
+     * @param connData vCenter connection information
+     * @throws Exception
+     */
+    void startVM(String vmName, ConnectionData connData) throws Exception;
 }

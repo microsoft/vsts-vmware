@@ -55,6 +55,9 @@ public class VmOpsTool {
             } else if (argsMap.containsKey(Constants.DELETE_VM)) {
                 errorMessage = "delete vm operation failed for virtual machines ";
                 failedVmList += executeDeleteVmAction(argsMap, vmName, connData);
+            } else if (argsMap.containsKey(Constants.POWER_OPS)) {
+                errorMessage = "start vm operation failed for virtual machines ";
+                failedVmList += executeStartVmAction(argsMap, vmName, connData);
             } else {
                 System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]\n",
                         Constants.TASK_ID);
@@ -65,6 +68,17 @@ public class VmOpsTool {
         if (!failedVmList.isEmpty()) {
             throw new Exception(String.format("%s [%s].", errorMessage, failedVmList));
         }
+    }
+
+    private String executeStartVmAction(Map<String, String> argsMap, String vmName, ConnectionData connData) {
+        String failedVm = "";
+        try {
+            vmWareImpl.startVM(vmName, connData);
+        } catch (Exception exp) {
+            System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred.");
+            failedVm = vmName + " ";
+        }
+        return failedVm;
     }
 
     private String executeDeleteVmAction(Map<String, String> argsMap, String vmName, ConnectionData connData) {

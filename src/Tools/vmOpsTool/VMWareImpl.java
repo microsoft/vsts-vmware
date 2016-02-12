@@ -21,6 +21,7 @@ public class VMWareImpl implements IVMWare {
     private final String SNAPSHOT = "snapshot";
     private final String CONFIG = "config";
     private final String NAME = "name";
+    private final String GUEST_IP = "guest.ipAddress";
 
     private VimService vimService;
     private VimPortType vimPort;
@@ -61,6 +62,14 @@ public class VMWareImpl implements IVMWare {
         return true;
     }
 
+    public boolean isVmPoweredOn(String vmName, ConnectionData connData) throws Exception {
+        connect(connData);
+        System.out.println("Checking virtual machine [ " + vmName + " ] power status.");
+        ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, VIRTUAL_MACHINE, false);
+        String vmIpAddress = (String) getMorProperties(vmMor, new String[]{GUEST_IP}).get(GUEST_IP);
+        return (vmIpAddress != null) && !vmIpAddress.isEmpty();
+    }
+
     public void deleteVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
         ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, VIRTUAL_MACHINE, false);
@@ -74,7 +83,8 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    public void cloneVMFromTemplate(String templateName, String vmName, String targetLocation, String computeType, String computeName, String newDatastore, String description, ConnectionData connData) throws Exception {
+    public void cloneVMFromTemplate(String templateName, String vmName, String targetLocation, String computeType,
+                                    String computeName, String newDatastore, String description, ConnectionData connData) throws Exception {
         connect(connData);
 
         System.out.printf("Finding template [%s] on vCenter server.\n", templateName);
@@ -147,7 +157,8 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    private ManagedObjectReference getMorByName(ManagedObjectReference rootContainer, String mobName, String morefType, boolean isTemplate) throws Exception {
+    private ManagedObjectReference getMorByName(ManagedObjectReference rootContainer, String mobName, String morefType,
+                                                boolean isTemplate) throws Exception {
         Map<String, ManagedObjectReference> mobrMap = getObjectsInContainerByType(rootContainer, morefType, isTemplate);
 
         if (!mobrMap.containsKey(mobName.toLowerCase())) {
@@ -173,6 +184,43 @@ public class VMWareImpl implements IVMWare {
         return retVal;
     }
 
+    private void waitForVmToBoot(ManagedObjectReference vmMor) throws Exception {
+        String version = "";
+        String ipAddress = "";
+        PropertyFilterSpec filterSpec = createPropFilterSpecForObject(vmMor, new String[]{GUEST_IP});
+        ManagedObjectReference propertyFilter = vimPort.createFilter(serviceContent.getPropertyCollector(), filterSpec, true);
+
+        while (ipAddress.isEmpty()) {
+            WaitOptions waitOptions = new WaitOptions();
+            waitOptions.setMaxWaitSeconds(10 * 60); // Wait in number of seconds
+            UpdateSet updateSet = vimPort.waitForUpdatesEx(serviceContent.getPropertyCollector(), version, waitOptions);
+            if (updateSet == null || updateSet.getFilterSet() == null) {
+                continue;
+            }
+            version = updateSet.getVersion();
+            List<PropertyFilterUpdate> filterUpdateList = updateSet.getFilterSet();
+
+            for (PropertyFilterUpdate filterUpdate : filterUpdateList) {
+                if (filterUpdate == null || filterUpdate.getObjectSet() == null) {
+                    continue;
+                }
+                List<ObjectUpdate> objectUpdateList = filterUpdate.getObjectSet();
+                for (ObjectUpdate objectUpdate : objectUpdateList) {
+                    if (objectUpdate == null || objectUpdate.getChangeSet() == null) {
+                        continue;
+                    }
+                    List<PropertyChange> propChangeList = objectUpdate.getChangeSet();
+                    for (PropertyChange propChange : propChangeList) {
+                        if (propChange.getVal() != null) {
+                            ipAddress = (String) propChange.getVal();
+                        }
+                    }
+                }
+            }
+        }
+        vimPort.destroyPropertyFilter(propertyFilter);
+    }
+
     private Object[] waitForTaskResult(ManagedObjectReference taskMor, String[] filterProps, String[] endWaitProps,
                                        Object[][] expectedVals) throws Exception {
         try {
@@ -181,13 +229,11 @@ public class VMWareImpl implements IVMWare {
             Object[] filterVals = new Object[filterProps.length];
             String version = "";
             PropertyFilterSpec filterSpec = createPropFilterSpecForObject(taskMor, filterProps);
-            ManagedObjectReference filterSpecRef = vimPort.createFilter(serviceContent.getPropertyCollector(),
-                    filterSpec, true);
+            ManagedObjectReference propertyFilter = vimPort.createFilter(serviceContent.getPropertyCollector(), filterSpec, true);
             boolean reached = false;
 
             while (!reached) {
-                UpdateSet updateSet = vimPort.waitForUpdatesEx(serviceContent.getPropertyCollector(), version,
-                        new WaitOptions());
+                UpdateSet updateSet = vimPort.waitForUpdatesEx(serviceContent.getPropertyCollector(), version, new WaitOptions());
                 if (updateSet == null || updateSet.getFilterSet() == null) {
                     continue;
                 }
@@ -219,7 +265,7 @@ public class VMWareImpl implements IVMWare {
                     }
                 }
             }
-            vimPort.destroyPropertyFilter(filterSpecRef);
+            vimPort.destroyPropertyFilter(propertyFilter);
             return filterVals;
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=PREREQ_WaitForResultFailed;TaskId=%s;]\n",
@@ -390,7 +436,7 @@ public class VMWareImpl implements IVMWare {
             for (ObjectContent objectContent : results.getObjects()) {
                 ManagedObjectReference mor = objectContent.getObj();
                 List<DynamicProperty> propertySet = objectContent.getPropSet();
-                if (propertySet != null && propertySet.get(0) != null) {
+                if (propertySet != null && !propertySet.isEmpty() && propertySet.get(0) != null) {
                     if (filterProperty.equals(CONFIG)) {
                         VirtualMachineConfigInfo vmConfig = (VirtualMachineConfigInfo) propertySet.get(0).getVal();
                         if (vmConfig != null && vmConfig.isTemplate() == isTemplate) {
@@ -520,6 +566,24 @@ public class VMWareImpl implements IVMWare {
             throw new Exception("Failed to connect: " + exp.getMessage());
         }
         System.out.println("Successfully established session with vCenter server.");
+    }
+
+    public void startVM(String vmName, ConnectionData connData) throws Exception {
+        connect(connData);
+        if (!isVmPoweredOn(vmName, connData)) {
+            ManagedObjectReference vmMor = getMorByName(rootFolder, vmName, VIRTUAL_MACHINE, false);
+            ManagedObjectReference task = vimPort.powerOnVMTask(vmMor, null);
+
+            if (!waitAndGetTaskResult(task)) {
+                throw new Exception(
+                        String.format("Failed to power on virtual machine [%s].\n", vmName));
+            }
+            System.out.printf("Waiting for virtual machine [%s] to start.\n", vmName);
+            waitForVmToBoot(vmMor);
+            System.out.printf("Successfully powered on virtual machine [%s].\n", vmName);
+            return;
+        }
+        System.out.printf("Virtual machine [%s] is already running.\n", vmName);
     }
 
     private boolean isSessionActive() {
