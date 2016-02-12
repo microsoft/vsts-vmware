@@ -71,7 +71,7 @@ public class VMWareImpl implements IVMWare {
         System.out.printf("Finding template [%s] on vCenter server.\n", templateName);
         ManagedObjectReference templateMor = getMorByName(targetDCMor, templateName, VIRTUAL_MACHINE, true);
         ManagedObjectReference targetVmFolder = (ManagedObjectReference) getMorProperties(targetDCMor, new String[]{VM_FOLDER}).get(VM_FOLDER);
-        VirtualMachineCloneSpec cloneSpec = getVirtualMachineCloneSpec(computeType, computeName, targetDS);
+        VirtualMachineCloneSpec cloneSpec = getVirtualMachineCloneSpec(computeType, computeName, targetDS, description);
 
         System.out.printf("Creating new virtual machine [%s] using template [%s].\n", vmName, templateName);
         ManagedObjectReference task = vimPort.cloneVMTask(templateMor, targetVmFolder, vmName, cloneSpec);
@@ -542,7 +542,7 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    private VirtualMachineCloneSpec getVirtualMachineCloneSpec(String computeType, String computeName, String targetDS) throws Exception {
+    private VirtualMachineCloneSpec getVirtualMachineCloneSpec(String computeType, String computeName, String targetDS, String description) throws Exception {
 
         VirtualMachineRelocateSpec relocSpec = getVirtualMachineRelocationSpec(computeType, computeName, targetDS);
         VirtualMachineConfigSpec configSpec = new VirtualMachineConfigSpec();
