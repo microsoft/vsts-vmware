@@ -11,7 +11,7 @@ public class Constants {
     public static final String DELETE_VM = "-deletevm";
     public static final String CLONE_TEMPLATE = "-clonetemplate";
     public static final String POWER_OPS = "-powerops";
-    public static final String TARGET_LOCATION = "-targetlocation";
+    public static final String TARGET_DC = "-targetdc";
     public static final String COMPUTE_TYPE = "-computetype";
     public static final String COMPUTE_NAME = "-computename";
     public static final String DATASTORE = "-datastore";

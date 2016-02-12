@@ -68,14 +68,13 @@ public interface IVMWare {
     /**
      * @param templateName   name of the virtual machine template to be cloned
      * @param vmName         name of the virtual machine
-     * @param targetLocation target location either a dc or vm folder
      * @param computeType    type of the compute esxi/cluster/resourcepool
      * @param computeName    name of the compute resouce
      * @param description    optional description for create operation
      * @param connData       connection information for vCenter
      * @throws Exception
      */
-    void cloneVMFromTemplate(String templateName, String vmName, String targetLocation, String computeType, String computeName, String datastore, String description, ConnectionData connData) throws Exception;
+    void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName, String datastore, String description, ConnectionData connData) throws Exception;
 
     /**
      * @param vmName   name of the virtual machine
