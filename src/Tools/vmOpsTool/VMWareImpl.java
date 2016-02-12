@@ -475,7 +475,7 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    private String createMap(final RetrieveResult results, String filterProperty, boolean isTemplate, final Map<String, ManagedObjectReference> morMap) throws Exception {
+    private String createMap(final RetrieveResult results, String filterProperty, boolean isTemplate, final Map<String, ManagedObjectReference> morMap) {
         String token = null;
 
         if (results != null) {
