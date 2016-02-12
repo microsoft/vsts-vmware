@@ -28,14 +28,49 @@ public class VMWareImpl implements IVMWare {
     private ServiceContent serviceContent;
     private UserSession userSession;
     private ManagedObjectReference rootFolder;
-    private ManagedObjectReference targetDC;
+    private ManagedObjectReference targetDCMor;
+
+    public void connect(ConnectionData connData) throws Exception {
+        try {
+            if (!isSessionActive()) {
+                System.out.println("No active session found.. establishing new session.");
+                vimService = new VimService();
+                vimPort = vimService.getVimPort();
+
+                Map<String, Object> reqContext = ((BindingProvider) vimPort).getRequestContext();
+                reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, connData.getUrl());
+                reqContext.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
+                reqContext.put(BindingProviderProperties.REQUEST_TIMEOUT, 30 * 60 * 1000);
+                reqContext.put(BindingProviderProperties.CONNECT_TIMEOUT, 5 * 60 * 1000);
+                ManagedObjectReference serviceInstance = new ManagedObjectReference();
+                serviceInstance.setType("ServiceInstance");
+                serviceInstance.setValue("ServiceInstance");
+
+                if (connData.isSkipCACheck()) {
+                    SkipCACheck.AllowUntrustedConnections();
+                }
+
+                serviceContent = vimPort.retrieveServiceContent(serviceInstance);
+                rootFolder = serviceContent.getRootFolder();
+                userSession = vimPort.login(serviceContent.getSessionManager(), connData.getUserName(), connData.getPassword(),
+                        null);
+                System.out.printf("Searching for datacenter with name [%s].\n", connData.getTargetDC());
+                targetDCMor = getMorByName(rootFolder, connData.getTargetDC(), DATA_CENTER, false);
+            }
+        } catch (Exception exp) {
+            System.out.printf("##vso[task.logissue type=error;code=USERINPUT_ConnectionFailed;TaskId=%s;]\n",
+                    Constants.TASK_ID);
+            throw new Exception("Failed to connect: " + exp.getMessage());
+        }
+        System.out.println("Successfully established session with vCenter server.");
+    }
 
     public void cloneVMFromTemplate(String templateName, String vmName, String computeType,
                                     String computeName, String targetDS, String description, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Finding template [%s] on vCenter server.\n", templateName);
-        ManagedObjectReference templateMor = getMorByName(targetDC, templateName, VIRTUAL_MACHINE, true);
-        ManagedObjectReference targetVmFolder = (ManagedObjectReference) getMorProperties(targetDC, new String[]{VM_FOLDER}).get(VM_FOLDER);
+        ManagedObjectReference templateMor = getMorByName(targetDCMor, templateName, VIRTUAL_MACHINE, true);
+        ManagedObjectReference targetVmFolder = (ManagedObjectReference) getMorProperties(targetDCMor, new String[]{VM_FOLDER}).get(VM_FOLDER);
         VirtualMachineCloneSpec cloneSpec = getVirtualMachineCloneSpec(computeType, computeName, targetDS);
 
         System.out.printf("Creating new virtual machine [%s] using template [%s].\n", vmName, templateName);
@@ -53,7 +88,7 @@ public class VMWareImpl implements IVMWare {
                                String description, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Creating snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getMorByName(targetDC, vmName, VIRTUAL_MACHINE, false);
+        ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
         ManagedObjectReference task = vimPort.createSnapshotTask(vmMor, snapshotName, description, saveVMMemory,
                 quiesceFs);
 
@@ -68,7 +103,7 @@ public class VMWareImpl implements IVMWare {
     public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Restoring snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getMorByName(targetDC, vmName, VIRTUAL_MACHINE, false);
+        ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
         ManagedObjectReference cpMor = getSnapshotReference(vmMor, vmName, snapshotName);
         ManagedObjectReference task = vimPort.revertToSnapshotTask(cpMor, null, true);
 
@@ -84,7 +119,7 @@ public class VMWareImpl implements IVMWare {
     public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Deleting snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getMorByName(targetDC, vmName, VIRTUAL_MACHINE, false);
+        ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
         ManagedObjectReference cpMor = getSnapshotReference(vmMor, vmName, snapshotName);
         ManagedObjectReference task = vimPort.removeSnapshotTask(cpMor, false, true);
 
@@ -99,7 +134,7 @@ public class VMWareImpl implements IVMWare {
     public void startVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
         if (!isVmPoweredOn(vmName, connData)) {
-            ManagedObjectReference vmMor = getMorByName(targetDC, vmName, VIRTUAL_MACHINE, false);
+            ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             ManagedObjectReference task = vimPort.powerOnVMTask(vmMor, null);
 
             if (!waitAndGetTaskResult(task)) {
@@ -116,7 +151,7 @@ public class VMWareImpl implements IVMWare {
 
     public void deleteVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
-        ManagedObjectReference vmMor = getMorByName(targetDC, vmName, VIRTUAL_MACHINE, false);
+        ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
         ManagedObjectReference task = vimPort.destroyTask(vmMor);
 
         if (waitAndGetTaskResult(task)) {
@@ -130,14 +165,14 @@ public class VMWareImpl implements IVMWare {
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.println("Getting current snapshot name for virtual machine [ " + vmName + " ].");
-        ManagedObjectReference vmMor = getMorByName(targetDC, vmName, VIRTUAL_MACHINE, false);
+        ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
         return getCurrentSnapshotName(vmMor, vmName);
     }
 
     public boolean isSnapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Finding snapshot (%s) on virtual machine (%s).\n", snapshotName, vmName);
-        ManagedObjectReference vmMor = getMorByName(targetDC, vmName, VIRTUAL_MACHINE, false);
+        ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
         try {
             getSnapshotReference(vmMor, vmName, snapshotName);
         } catch (Exception exp) {
@@ -151,7 +186,7 @@ public class VMWareImpl implements IVMWare {
         connect(connData);
         System.out.printf("Finding virtual machine (%s) on vCenter server.\n", vmName);
         try {
-            getMorByName(targetDC, vmName, VIRTUAL_MACHINE, false);
+            getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
         } catch (Exception exp) {
             System.err.println(exp.getMessage());
             return false;
@@ -162,7 +197,7 @@ public class VMWareImpl implements IVMWare {
     public boolean isVmPoweredOn(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.println("Checking virtual machine [ " + vmName + " ] power status.");
-        ManagedObjectReference vmMor = getMorByName(targetDC, vmName, VIRTUAL_MACHINE, false);
+        ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
         String vmIpAddress = (String) getMorProperties(vmMor, new String[]{GUEST_IP}).get(GUEST_IP);
         return (vmIpAddress != null) && !vmIpAddress.isEmpty();
     }
@@ -527,20 +562,20 @@ public class VMWareImpl implements IVMWare {
         ManagedObjectReference targetCluster;
         ManagedObjectReference targetResourcePool;
         System.out.printf("Searching for datastore with name [%s].\n", targetDS);
-        ManagedObjectReference targetDSMor = getMorByName(targetDC, targetDS, DATA_STORE, false);
+        ManagedObjectReference targetDSMor = getMorByName(targetDCMor, targetDS, DATA_STORE, false);
         switch (computeType) {
             case "ESXi Host":
-                ManagedObjectReference targetHost = getMorByName(targetDC, computeName, HOST_SYSTEM, false);
+                ManagedObjectReference targetHost = getMorByName(targetDCMor, computeName, HOST_SYSTEM, false);
                 targetCluster = (ManagedObjectReference) getMorProperties(targetHost, new String[]{PARENT}).get(PARENT);
                 targetResourcePool = (ManagedObjectReference) getMorProperties(targetCluster, new String[]{RESOURCE_POOL_PROP}).get(RESOURCE_POOL_PROP);
                 relocSpec.setHost(targetHost);
                 break;
             case "Cluster":
-                targetCluster = getMorByName(targetDC, computeName, CLUSTER_COMPUTE_RESOURCE, false);
+                targetCluster = getMorByName(targetDCMor, computeName, CLUSTER_COMPUTE_RESOURCE, false);
                 targetResourcePool = (ManagedObjectReference) getMorProperties(targetCluster, new String[]{RESOURCE_POOL_PROP}).get(RESOURCE_POOL_PROP);
                 break;
             case "Resource Pool":
-                targetResourcePool = getMorByName(targetDC, computeName, RESOURCE_POOL, false);
+                targetResourcePool = getMorByName(targetDCMor, computeName, RESOURCE_POOL, false);
                 break;
             default:
                 System.out.printf("##vso[task.logissue type=error;code=INFRAISSUE_InvalidComputeType;TaskId=%s;]\n",
@@ -550,41 +585,6 @@ public class VMWareImpl implements IVMWare {
         relocSpec.setPool(targetResourcePool);
         relocSpec.setDatastore(targetDSMor);
         return relocSpec;
-    }
-
-    public void connect(ConnectionData connData) throws Exception {
-        try {
-            if (!isSessionActive()) {
-                System.out.println("No active session found.. establishing new session.");
-                vimService = new VimService();
-                vimPort = vimService.getVimPort();
-
-                Map<String, Object> reqContext = ((BindingProvider) vimPort).getRequestContext();
-                reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, connData.getUrl());
-                reqContext.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
-                reqContext.put(BindingProviderProperties.REQUEST_TIMEOUT, 30 * 60 * 1000);
-                reqContext.put(BindingProviderProperties.CONNECT_TIMEOUT, 5 * 60 * 1000);
-                ManagedObjectReference serviceInstance = new ManagedObjectReference();
-                serviceInstance.setType("ServiceInstance");
-                serviceInstance.setValue("ServiceInstance");
-
-                if (connData.isSkipCACheck()) {
-                    SkipCACheck.AllowUntrustedConnections();
-                }
-
-                serviceContent = vimPort.retrieveServiceContent(serviceInstance);
-                rootFolder = serviceContent.getRootFolder();
-                userSession = vimPort.login(serviceContent.getSessionManager(), connData.getUserName(), connData.getPassword(),
-                        null);
-                System.out.printf("Searching for datacenter with name [%s].\n", connData.getTargetDC());
-                targetDC = getMorByName(rootFolder, connData.getTargetDC(), DATA_CENTER, false);
-            }
-        } catch (Exception exp) {
-            System.out.printf("##vso[task.logissue type=error;code=USERINPUT_ConnectionFailed;TaskId=%s;]\n",
-                    Constants.TASK_ID);
-            throw new Exception("Failed to connect: " + exp.getMessage());
-        }
-        System.out.println("Successfully established session with vCenter server.");
     }
 
     private boolean isSessionActive() {
