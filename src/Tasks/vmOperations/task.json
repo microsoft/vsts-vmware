@@ -64,13 +64,12 @@
             "helpMarkDown": "Provide a comma separated list of the virtual machine's names. For example, FabrikamWeb, FabrikamDB, FabrikamTest."
         },
         {
-            "name": "targetlocation",
+            "name": "targetdc",
             "type": "string",
             "label": "Datacenter",
             "defaultValue": "",
             "required": true,
-            "visibleRule": "action = Deploy Virtual Machines using Template",
-            "helpMarkDown": "Enter a datacenter name to create the new virtual machine in."
+            "helpMarkDown": "Name of the datacenter in which virtual machine is present or needs to be created."
         },
         {
             "name": "computeType",
