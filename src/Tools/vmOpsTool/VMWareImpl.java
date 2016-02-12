@@ -234,10 +234,12 @@ public class VMWareImpl implements IVMWare {
         String ipAddress = "";
         PropertyFilterSpec filterSpec = createPropFilterSpecForObject(vmMor, new String[]{GUEST_IP});
         ManagedObjectReference propertyFilter = vimPort.createFilter(serviceContent.getPropertyCollector(), filterSpec, true);
+        WaitOptions waitOptions = new WaitOptions();
+        waitOptions.setMaxWaitSeconds(5 * 60); // Wait in number of seconds
+        long startTime = System.currentTimeMillis();
 
-        while (ipAddress.isEmpty()) {
-            WaitOptions waitOptions = new WaitOptions();
-            waitOptions.setMaxWaitSeconds(10 * 60); // Wait in number of seconds
+        while (((new Date()).getTime() - startTime < 5 * 60 * 1000) && ipAddress.isEmpty()) {
+
             UpdateSet updateSet = vimPort.waitForUpdatesEx(serviceContent.getPropertyCollector(), version, waitOptions);
             if (updateSet == null || updateSet.getFilterSet() == null) {
                 continue;
@@ -485,12 +487,7 @@ public class VMWareImpl implements IVMWare {
                     if (filterProperty.equals(CONFIG)) {
                         VirtualMachineConfigInfo vmConfig = (VirtualMachineConfigInfo) propertySet.get(0).getVal();
                         if (vmConfig != null && vmConfig.isTemplate() == isTemplate) {
-                            String vmName = vmConfig.getName().toLowerCase();
-                            if (morMap.containsKey(vmName)) {
-                                throw new Exception("There are more than one virtual machine with name ( " + vmName + " ) found in given data center.");
-                            } else {
-                                morMap.put(vmConfig.getName().toLowerCase(), mor);
-                            }
+                            morMap.put(vmConfig.getName().toLowerCase(), mor);
                         }
                     } else {
                         String mobName = (String) propertySet.get(0).getVal();

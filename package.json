@@ -30,6 +30,6 @@
     "tslint": "^2.5.1"
   },
   "dependencies": {
-    "vsts-task-lib": "^0.5.7"
+    "vsts-task-lib": "0.5.7"
   }
 }
