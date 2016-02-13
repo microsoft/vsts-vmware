@@ -16,12 +16,13 @@ export class VmOperations {
         var vCenterPassword: string = endPointAuthCreds["password"];
         var vmList: string = tl.getInput("vmList", true);
         var skipca: string = tl.getInput("skipca", false);
+        var targetdc: string = tl.getInput("targetdc", true);
         this.validateVmListInput(vmList);
 
         cmdArgs += " -vCenterUrl \"" + vCenterUrl  + "\" -vCenterUserName \"" + vCenterUserName  + "\" -vCenterPassword \"" +
-                 vCenterPassword + "\" -vmList \"" + vmList + "\"" + " -skipca " + skipca;
-        tl.debug(util.format("common args: -vCenterUrl \"%s\" -vCenterUserName \"%s\" -vCenterPassword \"%s\" -vmList \"%s\"",
-                vCenterUrl, vCenterUserName, "**********", vmList));
+                 vCenterPassword + "\" -vmList \"" + vmList + "\" -targetdc \"" + targetdc + "\" -skipca " + skipca;
+        tl.debug(util.format("common args: -vCenterUrl \"%s\" -vCenterUserName \"%s\" -vCenterPassword \"%s\" -vmList \"%s\" -targetlocaltion \"%s\" -skipca %s",
+                vCenterUrl, vCenterUserName, "**********", vmList, targetdc, skipca));
         return cmdArgs;
     }
 
@@ -30,7 +31,6 @@ export class VmOperations {
         switch (actionName) {
             case "Deploy Virtual Machines using Template":
                 var template = tl.getInput("template", true);
-                var targetLocation = tl.getInput("targetlocation", true);
                 var computeType = tl.getInput("computeType", true);
                 var datastore = tl.getInput("datastore", true);
                 var description = tl.getInput("description", false);
@@ -49,17 +49,16 @@ export class VmOperations {
                         tl.error("Invalid compute type : " + computeType);
                         tl.exit(1);
                 }
-                cmdArgs += " -clonetemplate \"" + template  + "\"" + " -targetlocation \"" + targetLocation + "\"" +
-                      " -computetype \"" + computeType + "\"" + " -computename \"" + computeName + "\"" + " -datastore \"" +
-                      datastore + "\"" + " -description \"" + description + "\"";
+                cmdArgs += " -clonetemplate \"" + template  + "\" -computetype \"" + computeType + "\" -computename \"" +
+                        computeName + "\" -datastore \"" + datastore + "\" -description \"" + description + "\"";
                 break;
             case "Take Snapshot of Virtual Machines":
                 var snapshotName = tl.getInput("snapshotName", true);
                 var snapshotVMMemory = "false";
                 var quiesceGuestFileSystem = "false";
                 var description: string = tl.getInput("description", false);
-                cmdArgs += " -snapshotOps create -snapshotName \"" + snapshotName  + "\"" + " -snapshotVMMemory " +
-                     snapshotVMMemory + " -quiesceGuestFileSystem " + quiesceGuestFileSystem + " -description \"" + description + "\"";
+                cmdArgs += " -snapshotOps create -snapshotName \"" + snapshotName  + "\" -snapshotVMMemory " + snapshotVMMemory + " -quiesceGuestFileSystem " +
+                            quiesceGuestFileSystem + " -description \"" + description + "\"";
                 break;
             case "Revert Snapshot of Virtual Machines":
                 var snapshotName  = tl.getInput("snapshotName", true);
@@ -71,6 +70,9 @@ export class VmOperations {
                 break;
             case "Delete Virtual Machines":
                 cmdArgs += " -deletevm delete";
+                break;
+            case "Power On Virtual Machines":
+                cmdArgs += " -powerops start";
                 break;
             default:
                 tl.error("Invalid action name : " + actionName);

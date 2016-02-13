@@ -39,13 +39,14 @@ describe("getCmdCommonArgs", (): void => {
         sandbox.restore();
     });
 
-    it("Successfully read all the common params (url, username, password, vmList, skipca)", (): void => {
+    it("Successfully read all the common params (url, username, password, vmList, skipca, datacenter)", (): void => {
 
         getInputStub.withArgs("vCenterConnection", true).returns(dummyConnectionName);
         getInputStub.withArgs("vmList", true).returns(dummyVmList);
         getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
         getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummyuser", "password" : "dummypassword"}});
         getInputStub.withArgs("skipca", false).returns("true");
+        getInputStub.withArgs("targetdc", true).returns("dummydc");
 
         var cmdArgs = vmOperations.VmOperations.getCmdCommonArgs();
 
@@ -54,6 +55,7 @@ describe("getCmdCommonArgs", (): void => {
         cmdArgs.should.contain("-vCenterPassword \"dummypassword\"");
         cmdArgs.should.contain("-vmList \"" + dummyVmList + "\"");
         cmdArgs.should.contain("-skipca true");
+        cmdArgs.should.contain("-targetdc \"dummydc\"");
     });
 
     it("Should throw on failure to get connected service name", (): void => {
@@ -93,6 +95,19 @@ describe("getCmdCommonArgs", (): void => {
         expect(vmOperations.VmOperations.getCmdCommonArgs).to.throw("Error");
         getInputStub.withArgs("skipca", false).should.have.been.calledOnce;
         getInputStub.withArgs("skipca", false).should.have.thrown("Error");
+    });
+
+    it("Should throw on failure read datastore name", (): void => {
+        getInputStub.withArgs("vCenterConnection", true).returns(dummyConnectionName);
+        getEndPointUrlStub.withArgs(dummyConnectionName, false).returns(dummyEndpointUrl);
+        getEndpointAuthorizationStub.withArgs(dummyConnectionName, false).returns( { "parameters": { "username" : "dummyuser", "password" : "dummypassword"}});
+        getInputStub.withArgs("vmList", true).returns("vm1");
+        getInputStub.withArgs("skipca", false).returns("true");
+        getInputStub.withArgs("targetdc", true).throws();
+
+        expect(vmOperations.VmOperations.getCmdCommonArgs).to.throw("Error");
+        getInputStub.withArgs("targetdc", true).should.have.been.calledOnce;
+        getInputStub.withArgs("targetdc", true).should.have.thrown("Error");
     });
 
     it("Should fail task for invalid vmList input, i.e vmname empty string", (): void => {
@@ -162,9 +177,8 @@ describe("getCmdArgsForAction", (): void => {
         cmdArgs.should.contain("-snapshotOps delete -snapshotName \"dummySnapshotName\"");
     });
 
-    it("Should read template, location, computeType, hostname, datastore and description", (): void => {
+    it("Should read template, computeType, hostname, datastore and description for clone template", (): void => {
         getInputStub.withArgs("template", true).returns("dummyTemplate");
-        getInputStub.withArgs("targetlocation", true).returns("dummyLocation");
         getInputStub.withArgs("computeType", true).returns("ESXi Host");
         getInputStub.withArgs("hostname", true).returns("Dummy Host");
         getInputStub.withArgs("datastore", true).returns("Dummy Datastore");
@@ -172,7 +186,7 @@ describe("getCmdArgsForAction", (): void => {
 
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Deploy Virtual Machines using Template");
 
-        cmdArgs.should.contain("-clonetemplate \"dummyTemplate\" -targetlocation \"dummyLocation\" -computetype \"ESXi Host\" -computename \"Dummy Host\" -datastore \"Dummy Datastore\" -description \"Dummy description\"");
+        cmdArgs.should.contain("-clonetemplate \"dummyTemplate\" -computetype \"ESXi Host\" -computename \"Dummy Host\" -datastore \"Dummy Datastore\" -description \"Dummy description\"");
     });
 
     it("Should read cluster name if compute is cluster and read empty description", (): void => {
@@ -209,6 +223,12 @@ describe("getCmdArgsForAction", (): void => {
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Delete Virtual Machines");
 
         cmdArgs.should.contain("-deletevm delete");
+    });
+
+    it("Should construct command action for start vm operation", (): void => {
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Power On Virtual Machines");
+
+        cmdArgs.should.contain("-powerops start");
     });
 
     it("Should throw on failure to read snapshot name for restore/create/delete snapshot action", (): void => {

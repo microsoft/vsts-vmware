@@ -85,6 +85,12 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
+    public void startVM(String vmName, ConnectionData connData) throws Exception {
+        if (vmName.equals("VmThatFailsInStart")) {
+            throw new Exception("start vm operation failed for VmThatFailsInStart");
+        }
+    }
+
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
 
         String currentSnapshotName;
@@ -113,8 +119,12 @@ public class InMemoryVMWareImpl implements IVMWare {
         return vmSnapshotInfo.containsKey(vmName);
     }
 
+    public boolean isVmPoweredOn(String vmName, ConnectionData connData) throws Exception {
+        return true;
+    }
 
-    public void cloneVMFromTemplate(String templateName, String vmName, String targetLocation, String computeType, String computeName,
+
+    public void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName,
                                     String datastore, String description, ConnectionData connData) throws Exception {
         if (vmName.equals("VMNameThatFailsInClone")) {
             throw new Exception("Clone VM from template operation failed for VMNameThatFailsInClone");
@@ -124,7 +134,7 @@ public class InMemoryVMWareImpl implements IVMWare {
             throw new Exception("Template does not exists");
         }
 
-        if (targetLocation.equals("InvalidDc")) {
+        if (connData.getTargetDC().equals("InvalidDc")) {
             throw new Exception("Target datacenter does not exists");
         }
 

@@ -15,9 +15,10 @@ public class VmOpsToolUnitTests {
     private String vCenterUrl = "https://localhost:8080/sdk/vimservice";
     private String vCenterUserName = "Administrator";
     private String vCenterPassword = "Password~1";
+    private String vCenterTargetDC = "DummyDC";
     private String vmSnapshotName = "Snapshot1";
 
-    private ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword, true);
+    private ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword, vCenterTargetDC, true);
 
     @Test
     public void parseCmdArgsWithAllRequiredInputs() {
@@ -45,8 +46,8 @@ public class VmOpsToolUnitTests {
 
     @Test
     public void executeActionShouldSucceedForCloneAndDeleteVMActionWithValidInputs() throws Exception {
-        String[] cmdArgs = getCmdArgs("newVM1, newVM2", Constants.CLONE_TEMPLATE, "dummyTemplate", Constants.TARGET_LOCATION,
-                "dummyLocation", Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName", Constants.DESCRIPTION, "Dummy description");
+        String[] cmdArgs = getCmdArgs("newVM1, newVM2", Constants.CLONE_TEMPLATE, "dummyTemplate",
+                Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName", Constants.DESCRIPTION, "Dummy description");
 
         vmOpsTool.executeAction(cmdArgs);
 
@@ -62,9 +63,35 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
+    public void executeActionShouldSucceedForStartVMActionWithValidInputs() throws Exception {
+        String[] cmdArgs = getCmdArgs("newVM1, newVM2", Constants.POWER_OPS, Constants.START_VM_ACTION);
+
+        vmOpsTool.executeAction(cmdArgs);
+
+        assertThat(vmWareImpl.isVmPoweredOn("newVM1", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVmPoweredOn("newVM2", connData)).isEqualTo(true);
+    }
+
+    @Test
+    public void executeActionShouldThrowForStartVMActionFailureOnAVM() throws Exception {
+        String[] cmdArgs = getCmdArgs("newVM1, VmThatFailsInStart", Constants.POWER_OPS, Constants.START_VM_ACTION);
+
+        Exception exp = null;
+
+        try {
+            vmOpsTool.executeAction(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+
+        assertThat(exp).isNotNull();
+        assertThat(vmWareImpl.isVmPoweredOn("newVM1", connData)).isEqualTo(true);
+    }
+
+    @Test
     public void executeActionShouldThrowForCloneAndDeleteVMFailureOnAVM() throws Exception {
-        String[] cmdArgs = getCmdArgs("newVM1, VMNameThatFailsInClone", Constants.CLONE_TEMPLATE, "dummyTemplate", Constants.TARGET_LOCATION,
-                "dummyLocation", Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName", Constants.DESCRIPTION, "Dummy description");
+        String[] cmdArgs = getCmdArgs("newVM1, VMNameThatFailsInClone", Constants.CLONE_TEMPLATE, "dummyTemplate",
+                Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName", Constants.DESCRIPTION, "Dummy description");
 
         Exception exp = null;
 
@@ -226,6 +253,10 @@ public class VmOpsToolUnitTests {
         cmdArgs.add("dummypassword");
         cmdArgs.add(Constants.VM_LIST);
         cmdArgs.add(vmList);
+        cmdArgs.add(Constants.TARGET_DC);
+        cmdArgs.add("dummyDC");
+        cmdArgs.add(Constants.SKIP_CA_CHECK);
+        cmdArgs.add("true");
 
         Collections.addAll(cmdArgs, vaArgs);
 
