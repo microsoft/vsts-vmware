@@ -4,7 +4,7 @@
     "name": "VMWare Resource Deployment",
     "version": "0.1.0",
     "publisher": "ms-vscs-rm",
-    "description": "Connect to a VMWare vCenter server, and easily provision VMs, and perform actions on them like snapshot, revert snapshot, start, stop etc.",
+    "description": "Connect to a VMWare vCenter Server, and easily provision VMs, and perform actions on them like snapshot, revert snapshot, start, stop etc.",
     "public": true,
     "galleryFlags": [
     "Preview"
