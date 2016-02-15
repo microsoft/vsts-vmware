@@ -1,8 +1,8 @@
 {
     "id": "735d144e-55fe-44d6-b687-db9031b6e70b",
-    "name": "VMWareTask",
-    "friendlyName": "VMWare Resource Deployment",
-    "description": "Deploy VM resources and manage their lifecycle actions",
+    "name": "VMwareTask",
+    "friendlyName": "VMware Resource Deployment",
+    "description": "Deploy VM resources and manage their life cycle actions",
     "helpMarkDown": "[More Information](http://aka.ms/vmwaretaskreadme)",
     "category": "Deploy",
     "visibility": [
@@ -28,7 +28,7 @@
             "label": "vCenter Server Connection",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "VMWare vCenter Server connection to target for deployment."
+            "helpMarkDown": "VMware vCenter Server connection to target for deployment."
         },
         {
             "name": "action", 
@@ -36,13 +36,13 @@
             "label": "Action",
             "defaultValue": "Deploy Virtual Machines using Template",
             "required": true,
-            "helpMarkDown" : "Select the action to perform on the VMWare Virtual Machines.",
+            "helpMarkDown" : "Select the action to perform on the VMware Virtual Machines.",
             "options": {
                 "Deploy Virtual Machines using Template": "Deploy Virtual Machines using Template",
                 "Take Snapshot of Virtual Machines": "Take Snapshot of Virtual Machines",
                 "Revert Snapshot of Virtual Machines": "Revert Snapshot of Virtual Machines",
                 "Delete Snapshot of Virtual Machines": "Delete Snapshot of Virtual Machines",
-                "Power On Virtual Machines": "Power On Virtual Machines",
+                "Power On Virtual Machines": "Power on Virtual Machines",
                 "Delete Virtual Machines": "Delete Virtual Machines"
             }
         },
@@ -53,7 +53,7 @@
             "defaultValue": "",
             "required": true,
             "visibleRule": "action = Deploy Virtual Machines using Template",
-            "helpMarkDown": "Enter the name of the template to use for creating virtual machines."
+            "helpMarkDown": "Enter the name of the template to use for creating the virtual machines."
         },
         {
             "name": "vmList",
@@ -61,7 +61,7 @@
             "label": "Virtual Machine Names",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "Provide a comma separated list of the virtual machine's names. For example, FabrikamWeb, FabrikamDB, FabrikamTest."
+            "helpMarkDown": "Provide a comma separated list of the virtual machines' names, like FabrikamWeb, FabrikamDB, FabrikamTest."
         },
         {
             "name": "targetdc",
@@ -69,7 +69,7 @@
             "label": "Datacenter",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "Name of the datacenter in which virtual machine is present or needs to be created."
+            "helpMarkDown": "Name of the Datacenter where the virtual machines are present or needs to be created."
         },
         {
             "name": "computeType",
@@ -78,7 +78,7 @@
             "defaultValue": "ESXi Host",
             "required": true,
             "visibleRule": "action = Deploy Virtual Machines using Template",
-            "helpMarkDown": "Select a cluster, host or resource pool to run this virtual machine.",
+            "helpMarkDown": "Select the cluster, host or resource pool, where the virtual machines will be deployed.",
             "options": {
                  "ESXi Host": "ESXi Host",
                  "Cluster": "Cluster",
@@ -92,7 +92,7 @@
             "defaultValue": "",
             "required": true,
             "visibleRule": "computeType = ESXi Host",
-            "helpMarkDown": "Name of the host to run the Virtual Machines."
+            "helpMarkDown": "Name of the ESXi host for deploying the virtual machines."
         },
         {
             "name": "clustername",
@@ -101,7 +101,7 @@
             "defaultValue": "",
             "required": true,
             "visibleRule": "computeType = Cluster",
-            "helpMarkDown": "Name of the cluster to run the Virtual Machines."
+            "helpMarkDown": "Name of the cluster for deploying the virtual machines."
         },
         {
             "name": "resourcepoolname",
@@ -110,7 +110,7 @@
             "defaultValue": "",
             "required": true,
             "visibleRule": "computeType = Resource Pool",
-            "helpMarkDown": "Name of the resource pool to run the Virtual Machines."
+            "helpMarkDown": "Name of the resource pool for deploying the virtual machines."
         },
         {
             "name": "datastore",
@@ -119,7 +119,7 @@
             "defaultValue": "",
             "required": true,
             "visibleRule": "action = Deploy Virtual Machines using Template",
-            "helpMarkDown": "Enter a datastore name in which to store the configuration and disk files."
+            "helpMarkDown": "Name of the Datastore for storing the virtual machine's configuration and disk files."
         },
         {
             "name": "snapshotName",
@@ -128,24 +128,24 @@
             "defaultValue": "",
             "required": true,
             "visibleRule": "action = Take Snapshot of Virtual Machines || action = Revert Snapshot of Virtual Machines || action = Delete Snapshot of Virtual Machines",
-            "helpMarkDown": "Name of the snapshot of the Virtual Machines."
+            "helpMarkDown": "Name of the snapshot of the virtual machines."
         },
         {
             "name": "description",
             "type": "multiLine",
-            "label": "Notes",
+            "label": "Description",
             "required": false,
             "defaultValue": "",
             "visibleRule": "action = Take Snapshot of Virtual Machines || action = Deploy Virtual Machines using Template",
-            "helpMarkDown": "Additional description for the action."
+            "helpMarkDown": "Provide a description for the action."
         },
         {
             "name": "skipca",
             "type": "boolean",
-            "label": "Skip Certification Authority check",
+            "label": "Skip Certificate Authority Check",
             "required": false,
             "defaultValue": "true",
-            "helpMarkDown": "Select the option to skip validating the authenticity of the machine's certificate by a trusted certification authority."
+            "helpMarkDown": "Select the option to skip validating the authenticity of the VMware vCenter Server's certificate from a trusted certificate authority."
         }
     ],
     "instanceNameFormat": "$(action) : $(vmList)",

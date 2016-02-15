@@ -1,10 +1,10 @@
 ﻿{
     "manifestVersion": 1,
     "id": "vmwareapp",
-    "name": "VMWare Resource Deployment",
+    "name": "VMware Resource Deployment",
     "version": "0.1.0",
     "publisher": "ms-vscs-rm",
-    "description": "Connect to a VMWare vCenter server, and easily provision VMs, and perform actions on them like snapshot, revert snapshot, start, stop etc.",
+    "description": "Connect to a VMware vCenter Server, and easily provision VMs, and perform actions on them like snapshot, revert snapshot, start, stop etc.",
     "public": true,
     "galleryFlags": [
     "Preview"
@@ -65,7 +65,7 @@
             ],
             "properties": {
                 "name": "vmware",
-                "displayName": "VMWare vCenter Server",
+                "displayName": "VMware vCenter Server",
                 "authenticationSchemes": [
                     {
                         "type": "ms.vss-endpoint.endpoint-auth-scheme-basic"
