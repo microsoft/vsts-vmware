@@ -1,7 +1,7 @@
 {
     "id": "735d144e-55fe-44d6-b687-db9031b6e70b",
-    "name": "VMWareTask",
-    "friendlyName": "VMWare Resource Deployment",
+    "name": "VMwareTask",
+    "friendlyName": "VMware Resource Deployment",
     "description": "Deploy VM resources and manage their life cycle actions",
     "helpMarkDown": "[More Information](http://aka.ms/vmwaretaskreadme)",
     "category": "Deploy",
@@ -28,7 +28,7 @@
             "label": "vCenter Server Connection",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "VMWare vCenter Server connection to target for deployment."
+            "helpMarkDown": "VMware vCenter Server connection to target for deployment."
         },
         {
             "name": "action", 
@@ -36,7 +36,7 @@
             "label": "Action",
             "defaultValue": "Deploy Virtual Machines using Template",
             "required": true,
-            "helpMarkDown" : "Select the action to perform on the VMWare Virtual Machines.",
+            "helpMarkDown" : "Select the action to perform on the VMware Virtual Machines.",
             "options": {
                 "Deploy Virtual Machines using Template": "Deploy Virtual Machines using Template",
                 "Take Snapshot of Virtual Machines": "Take Snapshot of Virtual Machines",
@@ -145,7 +145,7 @@
             "label": "Skip Certificate Authority Check",
             "required": false,
             "defaultValue": "true",
-            "helpMarkDown": "Select the option to skip validating the authenticity of the VMWare vCenter Server's certificate from a trusted certificate authority."
+            "helpMarkDown": "Select the option to skip validating the authenticity of the VMware vCenter Server's certificate from a trusted certificate authority."
         }
     ],
     "instanceNameFormat": "$(action) : $(vmList)",
