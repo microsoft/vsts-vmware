@@ -145,7 +145,7 @@
             "label": "Skip Certificate Authority Check",
             "required": false,
             "defaultValue": "true",
-            "helpMarkDown": "Select the option to skip validating the authenticity of the vCenter Server's certificate from a trusted certificate authority."
+            "helpMarkDown": "Select the option to skip validating the authenticity of the VMWare vCenter Server's certificate from a trusted certificate authority."
         }
     ],
     "instanceNameFormat": "$(action) : $(vmList)",
