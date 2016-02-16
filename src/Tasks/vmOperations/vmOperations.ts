@@ -3,6 +3,7 @@
 
 import * as tl from "vsts-task-lib/task";
 import * as util from "util";
+import * as path from "path";
 
 export class VmOperations {
     // tl.getInput will exit the task if required input is null or empty, we were not able to have
@@ -87,7 +88,7 @@ export class VmOperations {
         var commonArgs: string = this.getCmdCommonArgs();
         var cmdArgsForAction: string = this.getCmdArgsForAction(actionName);
         var systemClassPath: string = tl.getVariable("CLASSPATH");
-        var cmdArgs = "-classpath vmOpsTool-1.0.jar;" + systemClassPath + " VmOpsTool " + cmdArgsForAction + commonArgs;
+        var cmdArgs = "-classpath vmOpsTool-1.0.jar" + path.delimiter + systemClassPath + " VmOpsTool " + cmdArgsForAction + commonArgs;
         util.log("Invoking command to perform vm operations ...\n");
         return tl.exec("java", cmdArgs, <any> {failOnStdErr: true})
             .then((code) => {
