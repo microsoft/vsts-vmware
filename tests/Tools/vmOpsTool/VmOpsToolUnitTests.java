@@ -11,7 +11,7 @@ import org.junit.Test;
 public class VmOpsToolUnitTests {
 
     private InMemoryVMWareImpl vmWareImpl = new InMemoryVMWareImpl();
-    private VmOpsTool vmOpsTool = new VmOpsTool(vmWareImpl);
+    private VmOpsTool vmOpsTool = new VmOpsTool(() -> vmWareImpl);
     private String vCenterUrl = "https://localhost:8080/sdk/vimservice";
     private String vCenterUserName = "Administrator";
     private String vCenterPassword = "Password~1";
@@ -45,11 +45,11 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionShouldSucceedForCloneAndDeleteVMActionWithValidInputs() throws Exception {
+    public void executeActionInParallelShouldSucceedForCloneAndDeleteVMActionWithValidInputs() throws Exception {
         String[] cmdArgs = getCmdArgs("newVM1, newVM2", Constants.CLONE_TEMPLATE, "dummyTemplate",
                 Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName", Constants.DESCRIPTION, "Dummy description");
 
-        vmOpsTool.executeAction(cmdArgs);
+        vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
         assertThat(vmWareImpl.isVmExists("newVM1", connData)).isEqualTo(true);
         assertThat(vmWareImpl.isVmExists("newVM2", connData)).isEqualTo(true);
@@ -57,29 +57,29 @@ public class VmOpsToolUnitTests {
         // Delete vm validation
         cmdArgs = getCmdArgs("newVM1, newVM2", Constants.DELETE_VM, Constants.DELETE_VM_ACTION);
 
-        vmOpsTool.executeAction(cmdArgs);
+        vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
         assertThat(vmWareImpl.isVmExists("newVM1", connData)).isEqualTo(false);
         assertThat(vmWareImpl.isVmExists("newVM2", connData)).isEqualTo(false);
     }
 
     @Test
-    public void executeActionShouldSucceedForStartVMActionWithValidInputs() throws Exception {
+    public void executeActionInParallelShouldSucceedForStartVMActionWithValidInputs() throws Exception {
         String[] cmdArgs = getCmdArgs("newVM1, newVM2", Constants.POWER_OPS, Constants.START_VM_ACTION);
 
-        vmOpsTool.executeAction(cmdArgs);
+        vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
         assertThat(vmWareImpl.isVmPoweredOn("newVM1", connData)).isEqualTo(true);
         assertThat(vmWareImpl.isVmPoweredOn("newVM2", connData)).isEqualTo(true);
     }
 
     @Test
-    public void executeActionShouldThrowForStartVMActionFailureOnAVM() throws Exception {
+    public void executeActionInParallelShouldThrowForStartVMActionFailureOnAVM() throws Exception {
         String[] cmdArgs = getCmdArgs("newVM1, VmThatFailsInStart", Constants.POWER_OPS, Constants.START_VM_ACTION);
 
         Exception exp = null;
 
         try {
-            vmOpsTool.executeAction(cmdArgs);
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
         } catch (Exception e) {
             exp = e;
         }
@@ -89,14 +89,14 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionShouldThrowForCloneAndDeleteVMFailureOnAVM() throws Exception {
+    public void executeActionInParallelShouldThrowForCloneAndDeleteVMFailureOnAVM() throws Exception {
         String[] cmdArgs = getCmdArgs("newVM1, VMNameThatFailsInClone", Constants.CLONE_TEMPLATE, "dummyTemplate",
                 Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName", Constants.DESCRIPTION, "Dummy description");
 
         Exception exp = null;
 
         try {
-            vmOpsTool.executeAction(cmdArgs);
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
         } catch (Exception e) {
             exp = e;
         }
@@ -109,7 +109,7 @@ public class VmOpsToolUnitTests {
         exp = null;
 
         try {
-            vmOpsTool.executeAction(cmdArgs);
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
         } catch (Exception e) {
             exp = e;
         }
@@ -119,13 +119,13 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionShouldSucceedForCreateAndDeleteSnapshotOperation() throws Exception {
+    public void executeActionInParallelShouldSucceedForCreateAndDeleteSnapshotOperation() throws Exception {
         // Create snapshot operation validation
         String createSnapshot = "Sample Snapshot";
         String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.SNAPSHOT_OPS, Constants.CREATE_SNAPSHOT_ACTION,
                 Constants.SNAPSHOT_NAME, createSnapshot);
 
-        vmOpsTool.executeAction(cmdArgs);
+        vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
         assertThat(vmWareImpl.getCurrentSnapshot("vm1", connData)).isEqualTo(createSnapshot);
         assertThat(vmWareImpl.getCurrentSnapshot("vm2", connData)).isEqualTo(createSnapshot);
@@ -134,26 +134,26 @@ public class VmOpsToolUnitTests {
         cmdArgs = getCmdArgs("vm1, vm2", Constants.SNAPSHOT_OPS, Constants.DELETE_SNAPSHOT_ACTION, Constants.SNAPSHOT_NAME,
                 createSnapshot);
 
-        vmOpsTool.executeAction(cmdArgs);
+        vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
         assertThat(vmWareImpl.isSnapshotExists("vm1", createSnapshot, connData)).isEqualTo(false);
         assertThat(vmWareImpl.isSnapshotExists("vm2", createSnapshot, connData)).isEqualTo(false);
     }
 
     @Test
-    public void executeActionShouldRestoreSnapshotForRestoreOperation() throws Exception {
+    public void executeActionInParallelShouldRestoreSnapshotForRestoreOperation() throws Exception {
 
         String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.SNAPSHOT_OPS, Constants.RESTORE_SNAPSHOT_ACTION,
                 Constants.SNAPSHOT_NAME, vmSnapshotName);
 
-        vmOpsTool.executeAction(cmdArgs);
+        vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
         assertThat(vmWareImpl.getCurrentSnapshot("vm1", connData)).isEqualTo(vmSnapshotName);
         assertThat(vmWareImpl.getCurrentSnapshot("vm2", connData)).isEqualTo(vmSnapshotName);
     }
 
     @Test
-    public void executeActionShouldThrowForCreateAndDeleteSnapshotFailureOnAVM() throws Exception {
+    public void executeActionInParallelShouldThrowForCreateAndDeleteSnapshotFailureOnAVM() throws Exception {
         // Delete snapshot operation throws on failure validation
         String vmSnapshot = "New Snapshot";
         String[] cmdArgs = getCmdArgs("vm1, vm3", Constants.SNAPSHOT_OPS, Constants.CREATE_SNAPSHOT_ACTION,
@@ -161,7 +161,7 @@ public class VmOpsToolUnitTests {
         Exception exp = null;
 
         try {
-            vmOpsTool.executeAction(cmdArgs);
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
         } catch (Exception e) {
             exp = e;
         }
@@ -174,7 +174,7 @@ public class VmOpsToolUnitTests {
         cmdArgs = getCmdArgs("vm1, vm3", Constants.SNAPSHOT_OPS, Constants.DELETE_SNAPSHOT_ACTION, Constants.SNAPSHOT_NAME,
                 vmSnapshot);
         try {
-            vmOpsTool.executeAction(cmdArgs);
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
         } catch (Exception e) {
             exp = e;
         }
@@ -184,13 +184,13 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionShouldThrowForRestoreSnapshotFailureOnAVM() throws Exception {
+    public void executeActionInParallelShouldThrowForRestoreSnapshotFailureOnAVM() throws Exception {
         String[] cmdArgs = getCmdArgs("vm1, vm3", Constants.SNAPSHOT_OPS, Constants.RESTORE_SNAPSHOT_ACTION,
                 Constants.SNAPSHOT_NAME, vmSnapshotName);
         Exception exp = null;
 
         try {
-            vmOpsTool.executeAction(cmdArgs);
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
         } catch (Exception e) {
             exp = e;
         }
@@ -200,13 +200,13 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionInvalidSnapshotOperationShouldFail() {
+    public void executeActionInParallelInvalidSnapshotOperationShouldFail() {
         String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.SNAPSHOT_OPS, "invalid", Constants.SNAPSHOT_NAME,
                 vmSnapshotName);
         Exception exp = null;
 
         try {
-            vmOpsTool.executeAction(cmdArgs);
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
         } catch (Exception e) {
             exp = e;
         }
@@ -214,13 +214,13 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionForInvalidActionNameShouldFail() {
+    public void executeActionInParallelForInvalidActionNameShouldFail() {
         String[] cmdArgs = getCmdArgs("vm1, vm2", "-invalidOps", Constants.RESTORE_SNAPSHOT_ACTION,
                 Constants.SNAPSHOT_NAME, vmSnapshotName);
         Exception exp = null;
 
         try {
-            vmOpsTool.executeAction(cmdArgs);
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
         } catch (Exception e) {
             exp = e;
         }
@@ -228,12 +228,12 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionShouldThrowIfRequiredInputIsNotPresent() {
+    public void executeActionInParallelShouldThrowIfRequiredInputIsNotPresent() {
         String[] cmdArgs = new String[]{Constants.VM_OPS_TOOL};
         Exception exp = null;
 
         try {
-            vmOpsTool.executeAction(cmdArgs);
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
         } catch (Exception e) {
             exp = e;
         }
