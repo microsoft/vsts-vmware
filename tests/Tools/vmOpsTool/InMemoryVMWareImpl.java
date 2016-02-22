@@ -33,8 +33,8 @@ public class InMemoryVMWareImpl implements IVMWare {
         vmActiveSnapshot.put("vm2", activeSnapshot);
     }
 
-    public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
-                               String description, ConnectionData connData) throws Exception {
+    public synchronized void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
+                                            String description, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
             List<String> vmCpList = vmSnapshotInfo.get(vmName);
@@ -46,7 +46,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+    public synchronized void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         List<String> cpList;
 
         vmName = vmName.toLowerCase();
@@ -63,7 +63,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+    public synchronized void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
             List<String> vmCpList = vmSnapshotInfo.get(vmName);
@@ -124,8 +124,8 @@ public class InMemoryVMWareImpl implements IVMWare {
     }
 
 
-    public void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName,
-                                    String datastore, String description, ConnectionData connData) throws Exception {
+    public synchronized void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName,
+                                                 String datastore, String description, ConnectionData connData) throws Exception {
         if (vmName.equals("VMNameThatFailsInClone")) {
             throw new Exception("Clone VM from template operation failed for VMNameThatFailsInClone");
         }
@@ -151,7 +151,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         vmActiveSnapshot.put(vmName, "");
     }
 
-    public void deleteVM(String vmName, ConnectionData connData) throws Exception {
+    public synchronized void deleteVM(String vmName, ConnectionData connData) throws Exception {
         if (vmName.equals("VMNameThatFailsInDelete")) {
             throw new Exception("delete vm operation failed for VMNameThatFailsInDelete");
         }
