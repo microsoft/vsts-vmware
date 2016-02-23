@@ -7,10 +7,9 @@ public class InMemoryVMWareImpl implements IVMWare {
 
     private Map<String, List<String>> vmSnapshotInfo = new HashMap<>();
     private Map<String, String> vmActiveSnapshot = new HashMap<>();
-    private List<String> snapshotList = new ArrayList<>();
-    private String activeSnapshot = "Snapshot2";
 
     public InMemoryVMWareImpl() {
+        List<String> snapshotList = new ArrayList<>();
         snapshotList.add("Snapshot1");
         snapshotList.add("Snapshot2");
 
@@ -23,6 +22,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         vmSnapshotInfo.put("vm1", snapshotList);
         vmSnapshotInfo.put("vm2", snapshotList);
 
+        String activeSnapshot = "Snapshot2";
         vmActiveSnapshot.put("win2012r2", activeSnapshot);
         vmActiveSnapshot.put("poweredoffvm", activeSnapshot);
         vmActiveSnapshot.put("win10", activeSnapshot);
