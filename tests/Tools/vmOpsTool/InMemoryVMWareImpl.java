@@ -123,7 +123,6 @@ public class InMemoryVMWareImpl implements IVMWare {
         return true;
     }
 
-
     public synchronized void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName,
                                                  String datastore, String description, ConnectionData connData) throws Exception {
         if (vmName.equals("VMNameThatFailsInClone")) {
