@@ -63,18 +63,25 @@ public class VmOpsToolUnitTests {
     }
 
     @Test
-    public void executeActionInParallelShouldSucceedForStartVMActionWithValidInputs() throws Exception {
-        String[] cmdArgs = getCmdArgs("newVM1, newVM2", Constants.POWER_OPS, Constants.START_VM_ACTION);
+    public void executeActionInParallelShouldSucceedForStartAndStopVMActionWithValidInputs() throws Exception {
+        String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.POWER_OPS, Constants.START_VM_ACTION);
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
-        assertThat(vmWareImpl.isVmPoweredOn("newVM1", connData)).isEqualTo(true);
-        assertThat(vmWareImpl.isVmPoweredOn("newVM2", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVmPoweredOn("vm1", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVmPoweredOn("vm2", connData)).isEqualTo(true);
+
+        cmdArgs = getCmdArgs("vm1, vm2", Constants.POWER_OPS, Constants.STOP_VM_ACTION);
+
+        vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
+
+        assertThat(vmWareImpl.isVmPoweredOn("vm1", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVmPoweredOn("vm2", connData)).isEqualTo(false);
     }
 
     @Test
-    public void executeActionInParallelShouldThrowForStartVMActionFailureOnAVM() throws Exception {
-        String[] cmdArgs = getCmdArgs("newVM1, VmThatFailsInStart", Constants.POWER_OPS, Constants.START_VM_ACTION);
+    public void executeActionInParallelShouldThrowForStartAndStopVMActionFailureOnAVM() throws Exception {
+        String[] cmdArgs = getCmdArgs("vm1, VmThatFailsInStart", Constants.POWER_OPS, Constants.START_VM_ACTION);
 
         Exception exp = null;
 
@@ -85,7 +92,32 @@ public class VmOpsToolUnitTests {
         }
 
         assertThat(exp).isNotNull();
-        assertThat(vmWareImpl.isVmPoweredOn("newVM1", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVmPoweredOn("vm1", connData)).isEqualTo(true);
+
+        cmdArgs = getCmdArgs("vm1, VmThatFailsInStop", Constants.POWER_OPS, Constants.STOP_VM_ACTION);
+
+        exp = null;
+        try {
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+
+        assertThat(exp).isNotNull();
+        assertThat(vmWareImpl.isVmPoweredOn("vm1", connData)).isEqualTo(false);
+    }
+
+    @Test
+    public void executeActionInParallelInvalidPowerOperationShouldFail() {
+        String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.POWER_OPS, "pause");
+        Exception exp = null;
+
+        try {
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+        assertThat(exp).isNotNull();
     }
 
     @Test

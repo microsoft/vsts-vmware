@@ -110,8 +110,9 @@ public class VmOpsTool {
             actionResult.setErrorMessage("delete vm operation failed for virtual machines ");
             actionResult.setFailedVm(executeDeleteVmAction(vmName, connData));
         } else if (argsMap.containsKey(Constants.POWER_OPS)) {
-            actionResult.setErrorMessage("start vm operation failed for virtual machines ");
-            actionResult.setFailedVm(executeStartVmAction(vmName, connData));
+            String actionName = argsMap.get(Constants.POWER_OPS);
+            actionResult.setErrorMessage(String.format("Failed to [%s] virtual machines ", actionName));
+            actionResult.setFailedVm(executePowerOpsAction(vmName, actionName, connData));
         } else {
             System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]\n",
                     Constants.TASK_ID);
@@ -126,10 +127,23 @@ public class VmOpsTool {
      * @param connData vCenter connection information
      * @return vmName if operation fails
      */
-    private String executeStartVmAction(String vmName, ConnectionData connData) {
+    private String executePowerOpsAction(String vmName, String actionName, ConnectionData connData) {
         String failedVm = "";
         try {
-            vmwareFactory.call().startVM(vmName, connData);
+            switch (actionName) {
+                case Constants.START_VM_ACTION:
+                    vmwareFactory.call().startVM(vmName, connData);
+                    break;
+                case Constants.STOP_VM_ACTION:
+                    vmwareFactory.call().stopVM(vmName, connData);
+                    break;
+                default:
+                    System.out.printf(
+                            "##vso[task.logissue type=error;code=INFRA_InvalidPowerOperation;TaskId=%s;]\n",
+                            Constants.TASK_ID);
+                    throw new Exception("Invalid action name ( " + actionName + " ) for power operation");
+            }
+
         } catch (Exception exp) {
             System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred.");
             failedVm = vmName + " ";

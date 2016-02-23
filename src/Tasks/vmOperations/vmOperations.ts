@@ -75,6 +75,9 @@ export class VmOperations {
             case "Power On Virtual Machines":
                 cmdArgs += " -powerops start";
                 break;
+            case "Shutdown Virtual Machines":
+                cmdArgs += " -powerops stop";
+                break;
             default:
                 tl.error("Invalid action name : " + actionName);
                 tl.exit(1);

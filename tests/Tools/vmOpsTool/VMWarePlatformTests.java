@@ -246,8 +246,8 @@ public abstract class VMWarePlatformTests {
     }
 
     @Test
-    public void startOnRunningVmShouldNotThrow() throws Exception {
-        String vmName = "Win2012R2";
+    public void startAndStopTwiceOnAVmShouldNotThrow() throws Exception {
+        String vmName = "startAndStopWindows";
         String targetDC = "redmonddc";
         connData.setTargetDC(targetDC);
 
@@ -255,26 +255,24 @@ public abstract class VMWarePlatformTests {
         assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
         vmWareImpl.startVM(vmName, connData);
         assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
+
+        vmWareImpl.stopVM(vmName, connData);
+        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(false);
+        vmWareImpl.stopVM(vmName, connData);
+        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(false);
     }
 
     @Test
-    public void startVmShouldSucceedForPoweredOffWindowsVM() throws Exception {
-        String vmName = "Win7";
-        String targetDC = "redmonddc";
-        connData.setTargetDC(targetDC);
-
-        vmWareImpl.startVM(vmName, connData);
-        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
-    }
-
-    @Test
-    public void startVmShouldSucceedForPoweredOffLinuxVM() throws Exception {
-        String vmName = "UbuntuVM";
+    public void startAndStopVmShouldSucceedForLinuxVM() throws Exception {
+        String vmName = "startAndStopUbuntu";
         String targetDC = "fareastdc";
         connData.setTargetDC(targetDC);
 
         vmWareImpl.startVM(vmName, connData);
         assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
+
+        vmWareImpl.stopVM(vmName, connData);
+        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(false);
     }
 
     // Common for restore/delete snapshot operations

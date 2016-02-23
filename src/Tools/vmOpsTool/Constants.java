@@ -25,6 +25,7 @@ public class Constants {
     public static final String DELETE_SNAPSHOT_ACTION = "delete";
     public static final String DELETE_VM_ACTION = "delete";
     public static final String START_VM_ACTION = "start";
+    public static final String STOP_VM_ACTION = "stop";
 
     public static final String TASK_ID = "735d144e-55fe-44d6-b687-db9031b6e70b";
 

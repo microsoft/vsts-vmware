@@ -43,6 +43,7 @@
                 "Revert Snapshot of Virtual Machines": "Revert Snapshot of Virtual Machines",
                 "Delete Snapshot of Virtual Machines": "Delete Snapshot of Virtual Machines",
                 "Power On Virtual Machines": "Power on Virtual Machines",
+                "Shutdown Virtual Machines": "Shutdown Virtual Machines",
                 "Delete Virtual Machines": "Delete Virtual Machines"
             }
         },

@@ -21,20 +21,18 @@ public class VMWareImpl implements IVMWare {
     private final String SNAPSHOT = "snapshot";
     private final String CONFIG = "config";
     private final String NAME = "name";
-    private final String GUEST_IP = "guest.ipAddress";
+    private final String GUEST_TOOLS_STATUS = "guest.toolsStatus";
 
-    private VimService vimService;
     private VimPortType vimPort;
     private ServiceContent serviceContent;
     private UserSession userSession;
-    private ManagedObjectReference rootFolder;
     private ManagedObjectReference targetDCMor;
 
     public void connect(ConnectionData connData) throws Exception {
         try {
             if (!isSessionActive()) {
                 System.out.println("No active session found.. establishing new session.");
-                vimService = new VimService();
+                VimService vimService = new VimService();
                 vimPort = vimService.getVimPort();
 
                 Map<String, Object> reqContext = ((BindingProvider) vimPort).getRequestContext();
@@ -48,15 +46,15 @@ public class VMWareImpl implements IVMWare {
 
                 if (connData.isSkipCACheck()) {
                     SkipCACheck.AllowUntrustedConnections();
-    }
+                }
 
                 serviceContent = vimPort.retrieveServiceContent(serviceInstance);
-                rootFolder = serviceContent.getRootFolder();
+                ManagedObjectReference rootFolder = serviceContent.getRootFolder();
                 userSession = vimPort.login(serviceContent.getSessionManager(), connData.getUserName(), connData.getPassword(),
                         null);
                 System.out.printf("Searching for datacenter with name [%s].\n", connData.getTargetDC());
                 targetDCMor = getMorByName(rootFolder, connData.getTargetDC(), DATA_CENTER, false);
-    }
+            }
         } catch (Exception exp) {
             System.out.printf("##vso[task.logissue type=error;code=USERINPUT_ConnectionFailed;TaskId=%s;]\n",
                     Constants.TASK_ID);
@@ -142,11 +140,23 @@ public class VMWareImpl implements IVMWare {
                         String.format("Failed to power on virtual machine [%s].\n", vmName));
             }
             System.out.printf("Waiting for virtual machine [%s] to start.\n", vmName);
-            waitForVmToBoot(vmMor);
+            waitForPowerOperation(vmMor, VirtualMachineToolsStatus.TOOLS_OK);
             System.out.printf("Successfully powered on virtual machine [%s].\n", vmName);
             return;
         }
         System.out.printf("Virtual machine [%s] is already running.\n", vmName);
+    }
+
+    public void stopVM(String vmName, ConnectionData connData) throws Exception {
+        connect(connData);
+        if (isVmPoweredOn(vmName, connData)) {
+            ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
+            vimPort.shutdownGuest(vmMor);
+            System.out.printf("Waiting for virtual machine [%s] to shutdown.\n", vmName);
+            waitForPowerOperation(vmMor, VirtualMachineToolsStatus.TOOLS_NOT_RUNNING);
+            System.out.printf("Successfully shutdowned the virtual machine [%s].\n", vmName);
+        }
+        System.out.printf("Virtual machine [%s] is already shutdowned.\n", vmName);
     }
 
     public void deleteVM(String vmName, ConnectionData connData) throws Exception {
@@ -198,8 +208,8 @@ public class VMWareImpl implements IVMWare {
         connect(connData);
         System.out.println("Checking virtual machine [ " + vmName + " ] power status.");
         ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
-        String vmIpAddress = (String) getMorProperties(vmMor, new String[]{GUEST_IP}).get(GUEST_IP);
-        return (vmIpAddress != null) && !vmIpAddress.isEmpty();
+        VirtualMachineToolsStatus vmToolsStatus = (VirtualMachineToolsStatus) getMorProperties(vmMor, new String[]{GUEST_TOOLS_STATUS}).get(GUEST_TOOLS_STATUS);
+        return (vmToolsStatus != null) && (vmToolsStatus == VirtualMachineToolsStatus.TOOLS_OK);
     }
 
     private ManagedObjectReference getMorByName(ManagedObjectReference rootContainer, String mobName, String morefType,
@@ -229,16 +239,16 @@ public class VMWareImpl implements IVMWare {
         return retVal;
     }
 
-    private void waitForVmToBoot(ManagedObjectReference vmMor) throws Exception {
+    private void waitForPowerOperation(ManagedObjectReference vmMor, VirtualMachineToolsStatus desiredVmToolsStatus) throws Exception {
         String version = "";
-        String ipAddress = "";
-        PropertyFilterSpec filterSpec = createPropFilterSpecForObject(vmMor, new String[]{GUEST_IP});
+        VirtualMachineToolsStatus vmToolsStatus = VirtualMachineToolsStatus.TOOLS_NOT_INSTALLED;
+        PropertyFilterSpec filterSpec = createPropFilterSpecForObject(vmMor, new String[]{GUEST_TOOLS_STATUS});
         ManagedObjectReference propertyFilter = vimPort.createFilter(serviceContent.getPropertyCollector(), filterSpec, true);
         WaitOptions waitOptions = new WaitOptions();
         waitOptions.setMaxWaitSeconds(5 * 60); // Wait in number of seconds
         long startTime = System.currentTimeMillis();
 
-        while (((new Date()).getTime() - startTime < 5 * 60 * 1000) && ipAddress.isEmpty()) {
+        while (((new Date()).getTime() - startTime < 5 * 60 * 1000) && vmToolsStatus != desiredVmToolsStatus) {
 
             UpdateSet updateSet = vimPort.waitForUpdatesEx(serviceContent.getPropertyCollector(), version, waitOptions);
             if (updateSet == null || updateSet.getFilterSet() == null) {
@@ -259,7 +269,7 @@ public class VMWareImpl implements IVMWare {
                     List<PropertyChange> propChangeList = objectUpdate.getChangeSet();
                     for (PropertyChange propChange : propChangeList) {
                         if (propChange.getVal() != null) {
-                            ipAddress = (String) propChange.getVal();
+                            vmToolsStatus = (VirtualMachineToolsStatus) propChange.getVal();
                         }
                     }
                 }

@@ -95,4 +95,11 @@ public interface IVMWare {
      * @throws Exception
      */
     void startVM(String vmName, ConnectionData connData) throws Exception;
+
+    /**
+     * @param vmName   name of the virtual machine
+     * @param connData vCenter connection information
+     * @throws Exception
+     */
+    void stopVM(String vmName, ConnectionData connData) throws Exception;
 }
