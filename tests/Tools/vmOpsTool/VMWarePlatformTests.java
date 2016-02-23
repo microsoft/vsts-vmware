@@ -247,7 +247,7 @@ public abstract class VMWarePlatformTests {
 
     @Test
     public void startAndStopTwiceOnAVmShouldNotThrow() throws Exception {
-        String vmName = "startAndStopWindows";
+        String vmName = "Win2012R2";
         String targetDC = "redmonddc";
         connData.setTargetDC(targetDC);
 

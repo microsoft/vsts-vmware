@@ -140,7 +140,8 @@ public class VMWareImpl implements IVMWare {
                         String.format("Failed to power on virtual machine [%s].\n", vmName));
             }
             System.out.printf("Waiting for virtual machine [%s] to start.\n", vmName);
-            waitForPowerOperation(vmMor, VirtualMachineToolsStatus.TOOLS_OK);
+            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_STATUS}, new String[]{"toolsStatus"},
+                    new Object[][]{new Object[]{VirtualMachineToolsStatus.TOOLS_OK, VirtualMachineToolsStatus.TOOLS_OLD}}, 5);
             System.out.printf("Successfully powered on virtual machine [%s].\n", vmName);
             return;
         }
@@ -153,7 +154,8 @@ public class VMWareImpl implements IVMWare {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             vimPort.shutdownGuest(vmMor);
             System.out.printf("Waiting for virtual machine [%s] to shutdown.\n", vmName);
-            waitForPowerOperation(vmMor, VirtualMachineToolsStatus.TOOLS_NOT_RUNNING);
+            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_STATUS}, new String[]{"toolsStatus"},
+                    new Object[][]{new Object[]{VirtualMachineToolsStatus.TOOLS_NOT_RUNNING}}, 5);
             System.out.printf("Successfully shutdowned the virtual machine [%s].\n", vmName);
         }
         System.out.printf("Virtual machine [%s] is already shutdowned.\n", vmName);
@@ -229,8 +231,8 @@ public class VMWareImpl implements IVMWare {
         boolean retVal = false;
 
         System.out.println("Waiting for operation completion.");
-        Object[] result = waitForTaskResult(task, new String[]{"info.state", "info.error"}, new String[]{"state"},
-                new Object[][]{new Object[]{TaskInfoState.SUCCESS, TaskInfoState.ERROR}});
+        Object[] result = waitOnMorProperties(task, new String[]{"info.state"}, new String[]{"state"},
+                new Object[][]{new Object[]{TaskInfoState.SUCCESS, TaskInfoState.ERROR}}, 60);
 
         if (result[0].equals(TaskInfoState.SUCCESS)) {
             retVal = true;
@@ -239,58 +241,21 @@ public class VMWareImpl implements IVMWare {
         return retVal;
     }
 
-    private void waitForPowerOperation(ManagedObjectReference vmMor, VirtualMachineToolsStatus desiredVmToolsStatus) throws Exception {
-        String version = "";
-        VirtualMachineToolsStatus vmToolsStatus = VirtualMachineToolsStatus.TOOLS_NOT_INSTALLED;
-        PropertyFilterSpec filterSpec = createPropFilterSpecForObject(vmMor, new String[]{GUEST_TOOLS_STATUS});
-        ManagedObjectReference propertyFilter = vimPort.createFilter(serviceContent.getPropertyCollector(), filterSpec, true);
-        WaitOptions waitOptions = new WaitOptions();
-        waitOptions.setMaxWaitSeconds(5 * 60); // Wait in number of seconds
-        long startTime = System.currentTimeMillis();
-
-        while (((new Date()).getTime() - startTime < 5 * 60 * 1000) && vmToolsStatus != desiredVmToolsStatus) {
-
-            UpdateSet updateSet = vimPort.waitForUpdatesEx(serviceContent.getPropertyCollector(), version, waitOptions);
-            if (updateSet == null || updateSet.getFilterSet() == null) {
-                continue;
-            }
-            version = updateSet.getVersion();
-            List<PropertyFilterUpdate> filterUpdateList = updateSet.getFilterSet();
-
-            for (PropertyFilterUpdate filterUpdate : filterUpdateList) {
-                if (filterUpdate == null || filterUpdate.getObjectSet() == null) {
-                    continue;
-                }
-                List<ObjectUpdate> objectUpdateList = filterUpdate.getObjectSet();
-                for (ObjectUpdate objectUpdate : objectUpdateList) {
-                    if (objectUpdate == null || objectUpdate.getChangeSet() == null) {
-                        continue;
-                    }
-                    List<PropertyChange> propChangeList = objectUpdate.getChangeSet();
-                    for (PropertyChange propChange : propChangeList) {
-                        if (propChange.getVal() != null) {
-                            vmToolsStatus = (VirtualMachineToolsStatus) propChange.getVal();
-                        }
-                    }
-                }
-            }
-        }
-        vimPort.destroyPropertyFilter(propertyFilter);
-    }
-
-    private Object[] waitForTaskResult(ManagedObjectReference taskMor, String[] filterProps, String[] endWaitProps,
-                                       Object[][] expectedVals) throws Exception {
+    private Object[] waitOnMorProperties(ManagedObjectReference Mor, String[] filterProps, String[] endWaitProps,
+                                         Object[][] expectedVals, int noOfMinutes) throws Exception {
         try {
 
             Object[] endVals = new Object[endWaitProps.length];
             Object[] filterVals = new Object[filterProps.length];
             String version = "";
-            PropertyFilterSpec filterSpec = createPropFilterSpecForObject(taskMor, filterProps);
+            PropertyFilterSpec filterSpec = createPropFilterSpecForObject(Mor, filterProps);
             ManagedObjectReference propertyFilter = vimPort.createFilter(serviceContent.getPropertyCollector(), filterSpec, true);
             boolean reached = false;
+            WaitOptions waitOptions = new WaitOptions();
+            waitOptions.setMaxWaitSeconds(noOfMinutes * 60);
 
             while (!reached) {
-                UpdateSet updateSet = vimPort.waitForUpdatesEx(serviceContent.getPropertyCollector(), version, new WaitOptions());
+                UpdateSet updateSet = vimPort.waitForUpdatesEx(serviceContent.getPropertyCollector(), version, waitOptions);
                 if (updateSet == null || updateSet.getFilterSet() == null) {
                     continue;
                 }
