@@ -237,6 +237,12 @@ describe("getCmdArgsForAction", (): void => {
         cmdArgs.should.contain("-powerops shutdown");
     });
 
+    it("Should construct command action for power off vm operation", (): void => {
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Power off Virtual Machines");
+
+        cmdArgs.should.contain("-powerops poweroff");
+    });
+
     it("Should throw on failure to read snapshot name for restore/create/delete snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).throws();
 

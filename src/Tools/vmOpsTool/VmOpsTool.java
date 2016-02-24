@@ -137,6 +137,9 @@ public class VmOpsTool {
                 case Constants.SHUTDOWN_VM_ACTION:
                     vmwareFactory.call().shutdownVM(vmName, connData);
                     break;
+                case Constants.POWER_OFF_VM_ACTION:
+                    vmwareFactory.call().powerOffVM(vmName, connData);
+                    break;
                 default:
                     System.out.printf(
                             "##vso[task.logissue type=error;code=INFRA_InvalidPowerOperation;TaskId=%s;]\n",

@@ -279,6 +279,19 @@ public abstract class VMWarePlatformTests {
         assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
     }
 
+    @Test
+    public void powerOnAndPowerOffVmShouldSucceed() throws Exception {
+        String vmName = "powerOnAndPowerOff";
+        String targetDC = "fareastdc";
+        connData.setTargetDC(targetDC);
+
+        vmWareImpl.powerOnVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
+
+        vmWareImpl.powerOffVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
+    }
+
     // Common for restore/delete snapshot operations
     @Test
     public void restoreOrDeleteSnapshotShouldThrowIfSnapshotDoesNotExist() {
