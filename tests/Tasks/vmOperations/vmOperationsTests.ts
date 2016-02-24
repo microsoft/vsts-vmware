@@ -225,10 +225,22 @@ describe("getCmdArgsForAction", (): void => {
         cmdArgs.should.contain("-deletevm delete");
     });
 
-    it("Should construct command action for start vm operation", (): void => {
+    it("Should construct command action for power on vm operation", (): void => {
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Power On Virtual Machines");
 
-        cmdArgs.should.contain("-powerops start");
+        cmdArgs.should.contain("-powerops poweron");
+    });
+
+    it("Should construct command action for shutdown vm operation", (): void => {
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Shutdown Virtual Machines");
+
+        cmdArgs.should.contain("-powerops shutdown");
+    });
+
+    it("Should construct command action for power off vm operation", (): void => {
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Power off Virtual Machines");
+
+        cmdArgs.should.contain("-powerops poweroff");
     });
 
     it("Should throw on failure to read snapshot name for restore/create/delete snapshot action", (): void => {

@@ -37,7 +37,7 @@ public abstract class VMWarePlatformTests {
 
         vmWareImpl.cloneVMFromTemplate(templateName, newVmName, computeType, computeName, datastore, description, connData);
 
-        assertThat(vmWareImpl.isVmExists(newVmName, connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
         vmWareImpl.deleteVM(newVmName, connData);
     }
@@ -54,7 +54,7 @@ public abstract class VMWarePlatformTests {
 
         vmWareImpl.cloneVMFromTemplate(templateName, newVmName, computeType, computeName, datastore, description, connData);
 
-        assertThat(vmWareImpl.isVmExists(newVmName, connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
         vmWareImpl.deleteVM(newVmName, connData);
     }
@@ -71,7 +71,7 @@ public abstract class VMWarePlatformTests {
 
         vmWareImpl.cloneVMFromTemplate(templateName, newVmName, computeType, computeName, datastore, description, connData);
 
-        assertThat(vmWareImpl.isVmExists(newVmName, connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
         vmWareImpl.deleteVM(newVmName, connData);
     }
@@ -246,35 +246,50 @@ public abstract class VMWarePlatformTests {
     }
 
     @Test
-    public void startOnRunningVmShouldNotThrow() throws Exception {
-        String vmName = "Win2012R2";
+    public void startAndStopTwiceOnAVmShouldNotThrow() throws Exception {
+        String vmName = "startAndStopWindows";
         String targetDC = "redmonddc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.startVM(vmName, connData);
-        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
-        vmWareImpl.startVM(vmName, connData);
-        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
+        vmWareImpl.powerOnVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
+        vmWareImpl.shutdownVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
+
+        vmWareImpl.powerOnVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
+        vmWareImpl.shutdownVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
     }
 
     @Test
-    public void startVmShouldSucceedForPoweredOffWindowsVM() throws Exception {
-        String vmName = "Win7";
-        String targetDC = "redmonddc";
-        connData.setTargetDC(targetDC);
-
-        vmWareImpl.startVM(vmName, connData);
-        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
-    }
-
-    @Test
-    public void startVmShouldSucceedForPoweredOffLinuxVM() throws Exception {
-        String vmName = "UbuntuVM";
+    public void startAndStopVmShouldSucceedForLinuxVM() throws Exception {
+        String vmName = "startAndStopUbuntu";
         String targetDC = "fareastdc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.startVM(vmName, connData);
-        assertThat(vmWareImpl.isVmPoweredOn(vmName, connData)).isEqualTo(true);
+        vmWareImpl.powerOnVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
+        vmWareImpl.powerOnVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
+
+        vmWareImpl.shutdownVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
+        vmWareImpl.shutdownVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
+    }
+
+    @Test
+    public void powerOnAndPowerOffVmShouldSucceed() throws Exception {
+        String vmName = "powerOnAndPowerOff";
+        String targetDC = "fareastdc";
+        connData.setTargetDC(targetDC);
+
+        vmWareImpl.powerOnVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
+
+        vmWareImpl.powerOffVM(vmName, connData);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
     }
 
     // Common for restore/delete snapshot operations

@@ -7,10 +7,11 @@ public class InMemoryVMWareImpl implements IVMWare {
 
     private Map<String, List<String>> vmSnapshotInfo = new HashMap<>();
     private Map<String, String> vmActiveSnapshot = new HashMap<>();
-    private List<String> snapshotList = new ArrayList<>();
-    private String activeSnapshot = "Snapshot2";
+    private Map<String, String> vmStateInformation = new HashMap<>();
+    private String started = "Started";
 
     public InMemoryVMWareImpl() {
+        List<String> snapshotList = new ArrayList<>();
         snapshotList.add("Snapshot1");
         snapshotList.add("Snapshot2");
 
@@ -22,7 +23,11 @@ public class InMemoryVMWareImpl implements IVMWare {
         vmSnapshotInfo.put("win7", snapshotList);
         vmSnapshotInfo.put("vm1", snapshotList);
         vmSnapshotInfo.put("vm2", snapshotList);
+        vmSnapshotInfo.put("startandstopubuntu", snapshotList);
+        vmSnapshotInfo.put("startandstopwindows", snapshotList);
+        vmSnapshotInfo.put("poweronandpoweroff", snapshotList);
 
+        String activeSnapshot = "Snapshot2";
         vmActiveSnapshot.put("win2012r2", activeSnapshot);
         vmActiveSnapshot.put("poweredoffvm", activeSnapshot);
         vmActiveSnapshot.put("win10", activeSnapshot);
@@ -31,10 +36,26 @@ public class InMemoryVMWareImpl implements IVMWare {
         vmActiveSnapshot.put("win7", activeSnapshot);
         vmActiveSnapshot.put("vm1", activeSnapshot);
         vmActiveSnapshot.put("vm2", activeSnapshot);
+        vmActiveSnapshot.put("startandstopubuntu", activeSnapshot);
+        vmActiveSnapshot.put("startandstopwindows", activeSnapshot);
+        vmActiveSnapshot.put("poweronandpoweroff", activeSnapshot);
+
+        String vmState = "Paused";
+        vmStateInformation.put("win2012r2", vmState);
+        vmStateInformation.put("poweredoffvm", vmState);
+        vmStateInformation.put("win10", vmState);
+        vmStateInformation.put("ubuntuvm", vmState);
+        vmStateInformation.put("win8", vmState);
+        vmStateInformation.put("win7", vmState);
+        vmStateInformation.put("vm1", vmState);
+        vmStateInformation.put("vm2", vmState);
+        vmStateInformation.put("startandstopubuntu", vmState);
+        vmStateInformation.put("startandstopwindows", vmState);
+        vmStateInformation.put("poweronandpoweroff", vmState);
     }
 
-    public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
-                               String description, ConnectionData connData) throws Exception {
+    public synchronized void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
+                                            String description, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
             List<String> vmCpList = vmSnapshotInfo.get(vmName);
@@ -46,7 +67,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+    public synchronized void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         List<String> cpList;
 
         vmName = vmName.toLowerCase();
@@ -63,7 +84,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+    public synchronized void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
             List<String> vmCpList = vmSnapshotInfo.get(vmName);
@@ -85,10 +106,26 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public void startVM(String vmName, ConnectionData connData) throws Exception {
-        if (vmName.equals("VmThatFailsInStart")) {
-            throw new Exception("start vm operation failed for VmThatFailsInStart");
+    public synchronized void powerOnVM(String vmName, ConnectionData connData) throws Exception {
+        vmName = vmName.toLowerCase();
+        if (vmStateInformation.containsKey(vmName)) {
+            vmStateInformation.put(vmName, started);
+        } else {
+            throw new Exception("VM not found.");
         }
+    }
+
+    public synchronized void shutdownVM(String vmName, ConnectionData connData) throws Exception {
+        vmName = vmName.toLowerCase();
+        if (vmStateInformation.containsKey(vmName)) {
+            vmStateInformation.put(vmName, "Stopped");
+        } else {
+            throw new Exception("VM not found.");
+        }
+    }
+
+    public void powerOffVM(String vmName, ConnectionData connData) throws Exception {
+        shutdownVM(vmName, connData);
     }
 
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
@@ -106,7 +143,6 @@ public class InMemoryVMWareImpl implements IVMWare {
     }
 
     public boolean isSnapshotExists(String vmName, String snapshotName, ConnectionData connData) throws Exception {
-
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
             return vmSnapshotInfo.get(vmName).contains(snapshotName);
@@ -115,17 +151,21 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public boolean isVmExists(String vmName, ConnectionData connData) throws Exception {
+    public boolean isVMExists(String vmName, ConnectionData connData) throws Exception {
         return vmSnapshotInfo.containsKey(vmName);
     }
 
-    public boolean isVmPoweredOn(String vmName, ConnectionData connData) throws Exception {
-        return true;
+    public boolean isVMPoweredOn(String vmName, ConnectionData connData) throws Exception {
+        vmName = vmName.toLowerCase();
+        if (vmStateInformation.containsKey(vmName)) {
+            return vmStateInformation.get(vmName).equals(started);
+        } else {
+            throw new Exception("VM not found.");
+        }
     }
 
-
-    public void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName,
-                                    String datastore, String description, ConnectionData connData) throws Exception {
+    public synchronized void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName,
+                                                 String datastore, String description, ConnectionData connData) throws Exception {
         if (vmName.equals("VMNameThatFailsInClone")) {
             throw new Exception("Clone VM from template operation failed for VMNameThatFailsInClone");
         }
@@ -151,7 +191,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         vmActiveSnapshot.put(vmName, "");
     }
 
-    public void deleteVM(String vmName, ConnectionData connData) throws Exception {
+    public synchronized void deleteVM(String vmName, ConnectionData connData) throws Exception {
         if (vmName.equals("VMNameThatFailsInDelete")) {
             throw new Exception("delete vm operation failed for VMNameThatFailsInDelete");
         }
