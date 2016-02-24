@@ -103,7 +103,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public synchronized void startVM(String vmName, ConnectionData connData) throws Exception {
+    public synchronized void powerOnVM(String vmName, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmStateInformation.containsKey(vmName)) {
             vmStateInformation.put(vmName, started);
@@ -112,7 +112,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public synchronized void stopVM(String vmName, ConnectionData connData) throws Exception {
+    public synchronized void shutdownVM(String vmName, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmStateInformation.containsKey(vmName)) {
             vmStateInformation.put(vmName, "Stopped");
@@ -144,11 +144,11 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public boolean isVmExists(String vmName, ConnectionData connData) throws Exception {
+    public boolean isVMExists(String vmName, ConnectionData connData) throws Exception {
         return vmSnapshotInfo.containsKey(vmName);
     }
 
-    public boolean isVmPoweredOn(String vmName, ConnectionData connData) throws Exception {
+    public boolean isVMPoweredOn(String vmName, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmStateInformation.containsKey(vmName)) {
             return vmStateInformation.get(vmName).equals(started);

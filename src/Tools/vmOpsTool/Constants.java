@@ -24,9 +24,10 @@ public class Constants {
     public static final String SAVE_VM_MEMORY = "-saveVmMemory";
     public static final String DELETE_SNAPSHOT_ACTION = "delete";
     public static final String DELETE_VM_ACTION = "delete";
-    public static final String START_VM_ACTION = "start";
-    public static final String STOP_VM_ACTION = "stop";
+    public static final String POWER_ON_VM_ACTION = "poweron";
+    public static final String SHUTDOWN_VM_ACTION = "shutdown";
 
     public static final String TASK_ID = "735d144e-55fe-44d6-b687-db9031b6e70b";
-
+    public static final int START_STOP_MAX_WAIT_IN_MINUTES = 5;
+    public static final int OPERATION_MAX_WAIT_IN_MINUTES = 60;
 }

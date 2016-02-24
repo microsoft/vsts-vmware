@@ -22,6 +22,8 @@ public class VMWareImpl implements IVMWare {
     private final String CONFIG = "config";
     private final String NAME = "name";
     private final String GUEST_TOOLS_STATUS = "guest.toolsStatus";
+    private final String GUEST_HEART_BEAT_STATUS = "guestHeartbeatStatus";
+    private final String INFO_STATE = "info.state";
 
     private VimPortType vimPort;
     private ServiceContent serviceContent;
@@ -129,9 +131,9 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    public void startVM(String vmName, ConnectionData connData) throws Exception {
+    public void powerOnVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
-        if (!isVmPoweredOn(vmName, connData)) {
+        if (!isVMPoweredOn(vmName, connData)) {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             ManagedObjectReference task = vimPort.powerOnVMTask(vmMor, null);
 
@@ -140,22 +142,25 @@ public class VMWareImpl implements IVMWare {
                         String.format("Failed to power on virtual machine [%s].\n", vmName));
             }
             System.out.printf("Waiting for virtual machine [%s] to start.\n", vmName);
-            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_STATUS}, new String[]{"toolsStatus"},
-                    new Object[][]{new Object[]{VirtualMachineToolsStatus.TOOLS_OK, VirtualMachineToolsStatus.TOOLS_OLD}}, 5);
+            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_STATUS}, new String[]{GUEST_TOOLS_STATUS},
+                    new Object[][]{new Object[]{VirtualMachineToolsStatus.TOOLS_OK, VirtualMachineToolsStatus.TOOLS_OLD}},
+                    Constants.START_STOP_MAX_WAIT_IN_MINUTES);
             System.out.printf("Successfully powered on virtual machine [%s].\n", vmName);
             return;
         }
         System.out.printf("Virtual machine [%s] is already running.\n", vmName);
     }
 
-    public void stopVM(String vmName, ConnectionData connData) throws Exception {
+    public void shutdownVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
-        if (isVmPoweredOn(vmName, connData)) {
+        if (isVMPoweredOn(vmName, connData)) {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             vimPort.shutdownGuest(vmMor);
             System.out.printf("Waiting for virtual machine [%s] to shutdown.\n", vmName);
-            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_STATUS}, new String[]{"toolsStatus"},
-                    new Object[][]{new Object[]{VirtualMachineToolsStatus.TOOLS_NOT_RUNNING}}, 5);
+            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_STATUS}, new String[]{GUEST_TOOLS_STATUS},
+                    new Object[][]{new Object[]{VirtualMachineToolsStatus.TOOLS_NOT_RUNNING}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
+            waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
+                    new Object[][]{new Object[]{ManagedEntityStatus.GRAY}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
             System.out.printf("Successfully shutdowned the virtual machine [%s].\n", vmName);
         }
         System.out.printf("Virtual machine [%s] is already shutdowned.\n", vmName);
@@ -194,7 +199,7 @@ public class VMWareImpl implements IVMWare {
         return true;
     }
 
-    public boolean isVmExists(String vmName, ConnectionData connData) throws Exception {
+    public boolean isVMExists(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.printf("Finding virtual machine (%s) on vCenter server.\n", vmName);
         try {
@@ -206,7 +211,7 @@ public class VMWareImpl implements IVMWare {
         return true;
     }
 
-    public boolean isVmPoweredOn(String vmName, ConnectionData connData) throws Exception {
+    public boolean isVMPoweredOn(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.println("Checking virtual machine [ " + vmName + " ] power status.");
         ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
@@ -231,8 +236,8 @@ public class VMWareImpl implements IVMWare {
         boolean retVal = false;
 
         System.out.println("Waiting for operation completion.");
-        Object[] result = waitOnMorProperties(task, new String[]{"info.state"}, new String[]{"state"},
-                new Object[][]{new Object[]{TaskInfoState.SUCCESS, TaskInfoState.ERROR}}, 60);
+        Object[] result = waitOnMorProperties(task, new String[]{INFO_STATE}, new String[]{INFO_STATE},
+                new Object[][]{new Object[]{TaskInfoState.SUCCESS, TaskInfoState.ERROR}}, Constants.OPERATION_MAX_WAIT_IN_MINUTES);
 
         if (result[0].equals(TaskInfoState.SUCCESS)) {
             retVal = true;
@@ -253,8 +258,9 @@ public class VMWareImpl implements IVMWare {
             boolean reached = false;
             WaitOptions waitOptions = new WaitOptions();
             waitOptions.setMaxWaitSeconds(noOfMinutes * 60);
+            long startTime = System.currentTimeMillis();
 
-            while (!reached) {
+            while (((new Date()).getTime() - startTime < noOfMinutes * 60 * 1000) && !reached) {
                 UpdateSet updateSet = vimPort.waitForUpdatesEx(serviceContent.getPropertyCollector(), version, waitOptions);
                 if (updateSet == null || updateSet.getFilterSet() == null) {
                     continue;

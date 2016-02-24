@@ -131,11 +131,11 @@ public class VmOpsTool {
         String failedVm = "";
         try {
             switch (actionName) {
-                case Constants.START_VM_ACTION:
-                    vmwareFactory.call().startVM(vmName, connData);
+                case Constants.POWER_ON_VM_ACTION:
+                    vmwareFactory.call().powerOnVM(vmName, connData);
                     break;
-                case Constants.STOP_VM_ACTION:
-                    vmwareFactory.call().stopVM(vmName, connData);
+                case Constants.SHUTDOWN_VM_ACTION:
+                    vmwareFactory.call().shutdownVM(vmName, connData);
                     break;
                 default:
                     System.out.printf(

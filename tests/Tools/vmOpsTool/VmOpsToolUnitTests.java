@@ -51,37 +51,37 @@ public class VmOpsToolUnitTests {
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
-        assertThat(vmWareImpl.isVmExists("newVM1", connData)).isEqualTo(true);
-        assertThat(vmWareImpl.isVmExists("newVM2", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMExists("newVM1", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMExists("newVM2", connData)).isEqualTo(true);
 
         // Delete vm validation
         cmdArgs = getCmdArgs("newVM1, newVM2", Constants.DELETE_VM, Constants.DELETE_VM_ACTION);
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
-        assertThat(vmWareImpl.isVmExists("newVM1", connData)).isEqualTo(false);
-        assertThat(vmWareImpl.isVmExists("newVM2", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMExists("newVM1", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMExists("newVM2", connData)).isEqualTo(false);
     }
 
     @Test
     public void executeActionInParallelShouldSucceedForStartAndStopVMActionWithValidInputs() throws Exception {
-        String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.POWER_OPS, Constants.START_VM_ACTION);
+        String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.POWER_OPS, Constants.POWER_ON_VM_ACTION);
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
-        assertThat(vmWareImpl.isVmPoweredOn("vm1", connData)).isEqualTo(true);
-        assertThat(vmWareImpl.isVmPoweredOn("vm2", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMPoweredOn("vm1", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMPoweredOn("vm2", connData)).isEqualTo(true);
 
-        cmdArgs = getCmdArgs("vm1, vm2", Constants.POWER_OPS, Constants.STOP_VM_ACTION);
+        cmdArgs = getCmdArgs("vm1, vm2", Constants.POWER_OPS, Constants.SHUTDOWN_VM_ACTION);
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
-        assertThat(vmWareImpl.isVmPoweredOn("vm1", connData)).isEqualTo(false);
-        assertThat(vmWareImpl.isVmPoweredOn("vm2", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMPoweredOn("vm1", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMPoweredOn("vm2", connData)).isEqualTo(false);
     }
 
     @Test
     public void executeActionInParallelShouldThrowForStartAndStopVMActionFailureOnAVM() throws Exception {
-        String[] cmdArgs = getCmdArgs("vm1, VmThatFailsInStart", Constants.POWER_OPS, Constants.START_VM_ACTION);
+        String[] cmdArgs = getCmdArgs("vm1, VmThatFailsInStart", Constants.POWER_OPS, Constants.POWER_ON_VM_ACTION);
 
         Exception exp = null;
 
@@ -92,9 +92,9 @@ public class VmOpsToolUnitTests {
         }
 
         assertThat(exp).isNotNull();
-        assertThat(vmWareImpl.isVmPoweredOn("vm1", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMPoweredOn("vm1", connData)).isEqualTo(true);
 
-        cmdArgs = getCmdArgs("vm1, VmThatFailsInStop", Constants.POWER_OPS, Constants.STOP_VM_ACTION);
+        cmdArgs = getCmdArgs("vm1, VmThatFailsInStop", Constants.POWER_OPS, Constants.SHUTDOWN_VM_ACTION);
 
         exp = null;
         try {
@@ -104,7 +104,7 @@ public class VmOpsToolUnitTests {
         }
 
         assertThat(exp).isNotNull();
-        assertThat(vmWareImpl.isVmPoweredOn("vm1", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMPoweredOn("vm1", connData)).isEqualTo(false);
     }
 
     @Test
@@ -134,7 +134,7 @@ public class VmOpsToolUnitTests {
         }
 
         assertThat(exp).isNotNull();
-        assertThat(vmWareImpl.isVmExists("newVM1", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMExists("newVM1", connData)).isEqualTo(true);
 
         // Delete vm validation
         cmdArgs = getCmdArgs("newVM1, VMNameThatFailsInDelete", Constants.DELETE_VM, Constants.DELETE_VM_ACTION);
@@ -147,7 +147,7 @@ public class VmOpsToolUnitTests {
         }
 
         assertThat(exp).isNotNull();
-        assertThat(vmWareImpl.isVmExists("newVM1", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMExists("newVM1", connData)).isEqualTo(false);
     }
 
     @Test
