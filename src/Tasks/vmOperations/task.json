@@ -12,7 +12,7 @@
     "author": "Microsoft Corporation",
     "version": {
         "Major": 0,
-        "Minor": 1,
+        "Minor": 2,
         "Patch": 0
     },
     "demands": [
@@ -44,6 +44,7 @@
                 "Delete Snapshot of Virtual Machines": "Delete Snapshot of Virtual Machines",
                 "Power On Virtual Machines": "Power on Virtual Machines",
                 "Shutdown Virtual Machines": "Shutdown Virtual Machines",
+                "Power off Virtual Machines": "Power off Virtual Machines",
                 "Delete Virtual Machines": "Delete Virtual Machines"
             }
         },

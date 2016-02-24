@@ -166,6 +166,21 @@ public class VMWareImpl implements IVMWare {
         System.out.printf("Virtual machine [%s] is already shutdowned.\n", vmName);
     }
 
+    public void powerOffVM(String vmName, ConnectionData connData) throws Exception {
+        connect(connData);
+        if (isVMPoweredOn(vmName, connData)) {
+            ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
+            ManagedObjectReference powerOffTask = vimPort.powerOffVMTask(vmMor);
+            System.out.printf("Waiting for virtual machine [%s] to power off.\n", vmName);
+            if (!waitAndGetTaskResult(powerOffTask)) {
+                throw new Exception(
+                        String.format("Failed to power off virtual machine [%s].\n", vmName));
+            }
+            System.out.printf("Successfully powered off the virtual machine [%s].\n", vmName);
+        }
+        System.out.printf("Virtual machine [%s] is already powered off.\n", vmName);
+    }
+
     public void deleteVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
         ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);

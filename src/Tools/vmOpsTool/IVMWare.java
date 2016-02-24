@@ -102,4 +102,11 @@ public interface IVMWare {
      * @throws Exception
      */
     void shutdownVM(String vmName, ConnectionData connData) throws Exception;
+
+    /**
+     * @param vmName   name of the virtual machine
+     * @param connData vCenter connection information
+     * @throws Exception
+     */
+    void powerOffVM(String vmName, ConnectionData connData) throws Exception;
 }

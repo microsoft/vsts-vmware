@@ -25,6 +25,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         vmSnapshotInfo.put("vm2", snapshotList);
         vmSnapshotInfo.put("startandstopubuntu", snapshotList);
         vmSnapshotInfo.put("startandstopwindows", snapshotList);
+        vmSnapshotInfo.put("poweronandpoweroff", snapshotList);
 
         String activeSnapshot = "Snapshot2";
         vmActiveSnapshot.put("win2012r2", activeSnapshot);
@@ -37,6 +38,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         vmActiveSnapshot.put("vm2", activeSnapshot);
         vmActiveSnapshot.put("startandstopubuntu", activeSnapshot);
         vmActiveSnapshot.put("startandstopwindows", activeSnapshot);
+        vmActiveSnapshot.put("poweronandpoweroff", activeSnapshot);
 
         String vmState = "Paused";
         vmStateInformation.put("win2012r2", vmState);
@@ -49,6 +51,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         vmStateInformation.put("vm2", vmState);
         vmStateInformation.put("startandstopubuntu", vmState);
         vmStateInformation.put("startandstopwindows", vmState);
+        vmStateInformation.put("poweronandpoweroff", vmState);
     }
 
     public synchronized void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
@@ -119,6 +122,10 @@ public class InMemoryVMWareImpl implements IVMWare {
         } else {
             throw new Exception("VM not found.");
         }
+    }
+
+    public void powerOffVM(String vmName, ConnectionData connData) throws Exception {
+        shutdownVM(vmName, connData);
     }
 
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
