@@ -93,6 +93,9 @@ export class VmOperations {
         var actionName: string = tl.getInput("action", true);
         var commonArgs: string = this.getCmdCommonArgs();
         var cmdArgsForAction: string = this.getCmdArgsForAction(actionName);
+        var cwd: string = path.resolve(__dirname);
+        tl.debug("Setting current working directory to : " + cwd);
+        tl.cd(cwd);
         var systemClassPath: string = tl.getVariable("CLASSPATH");
         var cmdArgs = "-classpath vmOpsTool-1.0.jar" + path.delimiter + systemClassPath + " VmOpsTool " + cmdArgsForAction + commonArgs;
         util.log("Invoking command to perform vm operations ...\n");
