@@ -271,7 +271,7 @@ describe("runMain", (): void => {
     var errorStub;
     var getVariableStub;
     var changeCwdStub;
-    var getCwdStub;
+    var pathResolveStub;
 
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
@@ -283,7 +283,7 @@ describe("runMain", (): void => {
         getCmdCommonArgsStub = sandbox.stub(vmOperations.VmOperations, "getCmdCommonArgs");
         getCmdArgsForActionStub = sandbox.stub(vmOperations.VmOperations, "getCmdArgsForAction");
         changeCwdStub = sandbox.stub(tl, "cd");
-        getCwdStub = sandbox.stub(path, "resolve");
+        pathResolveStub = sandbox.stub(path, "resolve");
         sandbox.stub(tl, "debug");
         sandbox.stub(util, "log");
     });
@@ -302,7 +302,7 @@ describe("runMain", (): void => {
         getInputStub.withArgs("action", true).returns(actionName);
         getCmdCommonArgsStub.returns(commonArgs);
         getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
-        getCwdStub.returns(taskWorkingFolder);
+        pathResolveStub.returns(taskWorkingFolder);
         getVariableStub.withArgs("CLASSPATH").returns("c:\\Windows");
         var promise = Q.Promise<number>((complete, failure) => {
             complete(0);
