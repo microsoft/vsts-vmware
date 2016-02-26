@@ -1,6 +1,7 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
 import * as util from "util";
+import * as path from "path";
 import * as vmOperations from "../../../src/Tasks/vmOperations/vmOperations";
 
 import mocha = require("mocha");
@@ -269,6 +270,8 @@ describe("runMain", (): void => {
     var exitStub;
     var errorStub;
     var getVariableStub;
+    var changeCwdStub;
+    var pathResolveStub;
 
     beforeEach((): void => {
         sandbox = sinon.sandbox.create();
@@ -279,6 +282,8 @@ describe("runMain", (): void => {
         getVariableStub = sandbox.stub(tl, "getVariable");
         getCmdCommonArgsStub = sandbox.stub(vmOperations.VmOperations, "getCmdCommonArgs");
         getCmdArgsForActionStub = sandbox.stub(vmOperations.VmOperations, "getCmdArgsForAction");
+        changeCwdStub = sandbox.stub(tl, "cd");
+        pathResolveStub = sandbox.stub(path, "resolve");
         sandbox.stub(tl, "debug");
         sandbox.stub(util, "log");
     });
@@ -291,11 +296,13 @@ describe("runMain", (): void => {
     var cmdArgsForAction = " -snapshotOps restore -snapshotName \"dummysnapshot\"";
     var cmdArgs = "-classpath vmOpsTool-1.0.jar;c:\\Windows VmOpsTool " + cmdArgsForAction + commonArgs;
     var actionName = "RestoreSnapshot";
+    var taskWorkingFolder = "c:\\agent\\tasks\\VMwareTask\\0.2.0";
 
     it("Should return 0 on successful exection of the command", (done): void => {
         getInputStub.withArgs("action", true).returns(actionName);
         getCmdCommonArgsStub.returns(commonArgs);
         getCmdArgsForActionStub.withArgs(actionName).returns(cmdArgsForAction);
+        pathResolveStub.returns(taskWorkingFolder);
         getVariableStub.withArgs("CLASSPATH").returns("c:\\Windows");
         var promise = Q.Promise<number>((complete, failure) => {
             complete(0);
@@ -307,6 +314,7 @@ describe("runMain", (): void => {
             getCmdCommonArgsStub.should.have.been.calledOnce;
             getCmdArgsForActionStub.should.have.been.calledOnce;
             execCmdStub.should.have.been.calledOnce;
+            changeCwdStub.withArgs(taskWorkingFolder).should.have.been.calledOnce;
             exitStub.withArgs(0).should.have.been.calledOnce;
         }).done(done);
     });

@@ -27,9 +27,10 @@
     "sinon-chai": "^2.8.0",
     "tfx-cli": "^0.3.8",
     "tsd": "^0.6.5",
-    "tslint": "^2.5.1"
+    "tslint": "^2.5.1",
+    "typescript": "^1.8.2"
   },
   "dependencies": {
-    "vsts-task-lib": "0.5.7"
+    "vsts-task-lib": "0.5.10"
   }
 }
