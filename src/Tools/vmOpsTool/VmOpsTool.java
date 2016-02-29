@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -114,8 +111,8 @@ public class VmOpsTool {
             actionResult.setErrorMessage(String.format("Failed to [%s] virtual machines ", actionName));
             actionResult.setFailedVm(executePowerOpsAction(vmName, actionName, connData));
         } else {
-            System.out.printf("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]\n",
-                    Constants.TASK_ID);
+            System.out.println(String.format("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]",
+                    Constants.TASK_ID));
             throw new Exception("Invalid action input for the operation.");
         }
 
@@ -141,9 +138,9 @@ public class VmOpsTool {
                     vmwareFactory.call().powerOffVM(vmName, connData);
                     break;
                 default:
-                    System.out.printf(
+                    System.out.println(String.format(
                             "##vso[task.logissue type=error;code=INFRA_InvalidPowerOperation;TaskId=%s;]\n",
-                            Constants.TASK_ID);
+                            Constants.TASK_ID));
                     throw new Exception("Invalid action name ( " + actionName + " ) for power operation");
             }
 
@@ -220,9 +217,9 @@ public class VmOpsTool {
                     vmwareFactory.call().deleteSnapshot(vmName, snapshotName, connData);
                     break;
                 default:
-                    System.out.printf(
-                            "##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]\n",
-                            Constants.TASK_ID);
+                    System.out.println(String.format(
+                            "##vso[task.logissue type=error;code=INFRA_InvalidSnapshotOperation;TaskId=%s;]",
+                            Constants.TASK_ID));
                     throw new Exception("Invalid action name ( " + actionName + " ) for snapshot operation");
             }
         } catch (Exception exp) {
