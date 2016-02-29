@@ -308,6 +308,11 @@ public class VMWareImpl implements IVMWare {
                     }
                 }
             }
+
+            if (!reached) {
+                System.out.println("Operation didn't finish in expected time, continuing further.");
+            }
+
             vimPort.destroyPropertyFilter(propertyFilter);
             return filterVals;
         } catch (Exception exp) {
