@@ -40,6 +40,8 @@ public abstract class VMWarePlatformTests {
         assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
         vmWareImpl.deleteVM(newVmName, connData);
+
+        assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(false);
     }
 
     @Test
@@ -57,6 +59,8 @@ public abstract class VMWarePlatformTests {
         assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
         vmWareImpl.deleteVM(newVmName, connData);
+
+        assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(false);
     }
 
     @Test
@@ -74,6 +78,8 @@ public abstract class VMWarePlatformTests {
         assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
         vmWareImpl.deleteVM(newVmName, connData);
+
+        assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(false);
     }
 
     @Test
@@ -246,15 +252,10 @@ public abstract class VMWarePlatformTests {
     }
 
     @Test
-    public void startAndStopTwiceOnAVmShouldNotThrow() throws Exception {
+    public void startAndStopOnAVmShouldNotThrow() throws Exception {
         String vmName = "startAndStopWindows";
         String targetDC = "redmonddc";
         connData.setTargetDC(targetDC);
-
-        vmWareImpl.powerOnVM(vmName, connData);
-        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
-        vmWareImpl.shutdownVM(vmName, connData);
-        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
 
         vmWareImpl.powerOnVM(vmName, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
