@@ -87,7 +87,7 @@ Visual Studio Team Services or Team Foundation Server requires a service connect
 
   ![Power On or Delete VMware VMs](Images/PowerOnVMs.png)
 
-2. The **Power-On/Shutdown Virtual Machines** action, waits till the guest operating system in the virtual machines has started. For this to work properly, VMware Tools™ needs to be installed in the guest operating system. If the VMware Tools are not installed, then the task will wait for 5 minutes after the virtual machines have powered on and return successfully.  
+2. The **Power-On/Shutdown Virtual Machines** action, waits till the guest operating system in the virtual machines has started. For this to work properly, VMware Tools™ needs to be installed in the guest operating system. If the VMware Tools are not installed, then the task will wait for 10 minutes after the virtual machines have powered on and return successfully.  
 
 ### **Using VMware Resource Deployment task to Deploy Virtual Machines using Template**
 
@@ -119,5 +119,5 @@ For further information or to resolve issues, contact RM_Customer_Queries at Mic
 
 | Version     | Date    | Details |
 | --------|---------|-------|
-| 0.2.0  | 02/29/2016   | Added support for Shutdown, Power-Off virtual machines & bug fixes.    |
+| 0.2.0  | 03/02/2016   | Added support for Shutdown, Power-Off virtual machines & bug fixes.    |
 | 0.1.0 | 02/17/2016 | Added support for Create VM, Snapshot actions, and Delete virtual machines.    |
