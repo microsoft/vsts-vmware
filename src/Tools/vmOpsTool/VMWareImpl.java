@@ -145,6 +145,8 @@ public class VMWareImpl implements IVMWare {
             waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_STATUS}, new String[]{GUEST_TOOLS_STATUS},
                     new Object[][]{new Object[]{VirtualMachineToolsStatus.TOOLS_OK, VirtualMachineToolsStatus.TOOLS_OLD}},
                     Constants.START_STOP_MAX_WAIT_IN_MINUTES);
+            waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
+                    new Object[][]{new Object[]{ManagedEntityStatus.GREEN}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
             System.out.println(String.format("Successfully powered on virtual machine [ %s ].", vmName));
             return;
         }
@@ -236,7 +238,7 @@ public class VMWareImpl implements IVMWare {
 
     private ManagedObjectReference getMorByName(ManagedObjectReference rootContainer, String mobName, String morefType,
                                                 boolean isTemplate) throws Exception {
-        Map<String, ManagedObjectReference> mobrMap = getObjectsInContainerByType(rootContainer, mobName, morefType, isTemplate);
+        Map<String, List<ManagedObjectReference>> mobrMap = getObjectsInContainerByType(rootContainer, morefType, isTemplate);
 
         if (!mobrMap.containsKey(mobName.toLowerCase())) {
             System.out.println(String.format("##vso[task.logissue type=error;code=USERINPUT_ObjectNotFound;TaskId=%s;]",
@@ -244,7 +246,13 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(morefType + " with name [ " + mobName + " ] not found.");
         }
 
-        return mobrMap.get(mobName.toLowerCase());
+        if (mobrMap.get(mobName.toLowerCase()).size() > 1) {
+            System.out.println(String.format("##vso[task.logissue type=error;code=USERINPUT_DuplicateObjectsFound;TaskId=%s;]",
+                    Constants.TASK_ID));
+            throw new Exception("There are more than one virtual machine exists with name [ " + mobName + " ]");
+        }
+
+        return mobrMap.get(mobName.toLowerCase()).get(0);
     }
 
     private boolean waitAndGetTaskResult(ManagedObjectReference task) throws Exception {
@@ -450,8 +458,8 @@ public class VMWareImpl implements IVMWare {
         return propFilterSpec;
     }
 
-    private Map<String, ManagedObjectReference> getObjectsInContainerByType(ManagedObjectReference container, String mobName,
-                                                                            String morefType, boolean isTemplate) throws Exception {
+    private Map<String, List<ManagedObjectReference>> getObjectsInContainerByType(ManagedObjectReference container, String morefType,
+                                                                                  boolean isTemplate) throws Exception {
         String filterProperty = morefType.equals(VIRTUAL_MACHINE) ? CONFIG : NAME;
         PropertyFilterSpec propertyFilterSpecs = createRecursiveFilterSpec(container, morefType,
                 new String[]{filterProperty});
@@ -461,12 +469,12 @@ public class VMWareImpl implements IVMWare {
             RetrieveResult results = vimPort.retrievePropertiesEx(serviceContent.getPropertyCollector(),
                     Collections.singletonList(propertyFilterSpecs), new RetrieveOptions());
             String token;
-            final Map<String, ManagedObjectReference> morMap = new HashMap<>();
-            token = createMap(results, filterProperty, mobName, isTemplate, morMap);
+            final Map<String, List<ManagedObjectReference>> morMap = new HashMap<>();
+            token = createMap(results, filterProperty, isTemplate, morMap);
 
             while (token != null && !token.isEmpty()) {
                 results = vimPort.continueRetrievePropertiesEx(serviceContent.getPropertyCollector(), token);
-                token = createMap(results, filterProperty, mobName, isTemplate, morMap);
+                token = createMap(results, filterProperty, isTemplate, morMap);
             }
             return morMap;
         } catch (Exception exp) {
@@ -476,7 +484,7 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    private String createMap(final RetrieveResult results, String filterProperty, String morName, boolean isTemplate, final Map<String, ManagedObjectReference> morMap) throws Exception {
+    private String createMap(final RetrieveResult results, String filterProperty, boolean isTemplate, final Map<String, List<ManagedObjectReference>> morMap) throws Exception {
         String token = null;
 
         if (results != null) {
@@ -488,21 +496,25 @@ public class VMWareImpl implements IVMWare {
                     if (filterProperty.equals(CONFIG)) {
                         VirtualMachineConfigInfo vmConfig = (VirtualMachineConfigInfo) propertySet.get(0).getVal();
                         if (vmConfig != null && vmConfig.isTemplate() == isTemplate) {
-                            if (morMap.containsKey(morName.toLowerCase())) {
-                                System.out.println(String.format("##vso[task.logissue type=error;code=USERINPUT_DuplicateObjectsFound;TaskId=%s;]",
-                                        Constants.TASK_ID));
-                                throw new Exception("There are more than one virtual machine exists with name [ " + morName + " ]");
-                            }
-                            morMap.put(vmConfig.getName().toLowerCase(), mor);
+                            UpdateMap(vmConfig.getName().toLowerCase(), mor, morMap);
                         }
                     } else {
                         String mobName = (String) propertySet.get(0).getVal();
-                        morMap.put(mobName.toLowerCase(), mor);
+                        UpdateMap(mobName.toLowerCase(), mor, morMap);
                     }
                 }
             }
         }
         return token;
+    }
+
+    private void UpdateMap(String mobName, ManagedObjectReference mor, final Map<String, List<ManagedObjectReference>> morMap) {
+        if (morMap.containsKey(mobName)) {
+            morMap.get(mobName).add(mor);
+        } else {
+            ArrayList<ManagedObjectReference> list = new ArrayList<>(Collections.singletonList(mor));
+            morMap.put(mobName, list);
+        }
     }
 
     private PropertyFilterSpec createRecursiveFilterSpec(ManagedObjectReference container, String morefType,

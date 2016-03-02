@@ -29,6 +29,6 @@ public class Constants {
     public static final String POWER_OFF_VM_ACTION = "poweroff";
 
     public static final String TASK_ID = "735d144e-55fe-44d6-b687-db9031b6e70b";
-    public static final int START_STOP_MAX_WAIT_IN_MINUTES = 5;
+    public static final int START_STOP_MAX_WAIT_IN_MINUTES = 10;
     public static final int OPERATION_MAX_WAIT_IN_MINUTES = 60;
 }

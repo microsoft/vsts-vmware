@@ -2,9 +2,9 @@
 
 Connect to a VMware vCenter Server™ from Visual Studio Team Services or Team Foundation Server to provision, start, stop, or snapshot virtual machines. Currently, the following actions are available in the extension and others will be released in the future updates.
 
- - Deploy virtual machines using template.
- - Power on or delete virtual machines.
- - Take snapshot, or revert snapshot, or delete snapshot of virtual machines.
+ - Deploy virtual machines using template and Delete virtual machines. 
+ - Power-On, Power-Off, and Shuddown.
+ - Take snapshot, Revert snapshot, and Delete snapshot of virtual machines.
 
 ## **Usage**
 
@@ -15,17 +15,30 @@ The extension installs the following components:
 
 Follow the steps given below to setup the extension and to use it to deploy resources in VMWare.  
 
-### **Install vSphere Management SDK on the Automation Agent's machine**
+### **Setting up a Windows Agent with vSphere Management SDK**
 
 The extension uses the VMware vSphere® Management SDK, to call VMware API functions, to access vSphere Web services. Install and configure the SDK on the automation agent's machine as described below:
 
  1. Download and install the latest version of JRE™ or Java™ Runtime Environment from the [website](http://aka.ms/downloadjre).
  2. Create a directory for the vSphere Management SDK, like C:\vSphereSDK. Do not use spaces in the directory names to avoid issues with some of the included SDK batch and script files.
- 3. Download the [vSphere 6.0 Management SDK](http://aka.ms/vspheresdk) from the website. Login with existing credentials or register on the website to download the SDK.
+ 3. Download the [vSphere 6.0 Management SDK](http://aka.ms/vspheresdk). Login with existing credentials or register on the website to download the SDK.
  4. Unpack the vSphere Management SDK in the C:\vSphereSDK directory.
  5. Add the precompiled VMware JAVA SDK file, vim25.jar, to the machine's CLASSPATH environment variable - C:\vSphereSDK\SDK\vsphere-ws\java\JAXWS\lib\vim25.jar.
 
  ![Setting ClassPath](Images/ClassPath.png)
+
+### **Setting up a xPlat Agent with vSphere Management SDK**
+
+  1.	Refer to setup instructions for installing and configuring an agent from [here](https://www.npmjs.com/package/vsoagent-installer)
+  2.	Install JRE 8 by following below steps
+    ```bash
+        sudo add-apt-repository ppa:openjdk-r/ppa
+        sudo apt-get update
+        sudo apt-get install openjdk-8-jre -y
+     ```
+  3. Download the [vSphere 6.0 Management SDK](http://aka.ms/vspheresdk). Login with existing credentials or register on the website to download the SDK.
+  4. Unpack and place vim25.jar from the vSphere Management SDK to a directory of your choice. For example, ~/vspheresdk
+  5. Update the CLASSPATH to include /<pathtodirectory>/vpsheresdk/vim25.jar
 
 ### **Create a vCenter Server Service endpoint**
 
@@ -63,7 +76,7 @@ Visual Studio Team Services or Team Foundation Server requires a service connect
 
  ![Snapshot VMware VMs](Images/SnapshotTask.png)
 
-### **Using VMware Resource Deployment task to Power on Virtual Machines or to Delete them**
+### **Using VMware Resource Deployment task to Power-On, Power-Off, Shutdown or to Delete virtual machines**
 
 1. To power on virtual machines or to delete them, fill-in the task parameters as described below:
    * **VMware Service Connection**: In the dropdown, select the VMware vCenter Server connection that was created above.
@@ -74,7 +87,7 @@ Visual Studio Team Services or Team Foundation Server requires a service connect
 
   ![Power On or Delete VMware VMs](Images/PowerOnVMs.png)
 
-2. The **Power on Virtual Machines** action, waits till the guest operating system in the virtual machines has started. For this to work properly, VMware Tools™ needs to be installed in the guest operating system. If the VMware Tools are not installed, then the task will wait for 5 minutes after the virtual machines have powered on and return successfully.  
+2. The **Power-On/Shutdown Virtual Machines** action, waits till the guest operating system in the virtual machines has started. For this to work properly, VMware Tools™ needs to be installed in the guest operating system. If the VMware Tools are not installed, then the task will wait for 10 minutes after the virtual machines have powered on and return successfully.  
 
 ### **Using VMware Resource Deployment task to Deploy Virtual Machines using Template**
 
@@ -101,3 +114,10 @@ For further information or to resolve issues, contact RM_Customer_Queries at Mic
  VMware, VMware vCenter Server, VMware vSphere Management SDK, VMware Tools, VMware vSphere Web Client, and VMware ESXi are registered trademark or trademarks of VMware, Inc. in the United States and/or other jurisdictions.
 
  Oracle and Java are registered trademarks of Oracle and/or its affiliates.
+
+### **Change Log**
+
+| Version     | Date    | Details |
+| --------|---------|-------|
+| 0.2.0  | 03/02/2016   | Added support for Shutdown, Power-Off virtual machines & bug fixes.    |
+| 0.1.0 | 02/17/2016 | Added support for Create VM, Snapshot actions, and Delete virtual machines.    |
