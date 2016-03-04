@@ -1,9 +1,9 @@
 # **VMware Resource Deployment**
 
-Connect to a VMware vCenter Server™ from Visual Studio Team Services or Team Foundation Server to provision, start, stop, or snapshot virtual machines. Currently, the following actions are available in the extension and others will be released in the future updates.
+Connect to a VMware vCenter Server™ from Visual Studio Team Services or Team Foundation Server to provision, start, stop, or snapshot virtual machines. Following are the available actions.
 
  - Deploy virtual machines using template and Delete virtual machines. 
- - Power-On, Power-Off, and Shuddown.
+ - Power-On, Power-Off, and Shutdown.
  - Take snapshot, Revert snapshot, and Delete snapshot of virtual machines.
 
 ## **Usage**
