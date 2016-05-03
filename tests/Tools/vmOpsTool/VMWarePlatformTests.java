@@ -258,9 +258,9 @@ public abstract class VMWarePlatformTests {
         connData.setTargetDC(targetDC);
 
         vmWareImpl.powerOnVM(vmName, connData);
-        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
         vmWareImpl.shutdownVM(vmName, connData);
-        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, false, connData)).isEqualTo(false);
     }
 
     @Test
@@ -270,14 +270,14 @@ public abstract class VMWarePlatformTests {
         connData.setTargetDC(targetDC);
 
         vmWareImpl.powerOnVM(vmName, connData);
-        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
         vmWareImpl.powerOnVM(vmName, connData);
-        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
 
         vmWareImpl.shutdownVM(vmName, connData);
-        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, false, connData)).isEqualTo(false);
         vmWareImpl.shutdownVM(vmName, connData);
-        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, false, connData)).isEqualTo(false);
     }
 
     @Test
@@ -287,10 +287,10 @@ public abstract class VMWarePlatformTests {
         connData.setTargetDC(targetDC);
 
         vmWareImpl.powerOnVM(vmName, connData);
-        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
 
         vmWareImpl.powerOffVM(vmName, connData);
-        assertThat(vmWareImpl.isVMPoweredOn(vmName, connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMPoweredOn(vmName, false, connData)).isEqualTo(false);
     }
 
     // Common for restore/delete snapshot operations

@@ -155,7 +155,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         return vmSnapshotInfo.containsKey(vmName);
     }
 
-    public boolean isVMPoweredOn(String vmName, ConnectionData connData) throws Exception {
+    public boolean isVMPoweredOn(String vmName, boolean defaultValue, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmStateInformation.containsKey(vmName)) {
             return vmStateInformation.get(vmName).equals(started);

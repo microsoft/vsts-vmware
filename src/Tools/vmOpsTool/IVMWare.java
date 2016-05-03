@@ -59,11 +59,12 @@ public interface IVMWare {
 
     /**
      * @param vmName name of the virtual machine
+     * @param defaultValue this value is returned when not able to determine vm power on status
      * @param connData connection information for vCenter
      * @return true if powered on, otherwise false
      * @throws Exception
      */
-    boolean isVMPoweredOn(String vmName, ConnectionData connData) throws Exception;
+    boolean isVMPoweredOn(String vmName, boolean defaultValue, ConnectionData connData) throws Exception;
 
     /**
      * @param templateName   name of the virtual machine template to be cloned

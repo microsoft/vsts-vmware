@@ -21,7 +21,8 @@ public class VMWareImpl implements IVMWare {
     private final String SNAPSHOT = "snapshot";
     private final String CONFIG = "config";
     private final String NAME = "name";
-    private final String GUEST_TOOLS_STATUS = "guest.toolsStatus";
+    private final String GUEST_TOOLS_RUNNING_STATUS = "guest.toolsRunningStatus";
+    private final String GUEST_TOOLS_VERSION_STATUS = "guest.toolsVersionStatus";
     private final String GUEST_HEART_BEAT_STATUS = "guestHeartbeatStatus";
     private final String INFO_STATE = "info.state";
 
@@ -133,7 +134,7 @@ public class VMWareImpl implements IVMWare {
 
     public void powerOnVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
-        if (!isVMPoweredOn(vmName, connData)) {
+        if (!isVMPoweredOn(vmName, false, connData)) {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             ManagedObjectReference task = vimPort.powerOnVMTask(vmMor, null);
 
@@ -142,8 +143,9 @@ public class VMWareImpl implements IVMWare {
                         String.format("Failed to power on virtual machine [ %s ].", vmName));
             }
             System.out.println(String.format("Waiting for virtual machine [ %s ] to start.", vmName));
-            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_STATUS}, new String[]{GUEST_TOOLS_STATUS},
-                    new Object[][]{new Object[]{VirtualMachineToolsStatus.TOOLS_OK, VirtualMachineToolsStatus.TOOLS_OLD}},
+            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
+                    new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_EXECUTING_SCRIPTS.value(),
+                            VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}},
                     Constants.START_STOP_MAX_WAIT_IN_MINUTES);
             waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
                     new Object[][]{new Object[]{ManagedEntityStatus.GREEN}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
@@ -155,12 +157,13 @@ public class VMWareImpl implements IVMWare {
 
     public void shutdownVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
-        if (isVMPoweredOn(vmName, connData)) {
+        if (isVMPoweredOn(vmName, true, connData)) {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             vimPort.shutdownGuest(vmMor);
             System.out.println(String.format("Waiting for virtual machine [ %s ] to shutdown.", vmName));
-            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_STATUS}, new String[]{GUEST_TOOLS_STATUS},
-                    new Object[][]{new Object[]{VirtualMachineToolsStatus.TOOLS_NOT_RUNNING}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
+            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
+                    new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_NOT_RUNNING.value()}},
+                    Constants.START_STOP_MAX_WAIT_IN_MINUTES);
             waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
                     new Object[][]{new Object[]{ManagedEntityStatus.GRAY}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
             System.out.println(String.format("Successfully shutdowned the virtual machine [ %s ].", vmName));
@@ -170,7 +173,7 @@ public class VMWareImpl implements IVMWare {
 
     public void powerOffVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
-        if (isVMPoweredOn(vmName, connData)) {
+        if (isVMPoweredOn(vmName, true, connData)) {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             ManagedObjectReference powerOffTask = vimPort.powerOffVMTask(vmMor);
             System.out.println(String.format("Waiting for virtual machine [ %s ] to power off.", vmName));
@@ -179,6 +182,7 @@ public class VMWareImpl implements IVMWare {
                         String.format("Failed to power off virtual machine [ %s ].", vmName));
             }
             System.out.println(String.format("Successfully powered off the virtual machine [ %s ].", vmName));
+            return;
         }
         System.out.println(String.format("Virtual machine [ %s ] is already powered off.", vmName));
     }
@@ -228,12 +232,22 @@ public class VMWareImpl implements IVMWare {
         return true;
     }
 
-    public boolean isVMPoweredOn(String vmName, ConnectionData connData) throws Exception {
+    public boolean isVMPoweredOn(String vmName, boolean defaultValue, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.println("Checking virtual machine [ " + vmName + " ] power status.");
         ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
-        VirtualMachineToolsStatus vmToolsStatus = (VirtualMachineToolsStatus) getMorProperties(vmMor, new String[]{GUEST_TOOLS_STATUS}).get(GUEST_TOOLS_STATUS);
-        return (vmToolsStatus != null) && (vmToolsStatus == VirtualMachineToolsStatus.TOOLS_OK);
+
+        VirtualMachineToolsVersionStatus toolsVersionStatus = VirtualMachineToolsVersionStatus.fromValue(
+                (String) getMorProperties(vmMor, new String[]{GUEST_TOOLS_VERSION_STATUS}).get(GUEST_TOOLS_VERSION_STATUS));
+
+        if (toolsVersionStatus.equals(VirtualMachineToolsVersionStatus.GUEST_TOOLS_NOT_INSTALLED)) {
+            System.out.println("VMware tools are not installed, proceeding without checking poweron status");
+            return defaultValue;
+        }
+
+        VirtualMachineToolsRunningStatus toolsRunningStatus = VirtualMachineToolsRunningStatus.fromValue(
+                (String) getMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}).get(GUEST_TOOLS_RUNNING_STATUS));
+        return !(toolsRunningStatus.equals(VirtualMachineToolsRunningStatus.GUEST_TOOLS_NOT_RUNNING));
     }
 
     private ManagedObjectReference getMorByName(ManagedObjectReference rootContainer, String mobName, String morefType,
