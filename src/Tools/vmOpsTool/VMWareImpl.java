@@ -144,8 +144,7 @@ public class VMWareImpl implements IVMWare {
             }
             System.out.println(String.format("Waiting for virtual machine [ %s ] to start.", vmName));
             waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
-                    new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_EXECUTING_SCRIPTS.value(),
-                            VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}},
+                    new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}},
                     Constants.START_STOP_MAX_WAIT_IN_MINUTES);
             waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
                     new Object[][]{new Object[]{ManagedEntityStatus.GREEN}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
