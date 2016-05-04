@@ -165,7 +165,7 @@ public class InMemoryVMWareImpl implements IVMWare {
     }
 
     public synchronized void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName,
-                                                 String datastore, String description, ConnectionData connData) throws Exception {
+                                                 String datastore, String customizationSpec, String description, ConnectionData connData) throws Exception {
         if (vmName.equals("VMNameThatFailsInClone")) {
             throw new Exception("Clone VM from template operation failed for VMNameThatFailsInClone");
         }
@@ -185,7 +185,6 @@ public class InMemoryVMWareImpl implements IVMWare {
         if (computeType.equals("Invalid Compute")) {
             throw new Exception("Invalid compute resource");
         }
-
 
         vmSnapshotInfo.put(vmName, new ArrayList<>());
         vmActiveSnapshot.put(vmName, "");

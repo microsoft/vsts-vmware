@@ -67,15 +67,16 @@ public interface IVMWare {
     boolean isVMPoweredOn(String vmName, boolean defaultValue, ConnectionData connData) throws Exception;
 
     /**
-     * @param templateName   name of the virtual machine template to be cloned
-     * @param vmName         name of the virtual machine
-     * @param computeType    type of the compute esxi/cluster/resourcepool
-     * @param computeName    name of the compute resouce
-     * @param description    optional description for create operation
+     * @param templateName name of the virtual machine template to be cloned
+     * @param vmName       name of the virtual machine
+     * @param computeType  type of the compute esxi/cluster/resourcepool
+     * @param computeName  name of the compute resouce
+     * @param description  optional description for create operation
+     * @param customizationSpec name of the customization specification to be used during clone vm
      * @param connData       connection information for vCenter
      * @throws Exception
      */
-    void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName, String datastore, String description, ConnectionData connData) throws Exception;
+    void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName, String datastore, String customizationSpec, String description, ConnectionData connData) throws Exception;
 
     /**
      * @param vmName   name of the virtual machine

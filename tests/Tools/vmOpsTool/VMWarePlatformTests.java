@@ -10,7 +10,8 @@ public abstract class VMWarePlatformTests {
     private ConnectionData connData = new ConnectionData(vCenterUrl, vCenterUserName, vCenterPassword, defaultTargetDC, true);
     private IVMWare vmWareImpl = getVmWareImpl();
     private String snapshotOne = "Snapshot1";
-    private String templateName = "Ubuntu";
+    private String ubuntuTemplate = "Ubuntu";
+    String linuxCustomizationSpec = "Linux Spec";
     private String snapshotTwo = "Snapshot2";
 
     public abstract IVMWare getVmWareImpl();
@@ -35,7 +36,7 @@ public abstract class VMWarePlatformTests {
         String description = "Creating new VM from ubuntuVM template on ESXi host";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.cloneVMFromTemplate(templateName, newVmName, computeType, computeName, datastore, description, connData);
+        vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
 
         assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
@@ -54,7 +55,7 @@ public abstract class VMWarePlatformTests {
         String description = "Creating new VM from ubuntuVM template on cluster";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.cloneVMFromTemplate(templateName, newVmName, computeType, computeName, datastore, description, connData);
+        vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
 
         assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
@@ -73,7 +74,7 @@ public abstract class VMWarePlatformTests {
         String description = "Creating new VM from ubuntuVM template on resource pool";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.cloneVMFromTemplate(templateName, newVmName, computeType, computeName, datastore, description, connData);
+        vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
 
         assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
@@ -94,7 +95,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(templateName, newVmName, computeType, computeName, datastore, description, connData);
+            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -114,7 +115,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(nonExistingTemplate, newVmName, computeType, computeName, datastore, description, connData);
+            vmWareImpl.cloneVMFromTemplate(nonExistingTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -133,7 +134,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(templateName, newVmName, computeType, computeName, datastore, description, connData);
+            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -152,7 +153,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(templateName, newVmName, computeType, computeName, datastore, description, connData);
+            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -171,7 +172,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(templateName, newVmName, computeType, computeName, datastore, description, connData);
+            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -190,7 +191,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(templateName, newVmName, computeType, computeName, datastore, description, connData);
+            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
         } catch (Exception e) {
             exp = e;
         }
