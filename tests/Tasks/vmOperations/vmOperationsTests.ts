@@ -178,27 +178,26 @@ describe("getCmdArgsForAction", (): void => {
         cmdArgs.should.contain("-snapshotOps delete -snapshotName \"dummySnapshotName\"");
     });
 
-    it("Should read template, computeType, hostname, datastore and description for clone template", (): void => {
+    it("Should read template, computeType, hostname, datastore, customization spec and description for clone template", (): void => {
         getInputStub.withArgs("template", true).returns("dummyTemplate");
         getInputStub.withArgs("computeType", true).returns("ESXi Host");
         getInputStub.withArgs("hostname", true).returns("Dummy Host");
         getInputStub.withArgs("datastore", true).returns("Dummy Datastore");
         getInputStub.withArgs("description", false).returns("Dummy description");
+        getInputStub.withArgs("customizationspec", false).returns("Dummy Customization Spec");
 
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Deploy Virtual Machines using Template");
 
-        cmdArgs.should.contain("-clonetemplate \"dummyTemplate\" -computetype \"ESXi Host\" -computename \"Dummy Host\" -datastore \"Dummy Datastore\" -description \"Dummy description\"");
+        cmdArgs.should.contain("-clonetemplate \"dummyTemplate\" -computetype \"ESXi Host\" -computename \"Dummy Host\" -datastore \"Dummy Datastore\" -customizationspec \"Dummy Customization Spec\" -description \"Dummy description\"");
     });
 
     it("Should read cluster name if compute is cluster and read empty description", (): void => {
         getInputStub.withArgs("computeType", true).returns("Cluster");
         getInputStub.withArgs("clustername", true).returns("Dummy Cluster");
-        getInputStub.withArgs("datastore", true).returns("Dummy Datastore");
-        getInputStub.withArgs("description", false).returns("");
 
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Deploy Virtual Machines using Template");
 
-        cmdArgs.should.contain("-computetype \"Cluster\" -computename \"Dummy Cluster\" -datastore \"Dummy Datastore\" -description \"\"");
+        cmdArgs.should.contain("-computetype \"Cluster\" -computename \"Dummy Cluster\"");
     });
 
     it("Should read resource pool name if compute is resource pool", (): void => {

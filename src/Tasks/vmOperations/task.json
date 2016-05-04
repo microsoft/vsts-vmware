@@ -124,6 +124,15 @@
             "helpMarkDown": "Name of the Datastore for storing the virtual machine's configuration and disk files."
         },
         {
+            "name": "customizationspec",
+            "type": "string",
+            "label": "Guest OS Customization Spec",
+            "defaultValue": "",
+            "required": false,
+            "visibleRule": "action = Deploy Virtual Machines using Template",
+            "helpMarkDown": "Name of the guest os customization spec, our recommendation is to give a spec with netbios name to be same as VM name."
+        },
+        {
             "name": "snapshotName",
             "type": "string",
             "label": "Snapshot Name",
