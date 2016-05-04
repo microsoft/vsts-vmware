@@ -68,20 +68,20 @@ public class VmOpsToolUnitTests {
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
-        assertThat(vmWareImpl.isVMPoweredOn("vm1", connData)).isEqualTo(true);
-        assertThat(vmWareImpl.isVMPoweredOn("vm2", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMPoweredOn("vm1", true, connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMPoweredOn("vm2", true, connData)).isEqualTo(true);
 
         cmdArgs = getCmdArgs("vm1", Constants.POWER_OPS, Constants.SHUTDOWN_VM_ACTION);
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
-        assertThat(vmWareImpl.isVMPoweredOn("vm1", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMPoweredOn("vm1", false, connData)).isEqualTo(false);
 
         cmdArgs = getCmdArgs("vm2", Constants.POWER_OPS, Constants.POWER_OFF_VM_ACTION);
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
-        assertThat(vmWareImpl.isVMPoweredOn("vm2", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMPoweredOn("vm2", false, connData)).isEqualTo(false);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class VmOpsToolUnitTests {
         }
 
         assertThat(exp).isNotNull();
-        assertThat(vmWareImpl.isVMPoweredOn("vm1", connData)).isEqualTo(true);
+        assertThat(vmWareImpl.isVMPoweredOn("vm1", true, connData)).isEqualTo(true);
 
         cmdArgs = getCmdArgs("vm1, VmThatFailsInShutdown", Constants.POWER_OPS, Constants.SHUTDOWN_VM_ACTION);
 
@@ -109,7 +109,7 @@ public class VmOpsToolUnitTests {
         }
 
         assertThat(exp).isNotNull();
-        assertThat(vmWareImpl.isVMPoweredOn("vm1", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMPoweredOn("vm1", false, connData)).isEqualTo(false);
 
         cmdArgs = getCmdArgs("vm2, VmThatFailsInPowerOff", Constants.POWER_OPS, Constants.POWER_OFF_VM_ACTION);
 
@@ -121,7 +121,7 @@ public class VmOpsToolUnitTests {
         }
 
         assertThat(exp).isNotNull();
-        assertThat(vmWareImpl.isVMPoweredOn("vm2", connData)).isEqualTo(false);
+        assertThat(vmWareImpl.isVMPoweredOn("vm2", false, connData)).isEqualTo(false);
     }
 
     @Test
