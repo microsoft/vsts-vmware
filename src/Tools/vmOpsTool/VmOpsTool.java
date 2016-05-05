@@ -1,4 +1,7 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -129,7 +132,7 @@ public class VmOpsTool {
         try {
             switch (actionName) {
                 case Constants.POWER_ON_VM_ACTION:
-                    vmwareFactory.call().powerOnVM(vmName, false, connData);
+                    vmwareFactory.call().powerOnVM(vmName, connData);
                     break;
                 case Constants.SHUTDOWN_VM_ACTION:
                     vmwareFactory.call().shutdownVM(vmName, connData);

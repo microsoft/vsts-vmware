@@ -106,7 +106,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public synchronized void powerOnVM(String vmName, boolean isCustomizationRequired, ConnectionData connData) throws Exception {
+    public synchronized void powerOnVM(String vmName, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmStateInformation.containsKey(vmName)) {
             vmStateInformation.put(vmName, started);

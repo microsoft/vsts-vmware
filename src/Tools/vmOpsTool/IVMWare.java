@@ -93,11 +93,10 @@ public interface IVMWare {
 
     /**
      * @param vmName   name of the virtual machine
-     * @param isCustomizationRequired indiactes whether this operation need to wait for customization or not.
      * @param connData vCenter connection information
      * @throws Exception
      */
-    void powerOnVM(String vmName, boolean isCustomizationRequired, ConnectionData connData) throws Exception;
+    void powerOnVM(String vmName, ConnectionData connData) throws Exception;
 
     /**
      * @param vmName   name of the virtual machine

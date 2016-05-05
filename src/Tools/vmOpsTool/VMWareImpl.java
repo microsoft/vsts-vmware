@@ -25,6 +25,7 @@ public class VMWareImpl implements IVMWare {
     private final String GUEST_TOOLS_VERSION_STATUS = "guest.toolsVersionStatus";
     private final String GUEST_HEART_BEAT_STATUS = "guestHeartbeatStatus";
     private final String INFO_STATE = "info.state";
+    private final String INFO_ERROR = "info.error";
     private final String LATEST_PAGE = "latestPage";
     private final String CUSTOMIZATION_SUCCEEDED = "CustomizationSucceeded";
     private final String CUSTOMIZATION_FAILED = "CustomizationFailed";
@@ -88,8 +89,11 @@ public class VMWareImpl implements IVMWare {
                     String.format("Failed to create virtual machine [ %s ] using template [ %s ].", vmName, templateName));
         }
 
-        System.out.println("Powering on virtual machine " + vmName);
-        powerOnVM(vmName, !customizationSpec.isEmpty(), connData);
+        ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
+        if (!customizationSpec.isEmpty()) {
+            waitForOSCustomization(vmName, vmMor, Constants.OS_CUSTOMIZATION_MAX_WAIT_IN_MINUTES);
+        }
+        waitForPowerOnOperation(vmName, vmMor);
     }
 
     public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
@@ -139,7 +143,7 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    public void powerOnVM(String vmName, boolean isCustomizationRequired, ConnectionData connData) throws Exception {
+    public void powerOnVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
 
         if (!isVMPoweredOn(vmName, false, connData)) {
@@ -150,19 +154,7 @@ public class VMWareImpl implements IVMWare {
                 throw new Exception(
                         String.format("Failed to power on virtual machine [ %s ].", vmName));
             }
-
-            if (isCustomizationRequired) {
-                System.out.println(String.format("Waiting for virtual machine [ %s ] os customization to complete.", vmName));
-                waitForOsCustomization(vmMor, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
-            }
-
-            System.out.println(String.format("Waiting for virtual machine [ %s ] to start.", vmName));
-            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
-                    new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}},
-                    Constants.START_STOP_MAX_WAIT_IN_MINUTES);
-            waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
-                    new Object[][]{new Object[]{ManagedEntityStatus.GREEN}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
-            System.out.println(String.format("Successfully powered on virtual machine [ %s ].", vmName));
+            waitForPowerOnOperation(vmName, vmMor);
             return;
         }
         System.out.println(String.format("Virtual machine [ %s ] is already running.", vmName));
@@ -282,17 +274,30 @@ public class VMWareImpl implements IVMWare {
         return mobrMap.get(mobName.toLowerCase()).get(0);
     }
 
+    private void waitForPowerOnOperation(String vmName, ManagedObjectReference vmMor) throws Exception {
+        System.out.println(String.format("Waiting for virtual machine [ %s ] to start.", vmName));
+        waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
+                new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}},
+                Constants.START_STOP_MAX_WAIT_IN_MINUTES);
+        waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
+                new Object[][]{new Object[]{ManagedEntityStatus.GREEN}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
+        System.out.println(String.format("Successfully powered on virtual machine [ %s ].", vmName));
+    }
+
     private boolean waitAndGetTaskResult(ManagedObjectReference task) throws Exception {
         boolean retVal = false;
 
         System.out.println("Waiting for operation completion.");
-        Object[] result = waitOnMorProperties(task, new String[]{INFO_STATE}, new String[]{INFO_STATE},
+        Object[] result = waitOnMorProperties(task, new String[]{INFO_STATE, INFO_ERROR}, new String[]{INFO_STATE},
                 new Object[][]{new Object[]{TaskInfoState.SUCCESS, TaskInfoState.ERROR}}, Constants.OPERATION_MAX_WAIT_IN_MINUTES);
 
         if (result[0].equals(TaskInfoState.SUCCESS)) {
             retVal = true;
         }
 
+        if (result[1] instanceof LocalizedMethodFault) {
+            throw new Exception(((LocalizedMethodFault) result[1]).getLocalizedMessage());
+        }
         return retVal;
     }
 
@@ -357,12 +362,11 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    private void waitForOsCustomization(ManagedObjectReference vmMor, int maxWaitTimeInMinutes) throws Exception {
-
+    private void waitForOSCustomization(String vmName, ManagedObjectReference vmMor, int maxWaitTimeInMinutes) throws Exception {
         EventFilterSpec eventFilterSpec = getEventFilterSpecForVM(vmMor);
         ManagedObjectReference vmEventHistoryCollector = null;
         try {
-
+            System.out.println(String.format("Waiting for virtual machine [ %s ] OS customization to complete.", vmName));
             vmEventHistoryCollector = vimPort.createCollectorForEvents(serviceContent.getEventManager(), eventFilterSpec);
             long startTime = System.currentTimeMillis();
 
@@ -373,15 +377,16 @@ public class VMWareImpl implements IVMWare {
                     String eventName = anEvent.getClass().getSimpleName();
                     if (eventName.equalsIgnoreCase(CUSTOMIZATION_SUCCEEDED)
                             || eventName.equalsIgnoreCase(CUSTOMIZATION_FAILED)) {
-                        System.out.println("OS Customization step completed.");
+                        System.out.println("OS Customization for virtual machine [ " + vmName + " ] completed .");
                         return;
                     }
                 }
             }
+            System.out.println("OS Customization for virtual machine [ " + vmName + " ] didn't finish in time, continuing further.");
         } catch (Exception exp) {
             System.out.println(String.format("##vso[task.logissue type=error;code=PREREQ_WaitForOsCustomizationFailed;TaskId=%s;]",
                     Constants.TASK_ID));
-            throw new Exception("Failed to get operation result: " + exp.getMessage());
+            throw new Exception("Failed to wait for OS customization: " + exp.getMessage());
         } finally {
             vimPort.destroyCollector(vmEventHistoryCollector);
         }
@@ -644,7 +649,7 @@ public class VMWareImpl implements IVMWare {
 
         cloneSpec.setConfig(configSpec);
         cloneSpec.setLocation(relocSpec);
-        cloneSpec.setPowerOn(false);
+        cloneSpec.setPowerOn(true);
         cloneSpec.setTemplate(false);
 
         return cloneSpec;

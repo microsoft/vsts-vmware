@@ -1,6 +1,6 @@
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class VMWarePlatformTests {
     private String vCenterUserName = "Administrator@vsphere.local";
@@ -258,7 +258,7 @@ public abstract class VMWarePlatformTests {
         String targetDC = "redmonddc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.powerOnVM(vmName, false, connData);
+        vmWareImpl.powerOnVM(vmName, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
         vmWareImpl.shutdownVM(vmName, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, false, connData)).isEqualTo(false);
@@ -270,9 +270,9 @@ public abstract class VMWarePlatformTests {
         String targetDC = "fareastdc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.powerOnVM(vmName, false, connData);
+        vmWareImpl.powerOnVM(vmName, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
-        vmWareImpl.powerOnVM(vmName, false, connData);
+        vmWareImpl.powerOnVM(vmName, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
 
         vmWareImpl.shutdownVM(vmName, connData);
@@ -287,7 +287,7 @@ public abstract class VMWarePlatformTests {
         String targetDC = "fareastdc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.powerOnVM(vmName, false, connData);
+        vmWareImpl.powerOnVM(vmName, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
 
         vmWareImpl.powerOffVM(vmName, connData);
