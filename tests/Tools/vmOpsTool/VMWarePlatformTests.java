@@ -258,7 +258,7 @@ public abstract class VMWarePlatformTests {
         String targetDC = "redmonddc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.powerOnVM(vmName, connData);
+        vmWareImpl.powerOnVM(vmName, false, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
         vmWareImpl.shutdownVM(vmName, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, false, connData)).isEqualTo(false);
@@ -270,9 +270,9 @@ public abstract class VMWarePlatformTests {
         String targetDC = "fareastdc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.powerOnVM(vmName, connData);
+        vmWareImpl.powerOnVM(vmName, false, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
-        vmWareImpl.powerOnVM(vmName, connData);
+        vmWareImpl.powerOnVM(vmName, false, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
 
         vmWareImpl.shutdownVM(vmName, connData);
@@ -287,7 +287,7 @@ public abstract class VMWarePlatformTests {
         String targetDC = "fareastdc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.powerOnVM(vmName, connData);
+        vmWareImpl.powerOnVM(vmName, false, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
 
         vmWareImpl.powerOffVM(vmName, connData);

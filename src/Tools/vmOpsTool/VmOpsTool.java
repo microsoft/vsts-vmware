@@ -129,7 +129,7 @@ public class VmOpsTool {
         try {
             switch (actionName) {
                 case Constants.POWER_ON_VM_ACTION:
-                    vmwareFactory.call().powerOnVM(vmName, connData);
+                    vmwareFactory.call().powerOnVM(vmName, false, connData);
                     break;
                 case Constants.SHUTDOWN_VM_ACTION:
                     vmwareFactory.call().shutdownVM(vmName, connData);

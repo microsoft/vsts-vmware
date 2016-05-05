@@ -25,6 +25,9 @@ public class VMWareImpl implements IVMWare {
     private final String GUEST_TOOLS_VERSION_STATUS = "guest.toolsVersionStatus";
     private final String GUEST_HEART_BEAT_STATUS = "guestHeartbeatStatus";
     private final String INFO_STATE = "info.state";
+    private final String LATEST_PAGE = "latestPage";
+    private final String CUSTOMIZATION_SUCCEEDED = "CustomizationSucceeded";
+    private final String CUSTOMIZATION_FAILED = "CustomizationFailed";
 
     private VimPortType vimPort;
     private ServiceContent serviceContent;
@@ -84,6 +87,9 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to create virtual machine [ %s ] using template [ %s ].", vmName, templateName));
         }
+
+        System.out.println("Powering on virtual machine " + vmName);
+        powerOnVM(vmName, !customizationSpec.isEmpty(), connData);
     }
 
     public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
@@ -133,8 +139,9 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    public void powerOnVM(String vmName, ConnectionData connData) throws Exception {
+    public void powerOnVM(String vmName, boolean isCustomizationRequired, ConnectionData connData) throws Exception {
         connect(connData);
+
         if (!isVMPoweredOn(vmName, false, connData)) {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             ManagedObjectReference task = vimPort.powerOnVMTask(vmMor, null);
@@ -143,6 +150,12 @@ public class VMWareImpl implements IVMWare {
                 throw new Exception(
                         String.format("Failed to power on virtual machine [ %s ].", vmName));
             }
+
+            if (isCustomizationRequired) {
+                System.out.println(String.format("Waiting for virtual machine [ %s ] os customization to complete.", vmName));
+                waitForOsCustomization(vmMor, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
+            }
+
             System.out.println(String.format("Waiting for virtual machine [ %s ] to start.", vmName));
             waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
                     new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}},
@@ -344,6 +357,46 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
+    private void waitForOsCustomization(ManagedObjectReference vmMor, int maxWaitTimeInMinutes) throws Exception {
+
+        EventFilterSpec eventFilterSpec = getEventFilterSpecForVM(vmMor);
+        ManagedObjectReference vmEventHistoryCollector = null;
+        try {
+
+            vmEventHistoryCollector = vimPort.createCollectorForEvents(serviceContent.getEventManager(), eventFilterSpec);
+            long startTime = System.currentTimeMillis();
+
+            while ((new Date()).getTime() - startTime < maxWaitTimeInMinutes * 60 * 1000) {
+                Thread.sleep(30 * 1000);
+                ArrayList<Event> eventList = (ArrayList<Event>) ((ArrayOfEvent) getMorProperties(vmEventHistoryCollector, new String[]{LATEST_PAGE}).get(LATEST_PAGE)).getEvent();
+                for (Event anEvent : eventList) {
+                    String eventName = anEvent.getClass().getSimpleName();
+                    if (eventName.equalsIgnoreCase(CUSTOMIZATION_SUCCEEDED)
+                            || eventName.equalsIgnoreCase(CUSTOMIZATION_FAILED)) {
+                        System.out.println("OS Customization step completed.");
+                        return;
+                    }
+                }
+            }
+        } catch (Exception exp) {
+            System.out.println(String.format("##vso[task.logissue type=error;code=PREREQ_WaitForOsCustomizationFailed;TaskId=%s;]",
+                    Constants.TASK_ID));
+            throw new Exception("Failed to get operation result: " + exp.getMessage());
+        } finally {
+            vimPort.destroyCollector(vmEventHistoryCollector);
+        }
+    }
+
+    private EventFilterSpec getEventFilterSpecForVM(ManagedObjectReference vmMor) {
+        EventFilterSpecByEntity vmEntitySpec = new EventFilterSpecByEntity();
+        vmEntitySpec.setEntity(vmMor);
+        vmEntitySpec.setRecursion(EventFilterSpecRecursionOption.SELF);
+
+        EventFilterSpec eventFilterSpec = new EventFilterSpec();
+        eventFilterSpec.setEntity(vmEntitySpec);
+        return eventFilterSpec;
+    }
+
     private void updateValues(String[] endWaitProps, Object[] endVals, PropertyChange propChg) {
         for (int findi = 0; findi < endWaitProps.length; findi++) {
             if (propChg.getName().lastIndexOf(endWaitProps[findi]) >= 0) {
@@ -456,14 +509,14 @@ public class VMWareImpl implements IVMWare {
         return propMap;
     }
 
-    private PropertyFilterSpec createPropFilterSpecForObject(ManagedObjectReference vmMor, String[] propList) {
+    private PropertyFilterSpec createPropFilterSpecForObject(ManagedObjectReference objectMor, String[] propList) {
         PropertySpec propSpec = new PropertySpec();
-        propSpec.setType(vmMor.getType());
+        propSpec.setType(objectMor.getType());
         propSpec.getPathSet().addAll(Arrays.asList(propList));
         propSpec.setAll(false);
 
         ObjectSpec objSpec = new ObjectSpec();
-        objSpec.setObj(vmMor);
+        objSpec.setObj(objectMor);
         objSpec.setSkip(false);
 
         PropertyFilterSpec propFilterSpec = new PropertyFilterSpec();
@@ -582,10 +635,10 @@ public class VMWareImpl implements IVMWare {
         configSpec.setAnnotation(description);
         VirtualMachineCloneSpec cloneSpec = new VirtualMachineCloneSpec();
 
-        if(!customizationSpec.isEmpty()){
+        if (!customizationSpec.isEmpty()) {
             System.out.println(String.format("Fetching customization specification with name [ %s ].", customizationSpec));
             CustomizationSpecItem customizationSpecItem = vimPort.getCustomizationSpec(
-                                                serviceContent.getCustomizationSpecManager(), customizationSpec);
+                    serviceContent.getCustomizationSpecManager(), customizationSpec);
             cloneSpec.setCustomization(customizationSpecItem.getSpec());
         }
 
