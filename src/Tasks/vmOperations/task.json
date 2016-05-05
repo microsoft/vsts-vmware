@@ -130,7 +130,7 @@
             "defaultValue": "",
             "required": false,
             "visibleRule": "action = Deploy Virtual Machines using Template",
-            "helpMarkDown": "Name of the guest os customization spec, our recommendation is to give a spec with netbios name to be same as VM name."
+            "helpMarkDown": "Provide the name of the Guest OS Customization Specification. To keep hostname unique, set the VM name as the NetBIOS name."
         },
         {
             "name": "snapshotName",
