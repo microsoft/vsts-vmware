@@ -118,7 +118,7 @@ public class VMWareImpl implements IVMWare {
         System.out.println(String.format("Restoring snapshot [ %s ] on virtual machine [ %s ].", snapshotName, vmName));
         ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
         ManagedObjectReference cpMor = getSnapshotReference(vmMor, vmName, snapshotName);
-        ManagedObjectReference task = vimPort.revertToSnapshotTask(cpMor, null, true);
+        ManagedObjectReference task = vimPort.revertToSnapshotTask(cpMor, null, false);
 
         if (waitAndGetTaskResult(task)) {
             System.out.println(String.format("Successfully reverted to snapshot [ %s ] On virtual machine [ %s ].", snapshotName,
