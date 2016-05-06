@@ -110,6 +110,7 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to create snapshot [ %s ] on virtual machine [ %s ].", snapshotName, vmName));
         }
+        waitForPowerOnOperation(vmName, vmMor);
     }
 
     public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
@@ -126,6 +127,7 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to revert snapshot [ %s ] on virtual machine [ %s ].", snapshotName, vmName));
         }
+        waitForPowerOnOperation(vmName, vmMor);
     }
 
     public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
@@ -165,13 +167,8 @@ public class VMWareImpl implements IVMWare {
         if (isVMPoweredOn(vmName, true, connData)) {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             vimPort.shutdownGuest(vmMor);
-            System.out.println(String.format("Waiting for virtual machine [ %s ] to shutdown.", vmName));
-            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
-                    new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_NOT_RUNNING.value()}},
-                    Constants.START_STOP_MAX_WAIT_IN_MINUTES);
-            waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
-                    new Object[][]{new Object[]{ManagedEntityStatus.GRAY}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
-            System.out.println(String.format("Successfully shutdowned the virtual machine [ %s ].", vmName));
+            waitForPowerOffOperation(vmName, vmMor);
+            return;
         }
         System.out.println(String.format("Virtual machine [ %s ] is already shutdowned.", vmName));
     }
@@ -274,13 +271,33 @@ public class VMWareImpl implements IVMWare {
         return mobrMap.get(mobName.toLowerCase()).get(0);
     }
 
+    private void waitForPowerOffOperation(String vmName, ManagedObjectReference vmMor) throws Exception {
+        System.out.println(String.format("Waiting for virtual machine [ %s ] to shutdown.", vmName));
+
+        int waitTimeForToolsRunningStatus = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 90 / 100;
+        int waitTimeForGuestOsHeartBeat = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 10 / 100;
+
+        waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
+                new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_NOT_RUNNING.value()}},
+                waitTimeForToolsRunningStatus);
+        waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
+                new Object[][]{new Object[]{ManagedEntityStatus.GRAY}}, waitTimeForGuestOsHeartBeat);
+
+        System.out.println(String.format("Successfully shutdowned the virtual machine [ %s ].", vmName));
+    }
+
     private void waitForPowerOnOperation(String vmName, ManagedObjectReference vmMor) throws Exception {
         System.out.println(String.format("Waiting for virtual machine [ %s ] to start.", vmName));
+
+        int waitTimeForToolsRunningStatus = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 90 / 100;
+        int waitTimeForGuestOsHeartBeat = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 10 / 100;
+
         waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
                 new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}},
-                Constants.START_STOP_MAX_WAIT_IN_MINUTES);
+                waitTimeForToolsRunningStatus);
         waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
-                new Object[][]{new Object[]{ManagedEntityStatus.GREEN}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
+                new Object[][]{new Object[]{ManagedEntityStatus.GREEN}}, waitTimeForGuestOsHeartBeat);
+
         System.out.println(String.format("Successfully powered on virtual machine [ %s ].", vmName));
     }
 
