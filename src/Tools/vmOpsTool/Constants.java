@@ -32,5 +32,6 @@ public class Constants {
     public static final String TASK_ID = "735d144e-55fe-44d6-b687-db9031b6e70b";
     public static final int START_STOP_MAX_WAIT_IN_MINUTES = 10;
     public static final int OS_CUSTOMIZATION_MAX_WAIT_IN_MINUTES = 20;
+    public static final int OS_CUSTOMIZATION_POLLING_INTERVAL_IN_SECONDS = 30;
     public static final int OPERATION_MAX_WAIT_IN_MINUTES = 60;
 }

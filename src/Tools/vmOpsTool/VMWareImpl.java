@@ -371,7 +371,7 @@ public class VMWareImpl implements IVMWare {
             long startTime = System.currentTimeMillis();
 
             while ((new Date()).getTime() - startTime < maxWaitTimeInMinutes * 60 * 1000) {
-                Thread.sleep(30 * 1000);
+                Thread.sleep(Constants.OS_CUSTOMIZATION_POLLING_INTERVAL_IN_SECONDS * 1000);
                 ArrayList<Event> eventList = (ArrayList<Event>) ((ArrayOfEvent) getMorProperties(vmEventHistoryCollector, new String[]{LATEST_PAGE}).get(LATEST_PAGE)).getEvent();
                 for (Event anEvent : eventList) {
                     String eventName = anEvent.getClass().getSimpleName();
