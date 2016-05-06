@@ -149,7 +149,7 @@ describe("getCmdArgsForAction", (): void => {
 
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot of Virtual Machines");
 
-        cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory false -quiesceGuestFileSystem false -description \"Sample description\"");
+        cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory true -quiesceGuestFileSystem false -description \"Sample description\"");
         debugStub.should.have.been.calledOnce;
     });
 
@@ -158,7 +158,7 @@ describe("getCmdArgsForAction", (): void => {
 
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot of Virtual Machines");
 
-        cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory false -quiesceGuestFileSystem false -description \"undefined\"");
+        cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory true -quiesceGuestFileSystem false -description \"undefined\"");
         getInputStub.should.have.callCount(2);
     });
 
