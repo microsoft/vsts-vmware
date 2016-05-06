@@ -377,7 +377,7 @@ public class VMWareImpl implements IVMWare {
                     String eventName = anEvent.getClass().getSimpleName();
                     if (eventName.equalsIgnoreCase(CUSTOMIZATION_SUCCEEDED)
                             || eventName.equalsIgnoreCase(CUSTOMIZATION_FAILED)) {
-                        System.out.println("OS Customization for virtual machine [ " + vmName + " ] completed .");
+                        System.out.println("OS Customization for virtual machine [ " + vmName + " ] completed, with status: " + eventName);
                         return;
                     }
                 }
