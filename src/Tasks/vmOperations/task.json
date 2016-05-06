@@ -12,7 +12,7 @@
     "author": "Microsoft Corporation",
     "version": {
         "Major": 0,
-        "Minor": 2,
+        "Minor": 3,
         "Patch": 0
     },
     "demands": [
@@ -122,6 +122,15 @@
             "required": true,
             "visibleRule": "action = Deploy Virtual Machines using Template",
             "helpMarkDown": "Name of the Datastore for storing the virtual machine's configuration and disk files."
+        },
+        {
+            "name": "customizationspec",
+            "type": "string",
+            "label": "Guest OS Customization Spec",
+            "defaultValue": "",
+            "required": false,
+            "visibleRule": "action = Deploy Virtual Machines using Template",
+            "helpMarkDown": "Provide the name of the Guest OS Customization Specification. To keep hostname unique, set the VM name as the NetBIOS name."
         },
         {
             "name": "snapshotName",

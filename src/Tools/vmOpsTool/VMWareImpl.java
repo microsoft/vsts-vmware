@@ -25,6 +25,10 @@ public class VMWareImpl implements IVMWare {
     private final String GUEST_TOOLS_VERSION_STATUS = "guest.toolsVersionStatus";
     private final String GUEST_HEART_BEAT_STATUS = "guestHeartbeatStatus";
     private final String INFO_STATE = "info.state";
+    private final String INFO_ERROR = "info.error";
+    private final String LATEST_PAGE = "latestPage";
+    private final String CUSTOMIZATION_SUCCEEDED = "CustomizationSucceeded";
+    private final String CUSTOMIZATION_FAILED = "CustomizationFailed";
 
     private VimPortType vimPort;
     private ServiceContent serviceContent;
@@ -67,12 +71,13 @@ public class VMWareImpl implements IVMWare {
     }
 
     public void cloneVMFromTemplate(String templateName, String vmName, String computeType,
-                                    String computeName, String targetDS, String description, ConnectionData connData) throws Exception {
+                                    String computeName, String targetDS, String customizationSpec,
+                                    String description, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.println(String.format("Finding template [ %s ] on vCenter server.", templateName));
         ManagedObjectReference templateMor = getMorByName(targetDCMor, templateName, VIRTUAL_MACHINE, true);
         ManagedObjectReference targetVmFolder = (ManagedObjectReference) getMorProperties(targetDCMor, new String[]{VM_FOLDER}).get(VM_FOLDER);
-        VirtualMachineCloneSpec cloneSpec = getVirtualMachineCloneSpec(computeType, computeName, targetDS, description);
+        VirtualMachineCloneSpec cloneSpec = getVirtualMachineCloneSpec(computeType, computeName, targetDS, customizationSpec, description);
 
         System.out.println(String.format("Creating new virtual machine [ %s ] using template [ %s ].", vmName, templateName));
         ManagedObjectReference task = vimPort.cloneVMTask(templateMor, targetVmFolder, vmName, cloneSpec);
@@ -83,6 +88,12 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to create virtual machine [ %s ] using template [ %s ].", vmName, templateName));
         }
+
+        ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
+        if (!customizationSpec.isEmpty()) {
+            waitForOSCustomization(vmName, vmMor, Constants.OS_CUSTOMIZATION_MAX_WAIT_IN_MINUTES);
+        }
+        waitForPowerOnOperation(vmName, vmMor);
     }
 
     public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
@@ -99,6 +110,7 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to create snapshot [ %s ] on virtual machine [ %s ].", snapshotName, vmName));
         }
+        waitForPowerOnOperation(vmName, vmMor);
     }
 
     public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
@@ -115,6 +127,7 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to revert snapshot [ %s ] on virtual machine [ %s ].", snapshotName, vmName));
         }
+        waitForPowerOnOperation(vmName, vmMor);
     }
 
     public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
@@ -134,6 +147,7 @@ public class VMWareImpl implements IVMWare {
 
     public void powerOnVM(String vmName, ConnectionData connData) throws Exception {
         connect(connData);
+
         if (!isVMPoweredOn(vmName, false, connData)) {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             ManagedObjectReference task = vimPort.powerOnVMTask(vmMor, null);
@@ -142,13 +156,7 @@ public class VMWareImpl implements IVMWare {
                 throw new Exception(
                         String.format("Failed to power on virtual machine [ %s ].", vmName));
             }
-            System.out.println(String.format("Waiting for virtual machine [ %s ] to start.", vmName));
-            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
-                    new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}},
-                    Constants.START_STOP_MAX_WAIT_IN_MINUTES);
-            waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
-                    new Object[][]{new Object[]{ManagedEntityStatus.GREEN}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
-            System.out.println(String.format("Successfully powered on virtual machine [ %s ].", vmName));
+            waitForPowerOnOperation(vmName, vmMor);
             return;
         }
         System.out.println(String.format("Virtual machine [ %s ] is already running.", vmName));
@@ -159,13 +167,8 @@ public class VMWareImpl implements IVMWare {
         if (isVMPoweredOn(vmName, true, connData)) {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             vimPort.shutdownGuest(vmMor);
-            System.out.println(String.format("Waiting for virtual machine [ %s ] to shutdown.", vmName));
-            waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
-                    new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_NOT_RUNNING.value()}},
-                    Constants.START_STOP_MAX_WAIT_IN_MINUTES);
-            waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
-                    new Object[][]{new Object[]{ManagedEntityStatus.GRAY}}, Constants.START_STOP_MAX_WAIT_IN_MINUTES);
-            System.out.println(String.format("Successfully shutdowned the virtual machine [ %s ].", vmName));
+            waitForPowerOffOperation(vmName, vmMor);
+            return;
         }
         System.out.println(String.format("Virtual machine [ %s ] is already shutdowned.", vmName));
     }
@@ -268,17 +271,50 @@ public class VMWareImpl implements IVMWare {
         return mobrMap.get(mobName.toLowerCase()).get(0);
     }
 
+    private void waitForPowerOffOperation(String vmName, ManagedObjectReference vmMor) throws Exception {
+        System.out.println(String.format("Waiting for virtual machine [ %s ] to shutdown.", vmName));
+
+        int waitTimeForToolsRunningStatus = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 90 / 100;
+        int waitTimeForGuestOsHeartBeat = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 10 / 100;
+
+        waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
+                new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_NOT_RUNNING.value()}},
+                waitTimeForToolsRunningStatus);
+        waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
+                new Object[][]{new Object[]{ManagedEntityStatus.GRAY}}, waitTimeForGuestOsHeartBeat);
+
+        System.out.println(String.format("Successfully shutdowned the virtual machine [ %s ].", vmName));
+    }
+
+    private void waitForPowerOnOperation(String vmName, ManagedObjectReference vmMor) throws Exception {
+        System.out.println(String.format("Waiting for virtual machine [ %s ] to start.", vmName));
+
+        int waitTimeForToolsRunningStatus = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 90 / 100;
+        int waitTimeForGuestOsHeartBeat = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 10 / 100;
+
+        waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
+                new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}},
+                waitTimeForToolsRunningStatus);
+        waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
+                new Object[][]{new Object[]{ManagedEntityStatus.GREEN}}, waitTimeForGuestOsHeartBeat);
+
+        System.out.println(String.format("Successfully powered on virtual machine [ %s ].", vmName));
+    }
+
     private boolean waitAndGetTaskResult(ManagedObjectReference task) throws Exception {
         boolean retVal = false;
 
         System.out.println("Waiting for operation completion.");
-        Object[] result = waitOnMorProperties(task, new String[]{INFO_STATE}, new String[]{INFO_STATE},
+        Object[] result = waitOnMorProperties(task, new String[]{INFO_STATE, INFO_ERROR}, new String[]{INFO_STATE},
                 new Object[][]{new Object[]{TaskInfoState.SUCCESS, TaskInfoState.ERROR}}, Constants.OPERATION_MAX_WAIT_IN_MINUTES);
 
         if (result[0].equals(TaskInfoState.SUCCESS)) {
             retVal = true;
         }
 
+        if (result[1] instanceof LocalizedMethodFault) {
+            throw new Exception(((LocalizedMethodFault) result[1]).getLocalizedMessage());
+        }
         return retVal;
     }
 
@@ -341,6 +377,46 @@ public class VMWareImpl implements IVMWare {
                     Constants.TASK_ID));
             throw new Exception("Failed to get operation result: " + exp.getMessage());
         }
+    }
+
+    private void waitForOSCustomization(String vmName, ManagedObjectReference vmMor, int maxWaitTimeInMinutes) throws Exception {
+        EventFilterSpec eventFilterSpec = getEventFilterSpecForVM(vmMor);
+        ManagedObjectReference vmEventHistoryCollector = null;
+        try {
+            System.out.println(String.format("Waiting for virtual machine [ %s ] OS customization to complete.", vmName));
+            vmEventHistoryCollector = vimPort.createCollectorForEvents(serviceContent.getEventManager(), eventFilterSpec);
+            long startTime = System.currentTimeMillis();
+
+            while ((new Date()).getTime() - startTime < maxWaitTimeInMinutes * 60 * 1000) {
+                Thread.sleep(Constants.OS_CUSTOMIZATION_POLLING_INTERVAL_IN_SECONDS * 1000);
+                ArrayList<Event> eventList = (ArrayList<Event>) ((ArrayOfEvent) getMorProperties(vmEventHistoryCollector, new String[]{LATEST_PAGE}).get(LATEST_PAGE)).getEvent();
+                for (Event anEvent : eventList) {
+                    String eventName = anEvent.getClass().getSimpleName();
+                    if (eventName.equalsIgnoreCase(CUSTOMIZATION_SUCCEEDED)
+                            || eventName.equalsIgnoreCase(CUSTOMIZATION_FAILED)) {
+                        System.out.println("OS Customization for virtual machine [ " + vmName + " ] completed, with status: " + eventName);
+                        return;
+                    }
+                }
+            }
+            System.out.println("OS Customization for virtual machine [ " + vmName + " ] didn't finish in time, continuing further.");
+        } catch (Exception exp) {
+            System.out.println(String.format("##vso[task.logissue type=error;code=PREREQ_WaitForOsCustomizationFailed;TaskId=%s;]",
+                    Constants.TASK_ID));
+            throw new Exception("Failed to wait for OS customization: " + exp.getMessage());
+        } finally {
+            vimPort.destroyCollector(vmEventHistoryCollector);
+        }
+    }
+
+    private EventFilterSpec getEventFilterSpecForVM(ManagedObjectReference vmMor) {
+        EventFilterSpecByEntity vmEntitySpec = new EventFilterSpecByEntity();
+        vmEntitySpec.setEntity(vmMor);
+        vmEntitySpec.setRecursion(EventFilterSpecRecursionOption.SELF);
+
+        EventFilterSpec eventFilterSpec = new EventFilterSpec();
+        eventFilterSpec.setEntity(vmEntitySpec);
+        return eventFilterSpec;
     }
 
     private void updateValues(String[] endWaitProps, Object[] endVals, PropertyChange propChg) {
@@ -455,14 +531,14 @@ public class VMWareImpl implements IVMWare {
         return propMap;
     }
 
-    private PropertyFilterSpec createPropFilterSpecForObject(ManagedObjectReference vmMor, String[] propList) {
+    private PropertyFilterSpec createPropFilterSpecForObject(ManagedObjectReference objectMor, String[] propList) {
         PropertySpec propSpec = new PropertySpec();
-        propSpec.setType(vmMor.getType());
+        propSpec.setType(objectMor.getType());
         propSpec.getPathSet().addAll(Arrays.asList(propList));
         propSpec.setAll(false);
 
         ObjectSpec objSpec = new ObjectSpec();
-        objSpec.setObj(vmMor);
+        objSpec.setObj(objectMor);
         objSpec.setSkip(false);
 
         PropertyFilterSpec propFilterSpec = new PropertyFilterSpec();
@@ -573,15 +649,24 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    private VirtualMachineCloneSpec getVirtualMachineCloneSpec(String computeType, String computeName, String targetDS, String description) throws Exception {
+    private VirtualMachineCloneSpec getVirtualMachineCloneSpec(String computeType, String computeName, String targetDS,
+                                                               String customizationSpec, String description) throws Exception {
 
         VirtualMachineRelocateSpec relocSpec = getVirtualMachineRelocationSpec(computeType, computeName, targetDS);
         VirtualMachineConfigSpec configSpec = new VirtualMachineConfigSpec();
         configSpec.setAnnotation(description);
         VirtualMachineCloneSpec cloneSpec = new VirtualMachineCloneSpec();
+
+        if (!customizationSpec.isEmpty()) {
+            System.out.println(String.format("Fetching customization specification with name [ %s ].", customizationSpec));
+            CustomizationSpecItem customizationSpecItem = vimPort.getCustomizationSpec(
+                    serviceContent.getCustomizationSpecManager(), customizationSpec);
+            cloneSpec.setCustomization(customizationSpecItem.getSpec());
+        }
+
         cloneSpec.setConfig(configSpec);
         cloneSpec.setLocation(relocSpec);
-        cloneSpec.setPowerOn(false);
+        cloneSpec.setPowerOn(true);
         cloneSpec.setTemplate(false);
 
         return cloneSpec;

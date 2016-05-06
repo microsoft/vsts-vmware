@@ -35,6 +35,7 @@ export class VmOperations {
                 var computeType = tl.getInput("computeType", true);
                 var datastore = tl.getInput("datastore", true);
                 var description = tl.getInput("description", false);
+                var customizationspec = tl.getInput("customizationspec", false);
                 var computeName = null;
                 switch (computeType) {
                     case "ESXi Host":
@@ -51,11 +52,11 @@ export class VmOperations {
                         tl.exit(1);
                 }
                 cmdArgs += " -clonetemplate \"" + template  + "\" -computetype \"" + computeType + "\" -computename \"" +
-                        computeName + "\" -datastore \"" + datastore + "\" -description \"" + description + "\"";
+                        computeName + "\" -datastore \"" + datastore + "\" -customizationspec \"" + customizationspec + "\" -description \"" + description + "\"";
                 break;
             case "Take Snapshot of Virtual Machines":
                 var snapshotName = tl.getInput("snapshotName", true);
-                var snapshotVMMemory = "false";
+                var snapshotVMMemory = "true";
                 var quiesceGuestFileSystem = "false";
                 var description: string = tl.getInput("description", false);
                 cmdArgs += " -snapshotOps create -snapshotName \"" + snapshotName  + "\" -snapshotVMMemory " + snapshotVMMemory + " -quiesceGuestFileSystem " +

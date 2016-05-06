@@ -1,4 +1,7 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -179,10 +182,12 @@ public class VmOpsTool {
         String computeType = argsMap.get(Constants.COMPUTE_TYPE);
         String computeName = argsMap.get(Constants.COMPUTE_NAME);
         String datastore = argsMap.get(Constants.DATASTORE);
+        String customizationspec = argsMap.get(Constants.CUSTOMIZATIONSPEC);
         String description = argsMap.get(Constants.DESCRIPTION);
 
         try {
-            vmwareFactory.call().cloneVMFromTemplate(templateName, vmName, computeType, computeName, datastore, description, connData);
+            vmwareFactory.call().cloneVMFromTemplate(templateName, vmName, computeType, computeName, datastore,
+                    customizationspec, description, connData);
         } catch (Exception exp) {
             System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred.");
             failedVm = vmName + " ";

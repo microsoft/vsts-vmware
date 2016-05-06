@@ -47,7 +47,8 @@ public class VmOpsToolUnitTests {
     @Test
     public void executeActionInParallelShouldSucceedForCloneAndDeleteVMActionWithValidInputs() throws Exception {
         String[] cmdArgs = getCmdArgs("newVM1, newVM2", Constants.CLONE_TEMPLATE, "dummyTemplate",
-                Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName", Constants.DESCRIPTION, "Dummy description");
+                Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName",
+                Constants.CUSTOMIZATIONSPEC, "Dummy Customization Spec", Constants.DESCRIPTION, "Dummy description");
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
@@ -140,7 +141,8 @@ public class VmOpsToolUnitTests {
     @Test
     public void executeActionInParallelShouldThrowForCloneAndDeleteVMFailureOnAVM() throws Exception {
         String[] cmdArgs = getCmdArgs("newVM1, VMNameThatFailsInClone", Constants.CLONE_TEMPLATE, "dummyTemplate",
-                Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName", Constants.DESCRIPTION, "Dummy description");
+                Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName",
+                Constants.CUSTOMIZATIONSPEC, "Dummy Customization Spec", Constants.DESCRIPTION, "Dummy description");
 
         Exception exp = null;
 
