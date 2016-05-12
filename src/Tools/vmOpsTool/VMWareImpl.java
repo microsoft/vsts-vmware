@@ -2,7 +2,13 @@ import com.sun.xml.ws.client.BindingProviderProperties;
 import com.vmware.vim25.*;
 
 import javax.xml.ws.BindingProvider;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
+
+import static java.lang.Thread.sleep;
 
 public class VMWareImpl implements IVMWare {
 
@@ -23,6 +29,7 @@ public class VMWareImpl implements IVMWare {
     private final String NAME = "name";
     private final String GUEST_TOOLS_RUNNING_STATUS = "guest.toolsRunningStatus";
     private final String GUEST_TOOLS_VERSION_STATUS = "guest.toolsVersionStatus";
+    private final String GUEST_OS_FAMILY = "guest.guestFamily";
     private final String GUEST_HEART_BEAT_STATUS = "guestHeartbeatStatus";
     private final String INFO_STATE = "info.state";
     private final String INFO_ERROR = "info.error";
@@ -94,6 +101,8 @@ public class VMWareImpl implements IVMWare {
             waitForOSCustomization(vmName, vmMor, Constants.OS_CUSTOMIZATION_MAX_WAIT_IN_MINUTES);
         }
         waitForPowerOnOperation(vmName, vmMor);
+        boolean isGuestOSWindows = isGuestOSWindows(vmMor);
+        waitForNetworkDiscoveryOfVM(vmName, isGuestOSWindows, Constants.NETWORK_DISCOVERY_TIME_OUT_IN_MINUTES);
     }
 
     public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
@@ -252,6 +261,77 @@ public class VMWareImpl implements IVMWare {
         return !(toolsRunningStatus.equals(VirtualMachineToolsRunningStatus.GUEST_TOOLS_NOT_RUNNING));
     }
 
+    private boolean isGuestOSWindows(ManagedObjectReference vmMor) throws Exception {
+        String guestFamily = (String) getMorProperties(vmMor, new String[]{GUEST_OS_FAMILY}).get(GUEST_OS_FAMILY);
+        return guestFamily != null && guestFamily.toLowerCase().startsWith("windows");
+    }
+
+    private void waitForNetworkDiscoveryOfVM(String vmName, boolean isGuestOSWindows, int maxWaitTimeInMinutes) throws Exception {
+        long startTime = System.currentTimeMillis();
+
+        boolean isDnsResolved = false;
+        boolean isNetBIOSResolved = false;
+
+        System.out.println(String.format("Waiting for virtual machine [ %s ] network discovery to complete.", vmName));
+        while (((new Date()).getTime() - startTime < maxWaitTimeInMinutes * 60 * 1000) && !(isDnsResolved && isNetBIOSResolved)) {
+            sleep(Constants.NETWORK_DISCOVERY_POLLING_INTERVAL_IN_SECONDS * 1000);
+
+            if (!isDnsResolved) {
+                isDnsResolved = isDnsNameResolved(vmName);
+            }
+
+            if (!isNetBIOSResolved) {
+                isNetBIOSResolved = isNetBIOSNameResolved(vmName, isGuestOSWindows);
+            }
+        }
+
+        if (isDnsResolved && isNetBIOSResolved) {
+            System.out.println("Network discovery of virtual machine [ " + vmName + " ] completed.");
+            return;
+        }
+
+        System.out.println("Network discovery of virtual machine [ " + vmName + " ] not completed, subsequent deployment operations might fail.");
+    }
+
+    private boolean isNetBIOSNameResolved(String vmName, boolean isGuestOSWindows) throws Exception {
+
+        // When Automation Agent or guest OS type is linux NetBIOS resultion is not required
+        if (!System.getProperty("os.name").toLowerCase().startsWith("windows") || !isGuestOSWindows) {
+            return true;
+        }
+
+        String command = "cmd /c nbtstat -a " + vmName;
+        try {
+
+            Process child = Runtime.getRuntime().exec(command);
+            child.waitFor();
+            BufferedReader childStdOut = new BufferedReader(new InputStreamReader(child.getInputStream()));
+            String output = "";
+            String s;
+            while ((s = childStdOut.readLine()) != null) {
+                output += s.toLowerCase();
+            }
+
+            return output.contains(vmName.toLowerCase());
+
+        } catch (Exception e) {
+            // If host name is not registered in NetBIOS, this exception will be thrown hence ignoring.
+        }
+
+        return false;
+    }
+
+    private boolean isDnsNameResolved(String vmName) {
+
+        try {
+            String ipAddress = InetAddress.getByName(vmName).getHostAddress();
+            return !ipAddress.isEmpty();
+        } catch (UnknownHostException e) {
+            // If host name is not registered in DNS or NIS, this exception will be thrown hence ignoring.
+        }
+        return false;
+    }
+
     private ManagedObjectReference getMorByName(ManagedObjectReference rootContainer, String mobName, String morefType,
                                                 boolean isTemplate) throws Exception {
         Map<String, List<ManagedObjectReference>> mobrMap = getObjectsInContainerByType(rootContainer, morefType, isTemplate);
@@ -388,7 +468,7 @@ public class VMWareImpl implements IVMWare {
             long startTime = System.currentTimeMillis();
 
             while ((new Date()).getTime() - startTime < maxWaitTimeInMinutes * 60 * 1000) {
-                Thread.sleep(Constants.OS_CUSTOMIZATION_POLLING_INTERVAL_IN_SECONDS * 1000);
+                sleep(Constants.OS_CUSTOMIZATION_POLLING_INTERVAL_IN_SECONDS * 1000);
                 ArrayList<Event> eventList = (ArrayList<Event>) ((ArrayOfEvent) getMorProperties(vmEventHistoryCollector, new String[]{LATEST_PAGE}).get(LATEST_PAGE)).getEvent();
                 for (Event anEvent : eventList) {
                     String eventName = anEvent.getClass().getSimpleName();
