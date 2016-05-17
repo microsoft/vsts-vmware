@@ -354,8 +354,8 @@ public class VMWareImpl implements IVMWare {
     private void waitForPowerOffOperation(String vmName, ManagedObjectReference vmMor) throws Exception {
         System.out.println(String.format("Waiting for virtual machine [ %s ] to shutdown.", vmName));
 
-        int waitTimeForToolsRunningStatus = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 90 / 100;
-        int waitTimeForGuestOsHeartBeat = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 10 / 100;
+        int waitTimeForToolsRunningStatus = Constants.START_STOP_MAX_WAIT_IN_MINUTES;
+        int waitTimeForGuestOsHeartBeat = Constants.START_STOP_MAX_WAIT_IN_MINUTES;
 
         waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
                 new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_NOT_RUNNING.value()}},
@@ -369,8 +369,8 @@ public class VMWareImpl implements IVMWare {
     private void waitForPowerOnOperation(String vmName, ManagedObjectReference vmMor) throws Exception {
         System.out.println(String.format("Waiting for virtual machine [ %s ] to start.", vmName));
 
-        int waitTimeForToolsRunningStatus = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 90 / 100;
-        int waitTimeForGuestOsHeartBeat = Constants.START_STOP_MAX_WAIT_IN_MINUTES * 10 / 100;
+        int waitTimeForToolsRunningStatus = Constants.START_STOP_MAX_WAIT_IN_MINUTES;
+        int waitTimeForGuestOsHeartBeat = Constants.START_STOP_MAX_WAIT_IN_MINUTES;
 
         waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
                 new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}},
