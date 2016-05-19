@@ -102,7 +102,7 @@ public class VMWareImpl implements IVMWare {
         }
         waitForPowerOnOperation(vmName, vmMor);
         boolean isGuestOSWindows = isGuestOSWindows(vmMor);
-        waitForNetworkDiscoveryOfVM(vmName, isGuestOSWindows, Constants.NETWORK_DISCOVERY_TIME_OUT_IN_MINUTES);
+        waitForNetworkDiscoveryOfVM(vmName, isGuestOSWindows);
     }
 
     public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
@@ -137,6 +137,8 @@ public class VMWareImpl implements IVMWare {
                     String.format("Failed to revert snapshot [ %s ] on virtual machine [ %s ].", snapshotName, vmName));
         }
         waitForPowerOnOperation(vmName, vmMor);
+        boolean isGuestOSWindows = isGuestOSWindows(vmMor);
+        waitForNetworkDiscoveryOfVM(vmName, isGuestOSWindows);
     }
 
     public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
@@ -166,6 +168,8 @@ public class VMWareImpl implements IVMWare {
                         String.format("Failed to power on virtual machine [ %s ].", vmName));
             }
             waitForPowerOnOperation(vmName, vmMor);
+            boolean isGuestOSWindows = isGuestOSWindows(vmMor);
+            waitForNetworkDiscoveryOfVM(vmName, isGuestOSWindows);
             return;
         }
         System.out.println(String.format("Virtual machine [ %s ] is already running.", vmName));
@@ -266,14 +270,14 @@ public class VMWareImpl implements IVMWare {
         return guestFamily != null && guestFamily.toLowerCase().startsWith("windows");
     }
 
-    private void waitForNetworkDiscoveryOfVM(String vmName, boolean isGuestOSWindows, int maxWaitTimeInMinutes) throws Exception {
+    private void waitForNetworkDiscoveryOfVM(String vmName, boolean isGuestOSWindows) throws Exception {
         long startTime = System.currentTimeMillis();
 
         boolean isDnsResolved = false;
         boolean isNetBIOSResolved = false;
 
         System.out.println(String.format("Waiting for virtual machine [ %s ] network discovery to complete.", vmName));
-        while (((new Date()).getTime() - startTime < maxWaitTimeInMinutes * 60 * 1000) && !(isDnsResolved && isNetBIOSResolved)) {
+        while (((new Date()).getTime() - startTime < Constants.NETWORK_DISCOVERY_TIME_OUT_IN_MINUTES * 60 * 1000) && !(isDnsResolved && isNetBIOSResolved)) {
             sleep(Constants.NETWORK_DISCOVERY_POLLING_INTERVAL_IN_SECONDS * 1000);
 
             if (!isDnsResolved) {
