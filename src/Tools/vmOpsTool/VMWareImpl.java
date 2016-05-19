@@ -79,7 +79,7 @@ public class VMWareImpl implements IVMWare {
 
     public void cloneVMFromTemplate(String templateName, String vmName, String computeType,
                                     String computeName, String targetDS, String customizationSpec,
-                                    String description, ConnectionData connData) throws Exception {
+                                    String description, int timeout, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.println(String.format("Finding template [ %s ] on vCenter server.", templateName));
         ManagedObjectReference templateMor = getMorByName(targetDCMor, templateName, VIRTUAL_MACHINE, true);
@@ -106,7 +106,7 @@ public class VMWareImpl implements IVMWare {
     }
 
     public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
-                               String description, ConnectionData connData) throws Exception {
+                               String description, int timeout, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.println(String.format("Creating snapshot [ %s ] on virtual machine [ %s ].", snapshotName, vmName));
         ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
@@ -122,7 +122,7 @@ public class VMWareImpl implements IVMWare {
         waitForPowerOnOperation(vmName, vmMor);
     }
 
-    public void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+    public void restoreSnapshot(String vmName, String snapshotName, int timeout, ConnectionData connData) throws Exception {
         connect(connData);
         System.out.println(String.format("Restoring snapshot [ %s ] on virtual machine [ %s ].", snapshotName, vmName));
         ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
@@ -156,7 +156,7 @@ public class VMWareImpl implements IVMWare {
         }
     }
 
-    public void powerOnVM(String vmName, ConnectionData connData) throws Exception {
+    public void powerOnVM(String vmName, int timeout, ConnectionData connData) throws Exception {
         connect(connData);
 
         if (!isVMPoweredOn(vmName, false, connData)) {
@@ -175,7 +175,7 @@ public class VMWareImpl implements IVMWare {
         System.out.println(String.format("Virtual machine [ %s ] is already running.", vmName));
     }
 
-    public void shutdownVM(String vmName, ConnectionData connData) throws Exception {
+    public void shutdownVM(String vmName, int timeout, ConnectionData connData) throws Exception {
         connect(connData);
         if (isVMPoweredOn(vmName, true, connData)) {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);

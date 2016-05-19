@@ -1,12 +1,11 @@
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class VmOpsToolUnitTests {
 
@@ -48,7 +47,7 @@ public class VmOpsToolUnitTests {
     public void executeActionInParallelShouldSucceedForCloneAndDeleteVMActionWithValidInputs() throws Exception {
         String[] cmdArgs = getCmdArgs("newVM1, newVM2", Constants.CLONE_TEMPLATE, "dummyTemplate",
                 Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName",
-                Constants.CUSTOMIZATIONSPEC, "Dummy Customization Spec", Constants.DESCRIPTION, "Dummy description");
+                Constants.CUSTOMIZATIONSPEC, "Dummy Customization Spec", Constants.DESCRIPTION, "Dummy description", Constants.TIMEOUT, "1200");
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
@@ -65,14 +64,14 @@ public class VmOpsToolUnitTests {
 
     @Test
     public void executeActionInParallelShouldSucceedForPowerOnShutdownAndPowerOffVMActionWithValidInputs() throws Exception {
-        String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.POWER_OPS, Constants.POWER_ON_VM_ACTION);
+        String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.POWER_OPS, Constants.POWER_ON_VM_ACTION, Constants.TIMEOUT, "1200");
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
         assertThat(vmWareImpl.isVMPoweredOn("vm1", true, connData)).isEqualTo(true);
         assertThat(vmWareImpl.isVMPoweredOn("vm2", true, connData)).isEqualTo(true);
 
-        cmdArgs = getCmdArgs("vm1", Constants.POWER_OPS, Constants.SHUTDOWN_VM_ACTION);
+        cmdArgs = getCmdArgs("vm1", Constants.POWER_OPS, Constants.SHUTDOWN_VM_ACTION, Constants.TIMEOUT, "1200");
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
@@ -87,7 +86,7 @@ public class VmOpsToolUnitTests {
 
     @Test
     public void executeActionInParallelShouldThrowForPowerOnShutdownAndPowerOffVMActionFailureOnAVM() throws Exception {
-        String[] cmdArgs = getCmdArgs("vm1, vm2, VmThatFailsInPowerOn", Constants.POWER_OPS, Constants.POWER_ON_VM_ACTION);
+        String[] cmdArgs = getCmdArgs("vm1, vm2, VmThatFailsInPowerOn", Constants.POWER_OPS, Constants.POWER_ON_VM_ACTION, Constants.TIMEOUT, "1200");
 
         Exception exp = null;
 
@@ -100,7 +99,7 @@ public class VmOpsToolUnitTests {
         assertThat(exp).isNotNull();
         assertThat(vmWareImpl.isVMPoweredOn("vm1", true, connData)).isEqualTo(true);
 
-        cmdArgs = getCmdArgs("vm1, VmThatFailsInShutdown", Constants.POWER_OPS, Constants.SHUTDOWN_VM_ACTION);
+        cmdArgs = getCmdArgs("vm1, VmThatFailsInShutdown", Constants.POWER_OPS, Constants.SHUTDOWN_VM_ACTION, Constants.TIMEOUT, "1200");
 
         exp = null;
         try {
@@ -142,7 +141,7 @@ public class VmOpsToolUnitTests {
     public void executeActionInParallelShouldThrowForCloneAndDeleteVMFailureOnAVM() throws Exception {
         String[] cmdArgs = getCmdArgs("newVM1, VMNameThatFailsInClone", Constants.CLONE_TEMPLATE, "dummyTemplate",
                 Constants.COMPUTE_TYPE, "DummyCompute", Constants.COMPUTE_NAME, "DummyName",
-                Constants.CUSTOMIZATIONSPEC, "Dummy Customization Spec", Constants.DESCRIPTION, "Dummy description");
+                Constants.CUSTOMIZATIONSPEC, "Dummy Customization Spec", Constants.DESCRIPTION, "Dummy description", Constants.TIMEOUT, "1200");
 
         Exception exp = null;
 
@@ -174,7 +173,7 @@ public class VmOpsToolUnitTests {
         // Create snapshot operation validation
         String createSnapshot = "Sample Snapshot";
         String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.SNAPSHOT_OPS, Constants.CREATE_SNAPSHOT_ACTION,
-                Constants.SNAPSHOT_NAME, createSnapshot);
+                Constants.SNAPSHOT_NAME, createSnapshot, Constants.TIMEOUT, "1200");
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
@@ -195,7 +194,7 @@ public class VmOpsToolUnitTests {
     public void executeActionInParallelShouldRestoreSnapshotForRestoreOperation() throws Exception {
 
         String[] cmdArgs = getCmdArgs("vm1, vm2", Constants.SNAPSHOT_OPS, Constants.RESTORE_SNAPSHOT_ACTION,
-                Constants.SNAPSHOT_NAME, vmSnapshotName);
+                Constants.SNAPSHOT_NAME, vmSnapshotName, Constants.TIMEOUT, "1200");
 
         vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
 
@@ -208,7 +207,7 @@ public class VmOpsToolUnitTests {
         // Delete snapshot operation throws on failure validation
         String vmSnapshot = "New Snapshot";
         String[] cmdArgs = getCmdArgs("vm1, vm3", Constants.SNAPSHOT_OPS, Constants.CREATE_SNAPSHOT_ACTION,
-                Constants.SNAPSHOT_NAME, vmSnapshot);
+                Constants.SNAPSHOT_NAME, vmSnapshot, Constants.TIMEOUT, "1200");
         Exception exp = null;
 
         try {
@@ -237,7 +236,7 @@ public class VmOpsToolUnitTests {
     @Test
     public void executeActionInParallelShouldThrowForRestoreSnapshotFailureOnAVM() throws Exception {
         String[] cmdArgs = getCmdArgs("vm1, vm3", Constants.SNAPSHOT_OPS, Constants.RESTORE_SNAPSHOT_ACTION,
-                Constants.SNAPSHOT_NAME, vmSnapshotName);
+                Constants.SNAPSHOT_NAME, vmSnapshotName, Constants.TIMEOUT, "1200");
         Exception exp = null;
 
         try {
@@ -290,6 +289,63 @@ public class VmOpsToolUnitTests {
         }
 
         assertThat(exp).isNotNull();
+    }
+
+    @Test
+    public void executeActionInParallelOnAVMShouldThrowErrorForInvalidTimeout() {
+        String[] cmdArgs = getCmdArgs("vm1", Constants.SNAPSHOT_OPS, Constants.RESTORE_SNAPSHOT_ACTION,
+                Constants.SNAPSHOT_NAME, vmSnapshotName, Constants.TIMEOUT, "subbu");
+        Exception exp = null;
+
+        try {
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+
+        assertThat(exp).isNotNull();
+
+        exp = null;
+        cmdArgs = getCmdArgs("vm1", Constants.SNAPSHOT_OPS, Constants.CREATE_SNAPSHOT_ACTION,
+                Constants.SNAPSHOT_NAME, vmSnapshotName, Constants.TIMEOUT, "subbu");
+
+        try {
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+        assertThat(exp).isNotNull();
+
+        exp = null;
+        cmdArgs = getCmdArgs("vm1", Constants.POWER_OPS, Constants.POWER_ON_VM_ACTION, Constants.TIMEOUT, "subbu");
+
+        try {
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+        assertThat(exp).isNotNull();
+
+        exp = null;
+        cmdArgs = getCmdArgs("vm1", Constants.CLONE_TEMPLATE, "dummytemplate", Constants.TIMEOUT, "subbu");
+
+        try {
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+        assertThat(exp).isNotNull();
+
+        exp = null;
+        cmdArgs = getCmdArgs("vm1", Constants.POWER_OPS, Constants.POWER_ON_VM_ACTION, Constants.TIMEOUT, "subbu");
+
+        try {
+            vmOpsTool.executeActionOnVmsInParallel(cmdArgs);
+        } catch (Exception e) {
+            exp = e;
+        }
+        assertThat(exp).isNotNull();
+
     }
 
     private String[] getCmdArgs(String vmList, String... vaArgs) {

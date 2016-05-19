@@ -23,6 +23,7 @@ public class Constants {
     public static final String CUSTOMIZATIONSPEC = "-customizationspec";
     public static final String QUIESCE_VM_FS = "-quiesceGuestFileSystem";
     public static final String SAVE_VM_MEMORY = "-snapshotVMMemory";
+    public static final String TIMEOUT = "-timeout";
     public static final String DELETE_SNAPSHOT_ACTION = "delete";
     public static final String DELETE_VM_ACTION = "delete";
     public static final String POWER_ON_VM_ACTION = "poweron";

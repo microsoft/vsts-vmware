@@ -55,7 +55,7 @@ public class InMemoryVMWareImpl implements IVMWare {
     }
 
     public synchronized void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
-                                            String description, ConnectionData connData) throws Exception {
+                                            String description, int timeout, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmSnapshotInfo.containsKey(vmName)) {
             List<String> vmCpList = vmSnapshotInfo.get(vmName);
@@ -67,7 +67,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public synchronized void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
+    public synchronized void restoreSnapshot(String vmName, String snapshotName, int timeout, ConnectionData connData) throws Exception {
         List<String> cpList;
 
         vmName = vmName.toLowerCase();
@@ -106,7 +106,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public synchronized void powerOnVM(String vmName, ConnectionData connData) throws Exception {
+    public synchronized void powerOnVM(String vmName, int timeout, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmStateInformation.containsKey(vmName)) {
             vmStateInformation.put(vmName, started);
@@ -115,7 +115,7 @@ public class InMemoryVMWareImpl implements IVMWare {
         }
     }
 
-    public synchronized void shutdownVM(String vmName, ConnectionData connData) throws Exception {
+    public synchronized void shutdownVM(String vmName, int timeout, ConnectionData connData) throws Exception {
         vmName = vmName.toLowerCase();
         if (vmStateInformation.containsKey(vmName)) {
             vmStateInformation.put(vmName, "Stopped");
@@ -125,7 +125,7 @@ public class InMemoryVMWareImpl implements IVMWare {
     }
 
     public void powerOffVM(String vmName, ConnectionData connData) throws Exception {
-        shutdownVM(vmName, connData);
+        shutdownVM(vmName, 1200, connData);
     }
 
     public String getCurrentSnapshot(String vmName, ConnectionData connData) throws Exception {
@@ -165,7 +165,7 @@ public class InMemoryVMWareImpl implements IVMWare {
     }
 
     public synchronized void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName,
-                                                 String datastore, String customizationSpec, String description, ConnectionData connData) throws Exception {
+                                                 String datastore, String customizationSpec, String description, int timeout, ConnectionData connData) throws Exception {
         if (vmName.equals("VMNameThatFailsInClone")) {
             throw new Exception("Clone VM from template operation failed for VMNameThatFailsInClone");
         }
