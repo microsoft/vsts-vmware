@@ -29,6 +29,7 @@ export class VmOperations {
 
     public static getCmdArgsForAction(actionName: string): string {
         var cmdArgs = "";
+        var timeout = "";
         switch (actionName) {
             case "Deploy Virtual Machines using Template":
                 var template = tl.getInput("template", true);
@@ -36,6 +37,7 @@ export class VmOperations {
                 var datastore = tl.getInput("datastore", true);
                 var description = tl.getInput("description", false);
                 var customizationspec = tl.getInput("customizationspec", false);
+                timeout = tl.getInput("timeout", false);
                 var computeName = null;
                 switch (computeType) {
                     case "ESXi Host":
@@ -52,19 +54,21 @@ export class VmOperations {
                         tl.exit(1);
                 }
                 cmdArgs += " -clonetemplate \"" + template  + "\" -computetype \"" + computeType + "\" -computename \"" +
-                        computeName + "\" -datastore \"" + datastore + "\" -customizationspec \"" + customizationspec + "\" -description \"" + description + "\"";
+                        computeName + "\" -datastore \"" + datastore + "\" -customizationspec \"" + customizationspec + "\" -description \"" + description + "\" -timeout " + timeout;
                 break;
             case "Take Snapshot of Virtual Machines":
                 var snapshotName = tl.getInput("snapshotName", true);
                 var snapshotVMMemory = "true";
                 var quiesceGuestFileSystem = "false";
                 var description: string = tl.getInput("description", false);
+                timeout = tl.getInput("timeout", false);
                 cmdArgs += " -snapshotOps create -snapshotName \"" + snapshotName  + "\" -snapshotVMMemory " + snapshotVMMemory + " -quiesceGuestFileSystem " +
-                            quiesceGuestFileSystem + " -description \"" + description + "\"";
+                            quiesceGuestFileSystem + " -description \"" + description + "\" -timeout " + timeout;
                 break;
             case "Revert Snapshot of Virtual Machines":
                 var snapshotName  = tl.getInput("snapshotName", true);
-                cmdArgs += " -snapshotOps restore -snapshotName \"" + snapshotName  + "\"";
+                timeout = tl.getInput("timeout", false);
+                cmdArgs += " -snapshotOps restore -snapshotName \"" + snapshotName  + "\" -timeout " + timeout;
                 break;
             case "Delete Snapshot of Virtual Machines":
                 var snapshotName  = tl.getInput("snapshotName", true);
@@ -74,10 +78,12 @@ export class VmOperations {
                 cmdArgs += " -deletevm delete";
                 break;
             case "Power On Virtual Machines":
-                cmdArgs += " -powerops poweron";
+                timeout = tl.getInput("timeout", false);
+                cmdArgs += " -powerops poweron -timeout " + timeout;
                 break;
             case "Shutdown Virtual Machines":
-                cmdArgs += " -powerops shutdown";
+                timeout = tl.getInput("timeout", false);
+                cmdArgs += " -powerops shutdown -timeout " + timeout;
                 break;
             case "Power off Virtual Machines":
                 cmdArgs += " -powerops poweroff";

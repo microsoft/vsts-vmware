@@ -143,13 +143,14 @@ describe("getCmdArgsForAction", (): void => {
         sandbox.restore();
     });
 
-    it("Should read snapshot name, snapshot vm memory, quiesce file system and description for create snapshot", (): void => {
+    it("Should read snapshot name, snapshot vm memory, quiesce file system,description and timeout for create snapshot", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
         getInputStub.withArgs("description", false).returns("Sample description");
+        getInputStub.withArgs("timeout", false).returns("1200");
 
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot of Virtual Machines");
 
-        cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory true -quiesceGuestFileSystem false -description \"Sample description\"");
+        cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory true -quiesceGuestFileSystem false -description \"Sample description\" -timeout 1200");
         debugStub.should.have.been.calledOnce;
     });
 
@@ -159,15 +160,16 @@ describe("getCmdArgsForAction", (): void => {
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot of Virtual Machines");
 
         cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory true -quiesceGuestFileSystem false -description \"undefined\"");
-        getInputStub.should.have.callCount(2);
+        getInputStub.should.have.callCount(3);
     });
 
-    it("Should read snapshot name for restore snapshot action", (): void => {
+    it("Should read snapshot name for restore snapshot action and timeout", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
+        getInputStub.withArgs("timeout", false).returns("1200");
 
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Revert Snapshot of Virtual Machines");
 
-        cmdArgs.should.contain("-snapshotOps restore -snapshotName \"dummySnapshotName\"");
+        cmdArgs.should.contain("-snapshotOps restore -snapshotName \"dummySnapshotName\" -timeout 1200");
     });
 
     it("Should read snapshot name for delete snapshot action", (): void => {
@@ -178,17 +180,18 @@ describe("getCmdArgsForAction", (): void => {
         cmdArgs.should.contain("-snapshotOps delete -snapshotName \"dummySnapshotName\"");
     });
 
-    it("Should read template, computeType, hostname, datastore, customization spec and description for clone template", (): void => {
+    it("Should read template, computeType, hostname, datastore, customization spec,description and timeout for clone template", (): void => {
         getInputStub.withArgs("template", true).returns("dummyTemplate");
         getInputStub.withArgs("computeType", true).returns("ESXi Host");
         getInputStub.withArgs("hostname", true).returns("Dummy Host");
         getInputStub.withArgs("datastore", true).returns("Dummy Datastore");
         getInputStub.withArgs("description", false).returns("Dummy description");
         getInputStub.withArgs("customizationspec", false).returns("Dummy Customization Spec");
+        getInputStub.withArgs("timeout", false).returns("1200");
 
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Deploy Virtual Machines using Template");
 
-        cmdArgs.should.contain("-clonetemplate \"dummyTemplate\" -computetype \"ESXi Host\" -computename \"Dummy Host\" -datastore \"Dummy Datastore\" -customizationspec \"Dummy Customization Spec\" -description \"Dummy description\"");
+        cmdArgs.should.contain("-clonetemplate \"dummyTemplate\" -computetype \"ESXi Host\" -computename \"Dummy Host\" -datastore \"Dummy Datastore\" -customizationspec \"Dummy Customization Spec\" -description \"Dummy description\" -timeout 1200");
     });
 
     it("Should read cluster name if compute is cluster and read empty description", (): void => {
@@ -225,16 +228,20 @@ describe("getCmdArgsForAction", (): void => {
         cmdArgs.should.contain("-deletevm delete");
     });
 
-    it("Should construct command action for power on vm operation", (): void => {
+    it("Should construct command action for power on vm operation and read timeout", (): void => {
+        getInputStub.withArgs("timeout", false).returns("1200");
+
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Power On Virtual Machines");
 
-        cmdArgs.should.contain("-powerops poweron");
+        cmdArgs.should.contain("-powerops poweron -timeout 1200");
     });
 
-    it("Should construct command action for shutdown vm operation", (): void => {
+    it("Should construct command action for shutdown vm operation and read timeout", (): void => {
+        getInputStub.withArgs("timeout", false).returns("1200");
+
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Shutdown Virtual Machines");
 
-        cmdArgs.should.contain("-powerops shutdown");
+        cmdArgs.should.contain("-powerops shutdown -timeout 1200");
     });
 
     it("Should construct command action for power off vm operation", (): void => {
