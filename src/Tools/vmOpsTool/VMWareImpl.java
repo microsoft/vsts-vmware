@@ -7,6 +7,9 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
 
@@ -100,9 +103,7 @@ public class VMWareImpl implements IVMWare {
         if (!customizationSpec.isEmpty()) {
             waitForOSCustomization(vmName, vmMor, Constants.OS_CUSTOMIZATION_MAX_WAIT_IN_MINUTES);
         }
-        waitForPowerOnOperation(vmName, vmMor);
-        boolean isGuestOSWindows = isGuestOSWindows(vmMor);
-        waitForNetworkDiscoveryOfVM(vmName, isGuestOSWindows);
+        waitForVMToBeDeployReady(vmName, vmMor, timeout);
     }
 
     public void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
@@ -119,7 +120,10 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to create snapshot [ %s ] on virtual machine [ %s ].", snapshotName, vmName));
         }
-        waitForPowerOnOperation(vmName, vmMor);
+
+        if (isVMPoweredOn(vmName, true, connData)) {
+            waitForVMToBeDeployReady(vmName, vmMor, timeout);
+        }
     }
 
     public void restoreSnapshot(String vmName, String snapshotName, int timeout, ConnectionData connData) throws Exception {
@@ -136,9 +140,7 @@ public class VMWareImpl implements IVMWare {
             throw new Exception(
                     String.format("Failed to revert snapshot [ %s ] on virtual machine [ %s ].", snapshotName, vmName));
         }
-        waitForPowerOnOperation(vmName, vmMor);
-        boolean isGuestOSWindows = isGuestOSWindows(vmMor);
-        waitForNetworkDiscoveryOfVM(vmName, isGuestOSWindows);
+        waitForVMToBeDeployReady(vmName, vmMor, timeout);
     }
 
     public void deleteSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception {
@@ -167,9 +169,7 @@ public class VMWareImpl implements IVMWare {
                 throw new Exception(
                         String.format("Failed to power on virtual machine [ %s ].", vmName));
             }
-            waitForPowerOnOperation(vmName, vmMor);
-            boolean isGuestOSWindows = isGuestOSWindows(vmMor);
-            waitForNetworkDiscoveryOfVM(vmName, isGuestOSWindows);
+            waitForVMToBeDeployReady(vmName, vmMor, timeout);
             return;
         }
         System.out.println(String.format("Virtual machine [ %s ] is already running.", vmName));
@@ -180,7 +180,23 @@ public class VMWareImpl implements IVMWare {
         if (isVMPoweredOn(vmName, true, connData)) {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             vimPort.shutdownGuest(vmMor);
-            waitForPowerOffOperation(vmName, vmMor);
+
+            ExecutorService executorService = Executors.newFixedThreadPool(1);
+            Runnable task = () -> {
+                try {
+                    VMWareImpl.this.waitForPowerOffOperation(vmName, vmMor);
+                } catch (Exception e) {
+                    new Exception("Failed to wait for vm [ " + vmName + " ] to be powered off");
+                }
+            };
+
+            executorService.submit(task);
+            boolean isWaitSuccessful = executorService.awaitTermination(timeout, TimeUnit.SECONDS);
+            if (!isWaitSuccessful) {
+                System.out.println("Virtual machine [ " + vmName + " ] did not shutdown within given time, further deployment operation might fail.");
+                executorService.shutdownNow();
+            }
+            executorService.shutdown();
             return;
         }
         System.out.println(String.format("Virtual machine [ %s ] is already shutdowned.", vmName));
@@ -271,13 +287,11 @@ public class VMWareImpl implements IVMWare {
     }
 
     private void waitForNetworkDiscoveryOfVM(String vmName, boolean isGuestOSWindows) throws Exception {
-        long startTime = System.currentTimeMillis();
-
         boolean isDnsResolved = false;
         boolean isNetBIOSResolved = false;
 
-        System.out.println(String.format("Waiting for virtual machine [ %s ] network discovery to complete.", vmName));
-        while (((new Date()).getTime() - startTime < Constants.NETWORK_DISCOVERY_TIME_OUT_IN_MINUTES * 60 * 1000) && !(isDnsResolved && isNetBIOSResolved)) {
+        System.out.println(String.format("Waiting for virtual machine [ %s ] network discovery to complete. isGuestOSWindows = %s ", vmName, isGuestOSWindows));
+        while (!(isDnsResolved && isNetBIOSResolved)) {
             sleep(Constants.NETWORK_DISCOVERY_POLLING_INTERVAL_IN_SECONDS * 1000);
 
             if (!isDnsResolved) {
@@ -288,13 +302,7 @@ public class VMWareImpl implements IVMWare {
                 isNetBIOSResolved = isNetBIOSNameResolved(vmName, isGuestOSWindows);
             }
         }
-
-        if (isDnsResolved && isNetBIOSResolved) {
-            System.out.println("Network discovery of virtual machine [ " + vmName + " ] completed.");
-            return;
-        }
-
-        System.out.println("Network discovery of virtual machine [ " + vmName + " ] not completed, subsequent deployment operations might fail.");
+        System.out.println("Network discovery of virtual machine [ " + vmName + " ] completed.");
     }
 
     private boolean isNetBIOSNameResolved(String vmName, boolean isGuestOSWindows) throws Exception {
@@ -355,17 +363,37 @@ public class VMWareImpl implements IVMWare {
         return mobrMap.get(mobName.toLowerCase()).get(0);
     }
 
+    private void waitForVMToBeDeployReady(String vmName, ManagedObjectReference vmMor, int timeout) throws Exception {
+
+        System.out.println("Waiting for virtual machine [ " + vmName + " ] to be deployment ready.");
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        Runnable task = () -> {
+            try {
+                VMWareImpl.this.waitForPowerOnOperation(vmName, vmMor);
+                boolean isGuestOSWindows = isGuestOSWindows(vmMor);
+                VMWareImpl.this.waitForNetworkDiscoveryOfVM(vmName, isGuestOSWindows);
+            } catch (Exception e) {
+                new Exception("Failed to wait for vm [ " + vmName + " ] to be deployment ready");
+            }
+        };
+
+        executorService.submit(task);
+        boolean isWaitSuccessful = executorService.awaitTermination(timeout, TimeUnit.SECONDS);
+        if (!isWaitSuccessful) {
+            System.out.println("Virtual machine [ " + vmName + " ] deployment requirements not finished within given time, continuing further deployment operation might fail.");
+            executorService.shutdownNow();
+        }
+        executorService.shutdown();
+        System.out.println("Virtual machine [ " + vmName + " ] is now ready for deployment.");
+    }
+
     private void waitForPowerOffOperation(String vmName, ManagedObjectReference vmMor) throws Exception {
         System.out.println(String.format("Waiting for virtual machine [ %s ] to shutdown.", vmName));
 
-        int waitTimeForToolsRunningStatus = Constants.START_STOP_MAX_WAIT_IN_MINUTES;
-        int waitTimeForGuestOsHeartBeat = Constants.START_STOP_MAX_WAIT_IN_MINUTES;
-
         waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
-                new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_NOT_RUNNING.value()}},
-                waitTimeForToolsRunningStatus);
+                new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_NOT_RUNNING.value()}});
         waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
-                new Object[][]{new Object[]{ManagedEntityStatus.GRAY}}, waitTimeForGuestOsHeartBeat);
+                new Object[][]{new Object[]{ManagedEntityStatus.GRAY}});
 
         System.out.println(String.format("Successfully shutdowned the virtual machine [ %s ].", vmName));
     }
@@ -373,14 +401,10 @@ public class VMWareImpl implements IVMWare {
     private void waitForPowerOnOperation(String vmName, ManagedObjectReference vmMor) throws Exception {
         System.out.println(String.format("Waiting for virtual machine [ %s ] to start.", vmName));
 
-        int waitTimeForToolsRunningStatus = Constants.START_STOP_MAX_WAIT_IN_MINUTES;
-        int waitTimeForGuestOsHeartBeat = Constants.START_STOP_MAX_WAIT_IN_MINUTES;
-
         waitOnMorProperties(vmMor, new String[]{GUEST_TOOLS_RUNNING_STATUS}, new String[]{GUEST_TOOLS_RUNNING_STATUS},
-                new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}},
-                waitTimeForToolsRunningStatus);
+                new Object[][]{new Object[]{VirtualMachineToolsRunningStatus.GUEST_TOOLS_RUNNING.value()}});
         waitOnMorProperties(vmMor, new String[]{GUEST_HEART_BEAT_STATUS}, new String[]{GUEST_HEART_BEAT_STATUS},
-                new Object[][]{new Object[]{ManagedEntityStatus.GREEN}}, waitTimeForGuestOsHeartBeat);
+                new Object[][]{new Object[]{ManagedEntityStatus.GREEN}});
 
         System.out.println(String.format("Successfully powered on virtual machine [ %s ].", vmName));
     }
@@ -390,7 +414,7 @@ public class VMWareImpl implements IVMWare {
 
         System.out.println("Waiting for operation completion.");
         Object[] result = waitOnMorProperties(task, new String[]{INFO_STATE, INFO_ERROR}, new String[]{INFO_STATE},
-                new Object[][]{new Object[]{TaskInfoState.SUCCESS, TaskInfoState.ERROR}}, Constants.OPERATION_MAX_WAIT_IN_MINUTES);
+                new Object[][]{new Object[]{TaskInfoState.SUCCESS, TaskInfoState.ERROR}});
 
         if (result[0].equals(TaskInfoState.SUCCESS)) {
             retVal = true;
@@ -403,7 +427,7 @@ public class VMWareImpl implements IVMWare {
     }
 
     private Object[] waitOnMorProperties(ManagedObjectReference Mor, String[] filterProps, String[] endWaitProps,
-                                         Object[][] expectedVals, int noOfMinutes) throws Exception {
+                                         Object[][] expectedVals) throws Exception {
         try {
 
             Object[] endVals = new Object[endWaitProps.length];
@@ -413,10 +437,8 @@ public class VMWareImpl implements IVMWare {
             ManagedObjectReference propertyFilter = vimPort.createFilter(serviceContent.getPropertyCollector(), filterSpec, true);
             boolean reached = false;
             WaitOptions waitOptions = new WaitOptions();
-            waitOptions.setMaxWaitSeconds(noOfMinutes * 60);
-            long startTime = System.currentTimeMillis();
 
-            while (((new Date()).getTime() - startTime < noOfMinutes * 60 * 1000) && !reached) {
+            while (!reached) {
                 UpdateSet updateSet = vimPort.waitForUpdatesEx(serviceContent.getPropertyCollector(), version, waitOptions);
                 if (updateSet == null || updateSet.getFilterSet() == null) {
                     continue;
@@ -449,11 +471,6 @@ public class VMWareImpl implements IVMWare {
                     }
                 }
             }
-
-            if (!reached) {
-                System.out.println("Operation didn't finish in expected time, continuing further.");
-            }
-
             vimPort.destroyPropertyFilter(propertyFilter);
             return filterVals;
         } catch (Exception exp) {
