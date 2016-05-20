@@ -150,6 +150,15 @@
             "visibleRule": "action = Take Snapshot of Virtual Machines || action = Deploy Virtual Machines using Template",
             "helpMarkDown": "Provide a description for the action."
         },
+        { 
+            "name": "timeout", 
+            "type": "string", 
+            "label": "Wait Time",
+            "defaultValue": "600", 
+            "required": false,
+            "helpMarkDown": "Specify wait time in seconds for the Virtual Machine to be in deployment ready state.", 
+            "visibleRule": "action = Power On Virtual Machines || action = Shutdown Virtual Machines || action = Take Snapshot of Virtual Machines || action = Revert Snapshot of Virtual Machines || action = Deploy Virtual Machines using Template"
+        },
         {
             "name": "skipca",
             "type": "boolean",

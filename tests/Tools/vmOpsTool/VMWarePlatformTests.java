@@ -36,7 +36,7 @@ public abstract class VMWarePlatformTests {
         String description = "Creating new VM from ubuntuVM template on ESXi host";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
+        vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, 1200, connData);
 
         assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
@@ -55,7 +55,7 @@ public abstract class VMWarePlatformTests {
         String description = "Creating new VM from ubuntuVM template on cluster";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
+        vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, 1200, connData);
 
         assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
@@ -74,7 +74,7 @@ public abstract class VMWarePlatformTests {
         String description = "Creating new VM from ubuntuVM template on resource pool";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
+        vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, 1200, connData);
 
         assertThat(vmWareImpl.isVMExists(newVmName, connData)).isEqualTo(true);
 
@@ -95,7 +95,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
+            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, 1200, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -115,7 +115,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(nonExistingTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
+            vmWareImpl.cloneVMFromTemplate(nonExistingTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, 1200, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -134,7 +134,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
+            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, 1200, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -153,7 +153,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
+            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, 1200, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -172,7 +172,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
+            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, 1200, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -191,7 +191,7 @@ public abstract class VMWarePlatformTests {
 
         Exception exp = null;
         try {
-            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, connData);
+            vmWareImpl.cloneVMFromTemplate(ubuntuTemplate, newVmName, computeType, computeName, datastore, linuxCustomizationSpec, description, 1200, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -231,7 +231,7 @@ public abstract class VMWarePlatformTests {
         String targetDC = "fareastdc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.createSnapshot(vmName, newSnapshot, true, false, "Snapshot created during platform tests", connData);
+        vmWareImpl.createSnapshot(vmName, newSnapshot, true, false, "Snapshot created during platform tests", 1200, connData);
 
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(newSnapshot);
 
@@ -245,7 +245,7 @@ public abstract class VMWarePlatformTests {
         String targetDC = "redmonddc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.createSnapshot(vmName, newSnapshot, false, true, "Snapshot created during platform tests", connData);
+        vmWareImpl.createSnapshot(vmName, newSnapshot, false, true, "Snapshot created during platform tests", 1200, connData);
 
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(newSnapshot);
 
@@ -258,9 +258,9 @@ public abstract class VMWarePlatformTests {
         String targetDC = "redmonddc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.powerOnVM(vmName, connData);
+        vmWareImpl.powerOnVM(vmName, 1200, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
-        vmWareImpl.shutdownVM(vmName, connData);
+        vmWareImpl.shutdownVM(vmName, 1200, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, false, connData)).isEqualTo(false);
     }
 
@@ -270,14 +270,14 @@ public abstract class VMWarePlatformTests {
         String targetDC = "fareastdc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.powerOnVM(vmName, connData);
+        vmWareImpl.powerOnVM(vmName, 1200, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
-        vmWareImpl.powerOnVM(vmName, connData);
+        vmWareImpl.powerOnVM(vmName, 1200, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
 
-        vmWareImpl.shutdownVM(vmName, connData);
+        vmWareImpl.shutdownVM(vmName, 1200, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, false, connData)).isEqualTo(false);
-        vmWareImpl.shutdownVM(vmName, connData);
+        vmWareImpl.shutdownVM(vmName, 1200, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, false, connData)).isEqualTo(false);
     }
 
@@ -287,7 +287,7 @@ public abstract class VMWarePlatformTests {
         String targetDC = "fareastdc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.powerOnVM(vmName, connData);
+        vmWareImpl.powerOnVM(vmName, 1200, connData);
         assertThat(vmWareImpl.isVMPoweredOn(vmName, true, connData)).isEqualTo(true);
 
         vmWareImpl.powerOffVM(vmName, connData);
@@ -303,7 +303,7 @@ public abstract class VMWarePlatformTests {
         connData.setTargetDC(targetDC);
 
         try {
-            vmWareImpl.restoreSnapshot(vmName, "InvalidSnapshot", connData);
+            vmWareImpl.restoreSnapshot(vmName, "InvalidSnapshot", 1200, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -326,7 +326,7 @@ public abstract class VMWarePlatformTests {
         connData.setTargetDC(targetDC);
 
         try {
-            vmWareImpl.restoreSnapshot("InvalidVM", snapshotOne, connData);
+            vmWareImpl.restoreSnapshot("InvalidVM", snapshotOne, 1200, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -340,10 +340,10 @@ public abstract class VMWarePlatformTests {
         String targetDC = "redmonddc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.createSnapshot(vmName, newSnapshot, false, false, "Snapshot created during platform tests", connData);
+        vmWareImpl.createSnapshot(vmName, newSnapshot, false, false, "Snapshot created during platform tests", 1200, connData);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(newSnapshot);
 
-        vmWareImpl.restoreSnapshot(vmName, snapshotTwo, connData);
+        vmWareImpl.restoreSnapshot(vmName, snapshotTwo, 1200, connData);
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(snapshotTwo);
 
         vmWareImpl.deleteSnapshot(vmName, newSnapshot, connData);
@@ -358,7 +358,7 @@ public abstract class VMWarePlatformTests {
         Exception exp = null;
 
         try {
-            vmWareImpl.restoreSnapshot(vmName, snapshotOne, connData);
+            vmWareImpl.restoreSnapshot(vmName, snapshotOne, 1200, connData);
         } catch (Exception e) {
             exp = e;
         }
@@ -373,11 +373,11 @@ public abstract class VMWarePlatformTests {
         String targetDC = "redmonddc";
         connData.setTargetDC(targetDC);
 
-        vmWareImpl.createSnapshot(vmName, newSnapshot, false, false, "Snapshot created during platform tests", connData);
+        vmWareImpl.createSnapshot(vmName, newSnapshot, false, false, "Snapshot created during platform tests", 1200, connData);
 
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(newSnapshot);
 
-        vmWareImpl.restoreSnapshot(vmName, snapshotTwo, connData);
+        vmWareImpl.restoreSnapshot(vmName, snapshotTwo, 1200, connData);
 
         assertThat(vmWareImpl.getCurrentSnapshot(vmName, connData)).isEqualTo(snapshotTwo);
 

@@ -7,10 +7,11 @@ public interface IVMWare {
      * @param saveVMMemory save virtual machine memory
      * @param quiesceFs    quiesce virtual machine file system
      * @param description  snapshot description
+     * @param timeout   timeout for vm to be deployment ready
      * @throws Exception on failure
      */
     void createSnapshot(String vmName, String snapshotName, boolean saveVMMemory, boolean quiesceFs,
-                        String description, ConnectionData connData) throws Exception;
+                        String description, int timeout, ConnectionData connData) throws Exception;
 
     /**
      * Takes a comma separated list of virtual machines and restores given
@@ -19,9 +20,10 @@ public interface IVMWare {
      * @param vmName       name of the virtual machine
      * @param snapshotName Name of the snapshot to restore
      * @param connData     connection information for vCenter
+     * @param timeout   timeout for vm to be deployment ready
      * @throws Exception on failure
      */
-    void restoreSnapshot(String vmName, String snapshotName, ConnectionData connData) throws Exception;
+    void restoreSnapshot(String vmName, String snapshotName, int timeout, ConnectionData connData) throws Exception;
 
     /**
      * @param vmName       name of the virtual machine
@@ -73,10 +75,11 @@ public interface IVMWare {
      * @param computeName  name of the compute resouce
      * @param description  optional description for create operation
      * @param customizationSpec name of the customization specification to be used during clone vm
+     * @param timeout   timeout for vm to be deployment ready
      * @param connData       connection information for vCenter
      * @throws Exception
      */
-    void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName, String datastore, String customizationSpec, String description, ConnectionData connData) throws Exception;
+    void cloneVMFromTemplate(String templateName, String vmName, String computeType, String computeName, String datastore, String customizationSpec, String description, int timeout, ConnectionData connData) throws Exception;
 
     /**
      * @param vmName   name of the virtual machine
@@ -94,16 +97,18 @@ public interface IVMWare {
     /**
      * @param vmName   name of the virtual machine
      * @param connData vCenter connection information
+     * @param timeout   timeout for vm to be deployment ready
      * @throws Exception
      */
-    void powerOnVM(String vmName, ConnectionData connData) throws Exception;
+    void powerOnVM(String vmName, int timeout, ConnectionData connData) throws Exception;
 
     /**
      * @param vmName   name of the virtual machine
      * @param connData vCenter connection information
+     * @param timeout   timeout for vm to be deployment ready
      * @throws Exception
      */
-    void shutdownVM(String vmName, ConnectionData connData) throws Exception;
+    void shutdownVM(String vmName, int timeout, ConnectionData connData) throws Exception;
 
     /**
      * @param vmName   name of the virtual machine

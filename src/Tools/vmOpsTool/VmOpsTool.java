@@ -94,6 +94,14 @@ public class VmOpsTool {
         }
     }
 
+    private int parseTimeout(String timeout) throws Exception {
+        try {
+            return Integer.parseInt(timeout);
+        } catch (NumberFormatException ex) {
+            throw new Exception("Invalid timeout value ( " + timeout + " ) for the operation, please specify valid interger value for timeout");
+        }
+    }
+
     public ActionResult executeActionOnAVm(Map<String, String> argsMap, String vmName, ConnectionData connData) throws Exception {
 
         ActionResult actionResult = new ActionResult();
@@ -112,7 +120,7 @@ public class VmOpsTool {
         } else if (argsMap.containsKey(Constants.POWER_OPS)) {
             String actionName = argsMap.get(Constants.POWER_OPS);
             actionResult.setErrorMessage(String.format("Failed to [%s] virtual machines ", actionName));
-            actionResult.setFailedVm(executePowerOpsAction(vmName, actionName, connData));
+            actionResult.setFailedVm(executePowerOpsAction(argsMap, vmName, actionName, connData));
         } else {
             System.out.println(String.format("##vso[task.logissue type=error;code=INFRA_InvalidOperation;TaskId=%s;]",
                     Constants.TASK_ID));
@@ -127,15 +135,17 @@ public class VmOpsTool {
      * @param connData vCenter connection information
      * @return vmName if operation fails
      */
-    private String executePowerOpsAction(String vmName, String actionName, ConnectionData connData) {
+    private String executePowerOpsAction(Map<String, String> argsMap, String vmName, String actionName, ConnectionData connData) {
         String failedVm = "";
         try {
             switch (actionName) {
                 case Constants.POWER_ON_VM_ACTION:
-                    vmwareFactory.call().powerOnVM(vmName, connData);
+                    int timeout = parseTimeout(argsMap.get(Constants.TIMEOUT));
+                    vmwareFactory.call().powerOnVM(vmName, timeout, connData);
                     break;
                 case Constants.SHUTDOWN_VM_ACTION:
-                    vmwareFactory.call().shutdownVM(vmName, connData);
+                    timeout = parseTimeout(argsMap.get(Constants.TIMEOUT));
+                    vmwareFactory.call().shutdownVM(vmName, timeout, connData);
                     break;
                 case Constants.POWER_OFF_VM_ACTION:
                     vmwareFactory.call().powerOffVM(vmName, connData);
@@ -184,10 +194,11 @@ public class VmOpsTool {
         String datastore = argsMap.get(Constants.DATASTORE);
         String customizationspec = argsMap.get(Constants.CUSTOMIZATIONSPEC);
         String description = argsMap.get(Constants.DESCRIPTION);
+        int timeout = parseTimeout(argsMap.get(Constants.TIMEOUT));
 
         try {
             vmwareFactory.call().cloneVMFromTemplate(templateName, vmName, computeType, computeName, datastore,
-                    customizationspec, description, connData);
+                    customizationspec, description, timeout, connData);
         } catch (Exception exp) {
             System.out.println(exp.getMessage() != null ? exp.getMessage() : "Unknown error occurred.");
             failedVm = vmName + " ";
@@ -208,14 +219,16 @@ public class VmOpsTool {
         try {
             switch (actionName) {
                 case Constants.RESTORE_SNAPSHOT_ACTION:
-                    vmwareFactory.call().restoreSnapshot(vmName, snapshotName, connData);
+                    int timeout = parseTimeout(argsMap.get(Constants.TIMEOUT));
+                    vmwareFactory.call().restoreSnapshot(vmName, snapshotName, timeout, connData);
                     break;
                 case Constants.CREATE_SNAPSHOT_ACTION:
                     String description = argsMap.get(Constants.DESCRIPTION);
+                    timeout = parseTimeout(argsMap.get(Constants.TIMEOUT));
                     boolean saveVmMemory = Boolean.parseBoolean(argsMap.get(Constants.SAVE_VM_MEMORY));
                     boolean quiesceVmFs = Boolean.parseBoolean(argsMap.get(Constants.QUIESCE_VM_FS));
 
-                    vmwareFactory.call().createSnapshot(vmName, snapshotName, saveVmMemory, quiesceVmFs, description,
+                    vmwareFactory.call().createSnapshot(vmName, snapshotName, saveVmMemory, quiesceVmFs, description, timeout,
                             connData);
                     break;
                 case Constants.DELETE_SNAPSHOT_ACTION:
