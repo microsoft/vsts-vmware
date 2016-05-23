@@ -186,7 +186,7 @@ public class VMWareImpl implements IVMWare {
                 try {
                     VMWareImpl.this.waitForPowerOffOperation(vmName, vmMor);
                 } catch (Exception e) {
-                    new Exception("Failed to wait for vm [ " + vmName + " ] to be powered off");
+                    System.err.println("Failed to wait for vm [ " + vmName + " ] to be powered off. Failure reason: " + e.getMessage());
                 }
             };
 
@@ -375,7 +375,7 @@ public class VMWareImpl implements IVMWare {
                 boolean isGuestOSWindows = isGuestOSWindows(vmMor);
                 VMWareImpl.this.waitForNetworkDiscoveryOfVM(vmName, isGuestOSWindows);
             } catch (Exception e) {
-                new Exception("Failed to wait for vm [ " + vmName + " ] to be deployment ready");
+                System.err.println("Failed to wait for vm [ " + vmName + " ] to be deployment ready: Failure reason :" + e.getMessage());
             }
         };
 
