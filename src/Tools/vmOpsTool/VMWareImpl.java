@@ -195,6 +195,7 @@ public class VMWareImpl implements IVMWare {
             boolean isWaitSuccessful = executorService.awaitTermination(timeout, TimeUnit.SECONDS);
             if (!isWaitSuccessful) {
                 System.out.println("Virtual machine [ " + vmName + " ] did not shutdown within given time, further deployment operation might fail.");
+                executorService.shutdownNow();
             }
             return;
         }
@@ -381,6 +382,7 @@ public class VMWareImpl implements IVMWare {
         boolean isWaitSuccessful = executorService.awaitTermination(timeout, TimeUnit.SECONDS);
         if (!isWaitSuccessful) {
             System.out.println("Virtual machine [ " + vmName + " ] deployment requirements not finished within given time, continuing further deployment operation might fail.");
+            executorService.shutdownNow();
         }
         System.out.println("Virtual machine [ " + vmName + " ] is now ready for deployment.");
     }
