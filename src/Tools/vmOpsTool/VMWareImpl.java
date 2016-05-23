@@ -181,7 +181,7 @@ public class VMWareImpl implements IVMWare {
             ManagedObjectReference vmMor = getMorByName(targetDCMor, vmName, VIRTUAL_MACHINE, false);
             vimPort.shutdownGuest(vmMor);
 
-            ExecutorService executorService = Executors.newFixedThreadPool(1);
+            ExecutorService threadPool = Executors.newFixedThreadPool(1);
             Runnable task = () -> {
                 try {
                     VMWareImpl.this.waitForPowerOffOperation(vmName, vmMor);
@@ -190,12 +190,14 @@ public class VMWareImpl implements IVMWare {
                 }
             };
 
-            executorService.submit(task);
-            executorService.shutdown();
-            boolean isWaitSuccessful = executorService.awaitTermination(timeout, TimeUnit.SECONDS);
-            if (!isWaitSuccessful) {
+            threadPool.submit(task);
+            threadPool.shutdown();
+            if (!threadPool.awaitTermination(timeout, TimeUnit.SECONDS)) {
                 System.out.println("Virtual machine [ " + vmName + " ] did not shutdown within given time, further deployment operation might fail.");
-                executorService.shutdownNow();
+                threadPool.shutdownNow();
+                if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
+                    System.exit(0);
+                }
             }
             return;
         }
@@ -292,7 +294,7 @@ public class VMWareImpl implements IVMWare {
 
         System.out.println(String.format("Waiting for virtual machine [ %s ] network discovery to complete. isGuestOSWindows = %s ", vmName, isGuestOSWindows));
         while (!(isDnsResolved && isNetBIOSResolved)) {
-            sleep(Constants.NETWORK_DISCOVERY_POLLING_INTERVAL_IN_SECONDS * 1000);
+            sleep(Constants.POLLING_INTERVAL_IN_SECONDS * 1000);
 
             if (!isDnsResolved) {
                 isDnsResolved = isDnsNameResolved(vmName);
@@ -366,7 +368,7 @@ public class VMWareImpl implements IVMWare {
     private void waitForVMToBeDeployReady(String vmName, ManagedObjectReference vmMor, int timeout) throws Exception {
 
         System.out.println("Waiting for virtual machine [ " + vmName + " ] to be deployment ready.");
-        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        ExecutorService threadPool = Executors.newFixedThreadPool(1);
         Runnable task = () -> {
             try {
                 VMWareImpl.this.waitForPowerOnOperation(vmName, vmMor);
@@ -377,12 +379,15 @@ public class VMWareImpl implements IVMWare {
             }
         };
 
-        executorService.submit(task);
-        executorService.shutdown();
-        boolean isWaitSuccessful = executorService.awaitTermination(timeout, TimeUnit.SECONDS);
-        if (!isWaitSuccessful) {
+        threadPool.submit(task);
+        threadPool.shutdown();
+        if (!threadPool.awaitTermination(timeout, TimeUnit.SECONDS)) {
             System.out.println("Virtual machine [ " + vmName + " ] deployment requirements not finished within given time, continuing further deployment operation might fail.");
-            executorService.shutdownNow();
+            threadPool.shutdownNow();
+            if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
+                System.exit(0);
+            }
+            return;
         }
         System.out.println("Virtual machine [ " + vmName + " ] is now ready for deployment.");
     }
@@ -470,6 +475,7 @@ public class VMWareImpl implements IVMWare {
                         reached = expectedVal.equals(endVals[chgi]);
                     }
                 }
+                Thread.sleep(Constants.POLLING_INTERVAL_IN_SECONDS * 1000);
             }
             vimPort.destroyPropertyFilter(propertyFilter);
             return filterVals;
@@ -489,7 +495,7 @@ public class VMWareImpl implements IVMWare {
             long startTime = System.currentTimeMillis();
 
             while ((new Date()).getTime() - startTime < maxWaitTimeInMinutes * 60 * 1000) {
-                sleep(Constants.OS_CUSTOMIZATION_POLLING_INTERVAL_IN_SECONDS * 1000);
+                sleep(Constants.POLLING_INTERVAL_IN_SECONDS * 1000);
                 ArrayList<Event> eventList = (ArrayList<Event>) ((ArrayOfEvent) getMorProperties(vmEventHistoryCollector, new String[]{LATEST_PAGE}).get(LATEST_PAGE)).getEvent();
                 for (Event anEvent : eventList) {
                     String eventName = anEvent.getClass().getSimpleName();
