@@ -186,7 +186,7 @@ public class VMWareImpl implements IVMWare {
                 try {
                     VMWareImpl.this.waitForPowerOffOperation(vmName, vmMor);
                 } catch (Exception e) {
-                    System.err.println("Failed to wait for vm [ " + vmName + " ] to be powered off. Failure reason: " + e.getMessage());
+                    System.out.println("##vso[task.debug] Failed to wait for vm [ " + vmName + " ] to be powered off. Failure reason: " + e.getMessage());
                 }
             };
 
@@ -196,6 +196,7 @@ public class VMWareImpl implements IVMWare {
                 System.out.println("Virtual machine [ " + vmName + " ] did not shutdown within given time, further deployment operation might fail.");
                 threadPool.shutdownNow();
                 if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
+                    System.out.println("##vso[task.debug] Operation didn't finish in time, hence exiting task with success");
                     System.exit(0);
                 }
             }
@@ -375,7 +376,7 @@ public class VMWareImpl implements IVMWare {
                 boolean isGuestOSWindows = isGuestOSWindows(vmMor);
                 VMWareImpl.this.waitForNetworkDiscoveryOfVM(vmName, isGuestOSWindows);
             } catch (Exception e) {
-                System.err.println("Failed to wait for vm [ " + vmName + " ] to be deployment ready: Failure reason :" + e.getMessage());
+                System.out.println("##vso[task.debug] Failed to wait for vm [ " + vmName + " ] to be deployment ready: Failure reason :" + e.getMessage());
             }
         };
 
@@ -385,6 +386,7 @@ public class VMWareImpl implements IVMWare {
             System.out.println("Virtual machine [ " + vmName + " ] deployment requirements not finished within given time, continuing further deployment operation might fail.");
             threadPool.shutdownNow();
             if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
+                System.out.println("##vso[task.debug] Operation didn't finish in time, hence exiting task with success");
                 System.exit(0);
             }
             return;
