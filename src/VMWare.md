@@ -2,7 +2,7 @@
 
 Connect to a VMware vCenter Server™ from Visual Studio Team Services or Team Foundation Server to provision, start, stop, or snapshot virtual machines. Following are the available actions.
 
- - Deploy virtual machines using template and Delete virtual machines. 
+ - Deploy virtual machines using template and Delete virtual machines.
  - Power-On, Power-Off, and Shutdown.
  - Take snapshot, Revert snapshot, and Delete snapshot of virtual machines.
 
@@ -72,6 +72,7 @@ Visual Studio Team Services or Team Foundation Server requires a service connect
     * **Datacenter**: Enter the name of the **Datacenter**, where the virtual machines are located.
     * **Snapshot Name**: Enter the name of the snapshot. Note that for the revert and delete snapshot actions, the snapshot should exist for the virtual machines, else the task will error out.
     * **Description**: Optionally, provide a description for the **Take Snapshot of Virtual Machines** action, like $(Build.DefinitionName).$(Build.BuildNumber). This can be used to track the particular run of the build or release definition that created the snapshot.
+    * **Wait Time**: Specify wait time in seconds for the Virtual Machine to be in deployment ready state.
     * **Skip Certificate Authority Check**: If the vCenter Server's certificate is self-signed then select this option to skip the validation of the certificate from a trusted certificate authority. To check if the self-signed certificate is installed on the vCenter Server open the VMware vSphere® Web Client in a Web browser and look for certificate error screen. The vSphere Web Client URL will be similar to https://devtestlab325.fabrikam.com/vsphere-client/. For best practices regarding the vCenter Server certificates see the [website](http://aka.ms/vcentercertificate).     
 
  ![Snapshot VMware VMs](Images/SnapshotTask.png)
@@ -83,6 +84,7 @@ Visual Studio Team Services or Team Foundation Server requires a service connect
    * **Action**: Select any one of the snapshot actions from amongst **Power on Virtual Machines**, or **Delete Virtual Machines**.
    * **Virtual Machines Name**: Provide the names of one or more virtual machines. For multiple machines use a comma separated list, like VM1, VM2, VM3.
    * **Datacenter**: Enter the name of the **Datacenter**, where the virtual machines are located.
+   * **Wait Time**: Specify wait time in seconds for the Virtual Machine to be in deployment ready state.
    * **Skip Certificate Authority Check**: If the vCenter Server's certificate is self-signed then select this option to skip the validation of the certificate from a trusted certificate authority.
 
   ![Power On or Delete VMware VMs](Images/PowerOnVMs.png)
@@ -100,10 +102,17 @@ Visual Studio Team Services or Team Foundation Server requires a service connect
    * **Compute Resource Type**: Select from the **VMware ESXi™ Host**, **Cluster**, or **Resource Pool**, where the virtual machines will be deployed.
    * **Host Name/Cluster Name/Resource Pool Name**: Enter the name of the ESXi Host, or the Cluster, or the Resource Pool.
    * **Datastore**: Enter the name of the datastore for storing the virtual machines configuration and disk files.
+   * **Guest OS Customization Spec**: Enter the name of the Guest OS Customization Specification.
    * **Description**: Optionally, provide a description, like VMs for Fabrikam App Testing.
+   * **Wait Time**: Specify wait time in seconds for the Virtual Machine to be in deployment ready state.
    * **Skip Certificate Authority Check**: If the vCenter Server's certificate is self-signed then select this option to skip the validation of the certificate from a trusted certificate authority.
 
   ![Create VMs from Template](Images/DeployVMUsingTemplate.png)
+
+1.a **Note on Guest OS customization spec**:
+   * Recommended to set the VM name as the NetBIOS name so that you can refer to the machine using VM name in deployment tasks.
+
+  ![Guest OS Customization Spec](Images/OSCustomSpec.png)
 
 ### **Contact Information**
 
@@ -119,5 +128,6 @@ For further information or to resolve issues, contact RM_Customer_Queries at Mic
 
 | Version     | Date    | Details |
 | --------|---------|-------|
+| 1.0.0  | 05/24/2016   | Added support for os customization spec, few improvements for deployment readiness    |
 | 0.2.0  | 03/02/2016   | Added support for Shutdown, Power-Off virtual machines & bug fixes.    |
 | 0.1.0 | 02/17/2016 | Added support for Create VM, Snapshot actions, and Delete virtual machines.    |
