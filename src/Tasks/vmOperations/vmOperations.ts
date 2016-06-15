@@ -58,7 +58,7 @@ export class VmOperations {
                 break;
             case "Take Snapshot of Virtual Machines":
                 var snapshotName = tl.getInput("snapshotName", true);
-                var snapshotVMMemory = "true";
+                var snapshotVMMemory = tl.getInput("snapshotMemory", true);
                 var quiesceGuestFileSystem = "false";
                 var description: string = tl.getInput("description", false);
                 timeout = tl.getInput("timeout", false);
