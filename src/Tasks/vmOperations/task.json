@@ -146,7 +146,7 @@
             "type": "boolean",
             "label": "Snapshot Memory",
             "defaultValue": "true",
-            "required": false,
+            "required": true,
             "visibleRule": "action = Take Snapshot of Virtual Machines",
             "helpMarkDown": "Snapshot the virtual machine's memory."
         },
