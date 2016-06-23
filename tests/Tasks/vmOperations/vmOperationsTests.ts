@@ -145,6 +145,7 @@ describe("getCmdArgsForAction", (): void => {
 
     it("Should read snapshot name, snapshot vm memory, quiesce file system,description and timeout for create snapshot", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
+        getInputStub.withArgs("snapshotMemory", true).returns("true");
         getInputStub.withArgs("description", false).returns("Sample description");
         getInputStub.withArgs("timeout", false).returns("1200");
 
@@ -154,13 +155,26 @@ describe("getCmdArgsForAction", (): void => {
         debugStub.should.have.been.calledOnce;
     });
 
+    it("Should read snapshot name, snapshot vm memory, quiesce file system,description and timeout for create snapshot", (): void => {
+        getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
+        getInputStub.withArgs("snapshotMemory", true).returns("false");
+        getInputStub.withArgs("description", false).returns("Sample description");
+        getInputStub.withArgs("timeout", false).returns("1200");
+
+        var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot of Virtual Machines");
+
+        cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory false -quiesceGuestFileSystem false -description \"Sample description\" -timeout 1200");
+        debugStub.should.have.been.calledOnce;
+    });
+
     it("Should not throw on failure to read description for create snapshot action", (): void => {
         getInputStub.withArgs("snapshotName", true).returns("dummySnapshotName");
+        getInputStub.withArgs("snapshotMemory", true).returns("true");
 
         var cmdArgs = vmOperations.VmOperations.getCmdArgsForAction("Take Snapshot of Virtual Machines");
 
         cmdArgs.should.contain("-snapshotOps create -snapshotName \"dummySnapshotName\" -snapshotVMMemory true -quiesceGuestFileSystem false -description \"undefined\"");
-        getInputStub.should.have.callCount(3);
+        getInputStub.should.have.callCount(4);
     });
 
     it("Should read snapshot name for restore snapshot action and timeout", (): void => {

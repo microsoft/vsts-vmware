@@ -13,7 +13,7 @@
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 0
+        "Patch": 1
     },
     "demands": [
         "java"
@@ -140,6 +140,15 @@
             "required": true,
             "visibleRule": "action = Take Snapshot of Virtual Machines || action = Revert Snapshot of Virtual Machines || action = Delete Snapshot of Virtual Machines",
             "helpMarkDown": "Name of the snapshot of the virtual machines."
+        },
+        {
+            "name": "snapshotMemory",
+            "type": "boolean",
+            "label": "Snapshot Memory",
+            "defaultValue": "true",
+            "required": true,
+            "visibleRule": "action = Take Snapshot of Virtual Machines",
+            "helpMarkDown": "Snapshot the virtual machine's memory."
         },
         {
             "name": "description",

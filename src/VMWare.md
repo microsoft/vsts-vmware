@@ -71,6 +71,7 @@ Visual Studio Team Services or Team Foundation Server requires a service connect
     * **Virtual Machines Name**: Provide the names of one or more virtual machines. For multiple machines use a comma separated list, like VM1, VM2, VM3.
     * **Datacenter**: Enter the name of the **Datacenter**, where the virtual machines are located.
     * **Snapshot Name**: Enter the name of the snapshot. Note that for the revert and delete snapshot actions, the snapshot should exist for the virtual machines, else the task will error out.
+    * **Snapshot Memory**: Check this option to snapshot the virtual machine's memory.
     * **Description**: Optionally, provide a description for the **Take Snapshot of Virtual Machines** action, like $(Build.DefinitionName).$(Build.BuildNumber). This can be used to track the particular run of the build or release definition that created the snapshot.
     * **Wait Time**: Specify wait time in seconds for the Virtual Machine to be in deployment ready state.
     * **Skip Certificate Authority Check**: If the vCenter Server's certificate is self-signed then select this option to skip the validation of the certificate from a trusted certificate authority. To check if the self-signed certificate is installed on the vCenter Server open the VMware vSphere® Web Client in a Web browser and look for certificate error screen. The vSphere Web Client URL will be similar to https://devtestlab325.fabrikam.com/vsphere-client/. For best practices regarding the vCenter Server certificates see the [website](http://aka.ms/vcentercertificate).     
