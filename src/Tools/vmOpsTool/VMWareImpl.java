@@ -612,6 +612,10 @@ public class VMWareImpl implements IVMWare {
             } else {
                 List<VirtualMachineSnapshotTree> childTree = vmSnapshot.getChildSnapshotList();
                 snapshotMor = findSnapshotInTree(childTree, snapshotName);
+                if( snapshotMor != null)
+                {
+                    break;
+                }
             }
         }
         return snapshotMor;

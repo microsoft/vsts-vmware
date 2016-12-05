@@ -129,6 +129,7 @@ For further information or to resolve issues, contact RM_Customer_Queries at Mic
 
 | Version     | Date    | Details |
 | --------|---------|-------|
+| 1.0.1  | 11/28/2016   | Fixed an issue in revert snapshot operation
 | 1.0.0  | 05/24/2016   | Added support for os customization spec, few improvements for deployment readiness    |
 | 0.2.0  | 03/02/2016   | Added support for Shutdown, Power-Off virtual machines & bug fixes.    |
 | 0.1.0 | 02/17/2016 | Added support for Create VM, Snapshot actions, and Delete virtual machines.    |
