@@ -1,4 +1,6 @@
-public class VMWareImplPlatformTests extends VMWarePlatformTests {
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class VMWareImplPlatformTests extends VMWarePlatformTests{
 
     @Override
     public IVMWare getVmWareImpl() {
@@ -7,6 +9,10 @@ public class VMWareImplPlatformTests extends VMWarePlatformTests {
 
     @Override
     public String getvCenterUrl() {
-        return System.getenv("VCENTER_URL") + "/sdk/vimservice";
+        String vCenterUrl = System.getenv("VCENTER_URL");
+        
+        assertThat(vCenterUrl).as("The environment variable 'VCENTER_URL' is not set.").isNotNull();
+        
+        return vCenterUrl + "/sdk/vimservice";
     }
 }
