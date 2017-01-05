@@ -608,7 +608,8 @@ public class VMWareImpl implements IVMWare {
 
             if (vmSnapshot.getName().equalsIgnoreCase(snapshotName)) {
                 System.out.println(String.format("Found snapshot [ %s ] for virtual machine.", snapshotName));
-                return vmSnapshot.getSnapshot();
+                snapshotMor =  vmSnapshot.getSnapshot();
+				break;
             } else {
                 List<VirtualMachineSnapshotTree> childTree = vmSnapshot.getChildSnapshotList();
                 snapshotMor = findSnapshotInTree(childTree, snapshotName);
