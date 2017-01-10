@@ -6,6 +6,11 @@ public class VMWareImplPlatformTests extends VMWarePlatformTests{
     public IVMWare getVmWareImpl() {
         return new VMWareImpl();
     }
+    
+    @Override
+    public TestResourceFactory getTestResourceFactory(){
+        return new TestResourceFactory(System.getProperty("user.name"));
+    }
 
     @Override
     public String getvCenterUrl() {

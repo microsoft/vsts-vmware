@@ -10,9 +10,13 @@ public abstract class VMWarePlatformTests {
     
     private final IVMWare vmWareImpl = getVmWareImpl();
     
-    private final int operationTimeout = TestResource.GetOperationTimeoutValue();
+    private final TestResourceFactory testResourceFactory = getTestResourceFactory();
+    
+    private final int operationTimeout = testResourceFactory.GetOperationTimeoutValue();
 
     public abstract IVMWare getVmWareImpl();
+    
+    public abstract TestResourceFactory getTestResourceFactory();
 
     public abstract String getvCenterUrl();
     
@@ -506,14 +510,14 @@ public abstract class VMWarePlatformTests {
     }
 
     private TestResource GetTestResource() throws Exception {
-        return TestResource.GetTestResource(testName.getMethodName());
+        return testResourceFactory.GetTestResource(testName.getMethodName());
     }
 
     private ConnectionData GetTestConnectionData() throws Exception {
-        return TestResource.GetConnectionData(vCenterUrl, testName.getMethodName());
+        return testResourceFactory.GetConnectionData(vCenterUrl, testName.getMethodName());
     }
 
     private TestVirtualMachine GetTestVirtualMachine() throws Exception {
-        return TestResource.GetVirtualMachine(testName.getMethodName());
+        return testResourceFactory.GetVirtualMachine(testName.getMethodName());
     }
 }
